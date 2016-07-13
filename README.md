@@ -1,0 +1,1 @@
+Aggregation pipeline for spatial (big) data with SPARQL and Spark.
