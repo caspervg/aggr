@@ -1,0 +1,48 @@
+@prefix geo:   <http://www.w3.org/2003/01/geo/wgs84_pos#> .
+@prefix casc:  <http://www.caspervg.net/test/class#> .
+@prefix eg:    <http://www.example.org/> .
+@prefix rss:   <http://purl.org/rss/1.0/> .
+@prefix rdf:   <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix casp:  <http://www.caspervg.net/test/property#> .
+@prefix owl:   <http://www.w3.org/2002/07/owl#> .
+@prefix ja:    <http://jena.hpl.hp.com/2005/11/Assembler#> .
+@prefix xsd:   <http://www.w3.org/2001/XMLSchema#> .
+@prefix mu:    <http://mu.semte.ch/vocabularies/core/> .
+@prefix rdfs:  <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix vcard: <http://www.w3.org/2001/vcard-rdf/3.0#> .
+@prefix dc:    <http://purl.org/dc/elements/1.1/> .
+@prefix dct:   <http://purl.org/dc/terms/> .
+
+<http://www.caspervg.net/test/measurements/ef62867f-4193-45eb-8ff4-89f048c1ffa1>
+        a        casc:Measurement ;
+        mu:uuid  "measurement_4" ;
+        <http://purl.org/dc/terms/date>
+                "2015-09-10T08:47:39" ;
+        geo:lat  "50.4" ;
+        geo:lon  "4.4" ;
+        dct:source "parent_4" .
+
+<http://www.caspervg.net/test/measurements/dc3734aa-f806-4527-bab3-c04244794e05>
+        a        casc:Measurement ;
+        mu:uuid  "" ;
+        <http://purl.org/dc/terms/date>
+                "2015-09-10T08:47:38" ;
+        geo:lat  "50.3" ;
+        geo:lon  "4.3" .
+
+<http://www.caspervg.net/test/measurements/ba030718-6e8d-4cb3-970c-883c88984a16>
+        a        casc:Measurement ;
+        mu:uuid  "measurement_1" ;
+        <http://purl.org/dc/terms/date>
+                "2015-09-10T08:47:36" ;
+        geo:lat  "50.1" ;
+        geo:lon  "4.1" ;
+        dct:source "parent_1" .
+
+<http://www.caspervg.net/test/measurements/c12f3b33-6436-42f8-8f13-6d36aab0a729>
+        a        casc:Measurement ;
+        mu:uuid  "measurement_2" ;
+        <http://purl.org/dc/terms/date>
+                "2015-09-10T08:47:37" ;
+        geo:lat  "50.2" ;
+        geo:lon  "4.2" ;

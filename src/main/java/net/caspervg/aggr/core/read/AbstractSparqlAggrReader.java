@@ -7,20 +7,18 @@ public abstract class AbstractSparqlAggrReader extends AbstractAggrReader {
             "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> " +
                     "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> " +
                     "PREFIX geo: <http://www.w3.org/2003/01/geo/wgs84_pos#> " +
-                    "PREFIX own: <http://www.caspervg.net/test/property#>" +
-                    "PREFIX dct: <TODO>" +
-                    "PREFIX mu: <TODO>" +
-                    "SELECT ?latitude ?longitude ?timestamp ?id ?source" +
-                    "WHERE {" +
-//                  "?point rdf:type ?type" +
-//                  "?type rdfs:subClassOf* geo:SpatialThing . " +
+                    "PREFIX own: <http://www.caspervg.net/test/property#> " +
+                    "PREFIX dct: <http://purl.org/dc/terms/> " +
+                    "PREFIX mu: <http://mu.semte.ch/vocabularies/core/> " +
+                    "SELECT * " + // ?timestamp ?id ?source " +
+                    "WHERE { " +
                     "%s" +
                     "?point geo:lat ?latitude . " +
-                    "?point geo:long ?longitude ." +
-                    "?point dct:date ?timestamp ." +
-                    "?point mu:uuid ?id ." +
-                    "OPTIONAL { ?point dct:source ?source }" +
-                    "MINUS { ?point own:dataset ?d . }" +
+                    "?point geo:lon ?longitude . " +
+                    "?point dct:date ?timestamp . " +
+                    "OPTIONAL { ?point mu:uuid ?id . } " +
+                    "OPTIONAL { ?point dct:source ?source . } " +
+                    "MINUS { ?point own:dataset ?d . } " +
                     "}";
 
     protected static final String DEFAULT_SERVICE = "mem:empty";
@@ -38,7 +36,7 @@ public abstract class AbstractSparqlAggrReader extends AbstractAggrReader {
 
     protected String query(String id, Map<String, String> parameters) {
         return parameters.getOrDefault("query",
-                String.format(DEFAULT_QUERY_FORMAT, String.format("?point mu:uuid %s .", id))
+                String.format(DEFAULT_QUERY_FORMAT, String.format("?point mu:uuid \"%s\" .", id))
         );
     }
 }

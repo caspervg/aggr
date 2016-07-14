@@ -6,7 +6,6 @@ import net.caspervg.aggr.core.util.AggrContext;
 import org.apache.jena.jdbc.mem.MemDriver;
 import org.apache.jena.jdbc.remote.RemoteEndpointDriver;
 
-import java.net.URL;
 import java.sql.*;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -43,9 +42,9 @@ public class JenaAggrReader extends AbstractSparqlAggrReader {
                             DateTimeFormatter.ISO_DATE_TIME
                     );
                     String foundId = rs.getString(rs.findColumn(idKey));
-                    URL source = rs.getURL(rs.findColumn(sourceKey));
+                    String source = rs.getString(rs.findColumn(sourceKey));
 
-                    return Optional.of(new Measurement(foundId, new Point(vector), source.toString(), time));
+                    return Optional.of(new Measurement(foundId, new Point(vector), source, time));
                 } else {
                     return Optional.empty();
                 }
@@ -88,9 +87,9 @@ public class JenaAggrReader extends AbstractSparqlAggrReader {
                             DateTimeFormatter.ISO_DATE_TIME
                     );
                     String id = rs.getString(rs.findColumn(idKey));
-                    URL source = rs.getURL(rs.findColumn(sourceKey));
+                    String source = rs.getString(rs.findColumn(sourceKey));
 
-                    measurements.add(new Measurement(id, new Point(vector), source.toString(), time));
+                    measurements.add(new Measurement(id, new Point(vector), source, time));
                 }
             } catch (SQLException ex) {
                 System.err.println(query);

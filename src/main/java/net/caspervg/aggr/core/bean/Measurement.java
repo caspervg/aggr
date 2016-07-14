@@ -1,5 +1,7 @@
 package net.caspervg.aggr.core.bean;
 
+import org.apache.commons.lang.StringUtils;
+
 import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.Optional;
@@ -26,8 +28,16 @@ public class Measurement implements Serializable {
 
     public Measurement(String uuid, Point point, String parent, LocalDateTime timestamp) {
         this.point = point;
-        this.uuid = uuid;
-        this.parent = parent;
+        if (StringUtils.isBlank(uuid)) {
+            this.uuid = UUID.randomUUID().toString();
+        } else {
+            this.uuid = uuid;
+        }
+        if (StringUtils.isBlank(parent)) {
+            this.parent = null;
+        } else {
+            this.parent = parent;
+        }
         this.timestamp = timestamp;
     }
 
