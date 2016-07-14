@@ -16,14 +16,19 @@ import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 public class SparkTimeAggregator implements TimeAggregator, Serializable {
+
+    private static final String DEFAULT_NUM_DETAIL = "8";
+
     @Override
     public Iterable<AggregationResult<TimeAggregation, Measurement>> aggregate(Dataset dataset,
                                                                                Iterable<Measurement> measurements,
                                                                                AggrContext context) {
+        Objects.requireNonNull(context.getSparkContext());
 
         JavaSparkContext sparkCtx = context.getSparkContext();
         JavaRDD<Measurement> measRDD = sparkCtx.parallelize(Lists.newArrayList(measurements));
@@ -33,7 +38,7 @@ public class SparkTimeAggregator implements TimeAggregator, Serializable {
         long duration = minTimestamp.until(maxTimestamp, ChronoUnit.MILLIS);
 
         Set<AggregationResult<TimeAggregation, Measurement>> aggregationResults = new HashSet<>();
-        int numDetail = Integer.parseInt(context.getParameters().getOrDefault("detail", "8"));
+        int numDetail = Integer.parseInt(context.getParameters().getOrDefault("detail", DEFAULT_NUM_DETAIL));
         for (int detail = 1; detail <= numDetail; detail *= 2) {
             long timeStep = duration / detail;
 
@@ -41,12 +46,9 @@ public class SparkTimeAggregator implements TimeAggregator, Serializable {
                 LocalDateTime start = minTimestamp.plus(timeStep * i, ChronoUnit.MILLIS);
                 LocalDateTime end = minTimestamp.plus(timeStep * (i + 1), ChronoUnit.MILLIS);
 
-                JavaRDD<Measurement> filteredMeas = measRDD.filter(new Function<Measurement, Boolean>() {
-                    @Override
-                    public Boolean call(Measurement measurement) throws Exception {
-                        LocalDateTime timestamp = measurement.getTimestamp();
-                        return (timestamp.isEqual(start) || (timestamp.isAfter(start) && timestamp.isBefore(end)));
-                    }
+                JavaRDD<Measurement> filteredMeas = measRDD.filter((Function<Measurement, Boolean>) measurement -> {
+                    LocalDateTime timestamp = measurement.getTimestamp();
+                    return (timestamp.isEqual(start) || (timestamp.isAfter(start) && timestamp.isBefore(end)));
                 });
 
                 List<Measurement> childMeasurements = filteredMeas.collect()
