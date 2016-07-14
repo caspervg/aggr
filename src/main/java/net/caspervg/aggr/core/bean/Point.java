@@ -3,7 +3,7 @@ package net.caspervg.aggr.core.bean;
 import java.io.Serializable;
 import java.util.Arrays;
 
-public class Point implements Serializable {
+public class Point implements Serializable, Cloneable {
     private Double[] vector;
 
     public Point(Double[] vector) {
@@ -35,5 +35,10 @@ public class Point implements Serializable {
         return "Point{" +
                 "vector=" + Arrays.toString(vector) +
                 '}';
+    }
+
+    @Override
+    public Object clone() {
+        return new Point(Arrays.stream(vector).toArray(Double[]::new));
     }
 }

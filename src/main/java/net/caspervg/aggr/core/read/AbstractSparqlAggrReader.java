@@ -10,7 +10,7 @@ public abstract class AbstractSparqlAggrReader extends AbstractAggrReader {
                     "PREFIX own: <http://www.caspervg.net/test/property#> " +
                     "PREFIX dct: <http://purl.org/dc/terms/> " +
                     "PREFIX mu: <http://mu.semte.ch/vocabularies/core/> " +
-                    "SELECT * " + // ?timestamp ?id ?source " +
+                    "SELECT * " +
                     "WHERE { " +
                     "%s" +
                     "?point geo:lat ?latitude . " +

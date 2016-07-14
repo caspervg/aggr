@@ -12,8 +12,11 @@ import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
 import org.eclipse.rdf4j.model.vocabulary.DCTERMS;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
+import org.eclipse.rdf4j.repository.Repository;
 import org.eclipse.rdf4j.repository.RepositoryConnection;
+import org.eclipse.rdf4j.repository.sail.SailRepository;
 import org.eclipse.rdf4j.repository.sparql.SPARQLRepository;
+import org.eclipse.rdf4j.sail.memory.MemoryStore;
 
 import java.math.BigInteger;
 import java.time.LocalDateTime;
@@ -24,6 +27,7 @@ public class Rdf4jAggrWriter extends AbstractSparqlAggrWriter {
 
     private static final String DEFAULT_SERVICE = "http://localhost:8890/sparql/";
 
+    private Repository repository;
     private ValueFactory valueFactory;
     private IRI geoPoint;
     private IRI geoLat;
@@ -31,7 +35,8 @@ public class Rdf4jAggrWriter extends AbstractSparqlAggrWriter {
     private IRI ownWeight;
     private IRI muUUID;
 
-    public Rdf4jAggrWriter() {
+    public Rdf4jAggrWriter(Repository repository) {
+        this.repository = repository;
         this.valueFactory = SimpleValueFactory.getInstance();
 
         this.geoPoint = valueFactory.createIRI(GEO_PREFIX, "Point");
@@ -41,11 +46,15 @@ public class Rdf4jAggrWriter extends AbstractSparqlAggrWriter {
         this.muUUID = valueFactory.createIRI(MU_PREFIX, "uuid");
     }
 
+    public Rdf4jAggrWriter() {
+        this(new SailRepository(new MemoryStore()));
+    }
+
     @Override
     public void writeMeasurement(Measurement measurement, AggrContext context) {
         Resource measRes = measurementWithId(measurement.getUuid());
 
-        add(measurementStatements(measurement, measRes), context);
+        add(measurementStatements(measurement, measRes));
     }
 
     @Override
@@ -57,14 +66,14 @@ public class Rdf4jAggrWriter extends AbstractSparqlAggrWriter {
             statements.addAll(measurementStatements(measurement, measRes));
         }
 
-        add(statements, context);
+        add(statements);
     }
 
     @Override
     public void writeCentroid(Centroid centroid, AggrContext context) {
         Resource centRes = centroidWithId(centroid.getUuid());
 
-        add(centroidStatements(centroid, centRes), context);
+        add(centroidStatements(centroid, centRes));
     }
 
     @Override
@@ -76,7 +85,7 @@ public class Rdf4jAggrWriter extends AbstractSparqlAggrWriter {
             statements.addAll(centroidStatements(centroid, centRes));
         }
 
-        add(statements, context);
+        add(statements);
     }
 
     @Override
@@ -107,7 +116,7 @@ public class Rdf4jAggrWriter extends AbstractSparqlAggrWriter {
                 )
         );
 
-        add(statements, context);
+        add(statements);
     }
 
     @Override
@@ -138,7 +147,7 @@ public class Rdf4jAggrWriter extends AbstractSparqlAggrWriter {
                 )
         );
 
-        add(statements, context);
+        add(statements);
     }
 
     @Override
@@ -159,7 +168,7 @@ public class Rdf4jAggrWriter extends AbstractSparqlAggrWriter {
                 )
         );
 
-        add(statements, context);
+        add(statements);
     }
 
     protected Collection<Statement> measurementStatements(Measurement measurement, Resource measRes) {
@@ -356,6 +365,14 @@ public class Rdf4jAggrWriter extends AbstractSparqlAggrWriter {
                             measurementWithId(measurement.getUuid())
                     )
             );
+
+            statements.add(
+                    valueFactory.createStatement(
+                            measurementWithId(measurement.getUuid()),
+                            DCTERMS.IS_PART_OF,
+                            aggRes
+                    )
+            );
         }
 
         return statements;
@@ -385,7 +402,7 @@ public class Rdf4jAggrWriter extends AbstractSparqlAggrWriter {
                 )
         );
 
-        add(statements, context);
+        add(statements);
     }
 
     private Resource datasetWithId(String id) {
@@ -414,17 +431,16 @@ public class Rdf4jAggrWriter extends AbstractSparqlAggrWriter {
         );
     }
 
-    private void add(Collection<Statement> statements, AggrContext context) {
-        try (RepositoryConnection conn = getConnection(context.getParameters())) {
-            conn.add(statements);
+    private void add(Collection<Statement> statements) {
+        try (RepositoryConnection conn = getConnection()) {
+            conn.add(statements, valueFactory.createIRI(DEFAULT_GRAPH));
         }
     }
 
-    private RepositoryConnection getConnection(Map<String, String> parameters) {
-        String service = parameters.getOrDefault("service", DEFAULT_SERVICE);
-
-        SPARQLRepository repository = new SPARQLRepository(service);
-        repository.initialize();
+    private RepositoryConnection getConnection() {
+        if (! this.repository.isInitialized()) {
+            this.repository.initialize();
+        }
         return repository.getConnection();
     }
 }

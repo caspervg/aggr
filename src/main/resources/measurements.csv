@@ -1,0 +1,5 @@
+id,timestamp,latitude,longitude,source
+measurement_1,2015-09-10T08:47:36,50.1,4.1,
+measurement_2,2015-09-10T08:47:37,50.2,4.2,
+measurement_3,2015-09-10T08:47:38,50.3,4.3,
+measurement_4,2015-09-10T08:47:39,50.4,4.4,
