@@ -7,6 +7,9 @@ import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
 
 import java.io.IOException;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
 
 import static net.caspervg.aggr.core.util.Constants.*;
 
@@ -26,6 +29,7 @@ public class CsvAggrWriter extends FileAggrWriter {
     public void writeMeasurement(Measurement measurement, AggrContext context) {
         try (CSVPrinter printer = CSVFormat.DEFAULT.withHeader(MEAS_HEADERS).print(out)) {
             printMeasurement(printer, measurement);
+            printer.flush();
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -37,6 +41,7 @@ public class CsvAggrWriter extends FileAggrWriter {
             for (Measurement measurement : measurements) {
                 printMeasurement(printer, measurement);
             }
+            printer.flush();
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -67,7 +72,7 @@ public class CsvAggrWriter extends FileAggrWriter {
                 measurement.getUuid(),
                 measurement.getPoint().getVector()[0],
                 measurement.getPoint().getVector()[1],
-                measurement.getTimestamp().toString(),
+                measurement.getTimestamp().atZone(ZoneOffset.UTC).format(DateTimeFormatter.ISO_DATE_TIME),
                 measurement.getParent().orElse(""));
     }
 

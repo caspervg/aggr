@@ -14,6 +14,7 @@ import net.caspervg.aggr.core.read.CsvAggrReader;
 import net.caspervg.aggr.core.read.JenaAggrReader;
 import net.caspervg.aggr.core.util.AggrCommand;
 import net.caspervg.aggr.core.util.AggrContext;
+import net.caspervg.aggr.core.util.untyped.UntypedSPARQLRepository;
 import net.caspervg.aggr.core.write.AggrWriter;
 import net.caspervg.aggr.core.write.CsvAggrWriter;
 import net.caspervg.aggr.core.write.Rdf4jAggrWriter;
@@ -36,7 +37,6 @@ import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.spark.SparkConf;
 import org.apache.spark.api.java.JavaSparkContext;
-import org.eclipse.rdf4j.repository.sparql.SPARQLRepository;
 
 import java.io.File;
 import java.io.IOException;
@@ -215,7 +215,7 @@ public class AggrMain {
 
     private static AggrWriter getWriter(AggrCommand ac, AggrContext ctx) {
         if (ac.getOutput().toLowerCase().contains("sparql")) {
-            return new Rdf4jAggrWriter(new SPARQLRepository(ac.getOutput()));
+            return new Rdf4jAggrWriter(new UntypedSPARQLRepository(ac.getOutput()));
         } else {
             try {
                 String path = ctx.getParameters().getOrDefault(OUTPUT_PARAM_KEY, "output.csv");

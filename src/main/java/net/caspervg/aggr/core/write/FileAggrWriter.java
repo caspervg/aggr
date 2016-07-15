@@ -28,6 +28,6 @@ public abstract class FileAggrWriter extends AbstractAggrWriter {
     }
 
     private void notSupported() {
-        throw new UnsupportedOperationException("Writing aggegrations or datasets to CSV is not supported");
+        //throw new UnsupportedOperationException("Writing aggegrations or datasets to CSV is not supported");
     }
 }

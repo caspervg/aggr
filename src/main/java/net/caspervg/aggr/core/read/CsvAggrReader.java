@@ -10,6 +10,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.Reader;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Optional;
@@ -76,7 +77,7 @@ public class CsvAggrReader extends AbstractAggrReader {
 
         double lat = Double.parseDouble(latStr);
         double lon = Double.parseDouble(lonStr);
-        LocalDateTime time = LocalDateTime.parse(timeStr);
+        LocalDateTime time = LocalDateTime.parse(timeStr, DateTimeFormatter.ISO_DATE_TIME);
         String parent = record.get(srcKey);
 
         Point point = new Point(new Double[]{lat, lon});

@@ -9,6 +9,7 @@ import net.caspervg.aggr.core.bean.aggregation.GridAggregation;
 import net.caspervg.aggr.core.bean.aggregation.KMeansAggregation;
 import net.caspervg.aggr.core.bean.aggregation.TimeAggregation;
 import net.caspervg.aggr.core.util.AggrContext;
+import net.caspervg.aggr.core.util.untyped.UntypedLiteral;
 import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
 import org.eclipse.rdf4j.model.vocabulary.DCTERMS;
@@ -198,10 +199,7 @@ public class Rdf4jAggrWriter extends AbstractSparqlAggrWriter {
                 valueFactory.createStatement(
                         measRes,
                         this.muUUID,
-                        valueFactory.createLiteral(
-                                id,
-                                (IRI) null
-                        )
+                        new UntypedLiteral(id)
                 )
         );
 
