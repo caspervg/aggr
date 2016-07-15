@@ -70,15 +70,13 @@ public class Centroid implements Serializable {
         if (uuid != null ? !uuid.equals(centroid.uuid) : centroid.uuid != null) return false;
         // Probably incorrect - comparing Object[] arrays with Arrays.equals
         if (!Arrays.equals(vector, centroid.vector)) return false;
-        return measurements != null ? measurements.equals(centroid.measurements) : centroid.measurements == null;
-
+        return true;
     }
 
     @Override
     public int hashCode() {
         int result = uuid != null ? uuid.hashCode() : 0;
         result = 31 * result + Arrays.hashCode(vector);
-        result = 31 * result + (measurements != null ? measurements.hashCode() : 0);
         return result;
     }
 

@@ -66,16 +66,13 @@ public class Measurement implements Serializable {
 
         if (point != null ? !point.equals(that.point) : that.point != null) return false;
         if (uuid != null ? !uuid.equals(that.uuid) : that.uuid != null) return false;
-        if (parent != null ? !parent.equals(that.parent) : that.parent != null) return false;
         return timestamp != null ? timestamp.equals(that.timestamp) : that.timestamp == null;
-
     }
 
     @Override
     public int hashCode() {
         int result = point != null ? point.hashCode() : 0;
         result = 31 * result + (uuid != null ? uuid.hashCode() : 0);
-        result = 31 * result + (parent != null ? parent.hashCode() : 0);
         result = 31 * result + (timestamp != null ? timestamp.hashCode() : 0);
         return result;
     }

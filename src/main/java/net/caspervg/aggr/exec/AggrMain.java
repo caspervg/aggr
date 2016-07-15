@@ -14,8 +14,8 @@ import net.caspervg.aggr.core.read.CsvAggrReader;
 import net.caspervg.aggr.core.read.JenaAggrReader;
 import net.caspervg.aggr.core.util.AggrCommand;
 import net.caspervg.aggr.core.util.AggrContext;
-import net.caspervg.aggr.core.write.AbstractAggrWriter;
 import net.caspervg.aggr.core.write.AggrWriter;
+import net.caspervg.aggr.core.write.CsvAggrWriter;
 import net.caspervg.aggr.core.write.Rdf4jAggrWriter;
 import net.caspervg.aggr.grid.AbstractGridAggregator;
 import net.caspervg.aggr.grid.GridAggregator;
@@ -31,14 +31,24 @@ import net.caspervg.aggr.time.PlainTimeAggregator;
 import net.caspervg.aggr.time.SparkTimeAggregator;
 import net.caspervg.aggr.time.TimeAggregator;
 import net.caspervg.aggr.time.util.TimeAggrCommand;
+import org.apache.hadoop.fs.FSDataOutputStream;
+import org.apache.hadoop.fs.FileSystem;
+import org.apache.hadoop.fs.Path;
 import org.apache.spark.SparkConf;
 import org.apache.spark.api.java.JavaSparkContext;
 import org.eclipse.rdf4j.repository.sparql.SPARQLRepository;
 
+import java.io.File;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.Map;
 
+import static net.caspervg.aggr.core.write.AbstractAggrWriter.OUTPUT_PARAM_KEY;
+
 public class AggrMain {
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException, URISyntaxException {
         AggrCommand ac = new AggrCommand();
         JCommander jc = new JCommander(ac);
 
@@ -71,10 +81,10 @@ public class AggrMain {
         }
     }
 
-    private static void handleKMeansCommand(AggrCommand ac, KMeansAggrCommand kac) {
+    private static void handleKMeansCommand(AggrCommand ac, KMeansAggrCommand kac) throws IOException, URISyntaxException {
         Map<String, String> params = ac.getDynamicParameters();
         params.put(AbstractAggrReader.INPUT_PARAM_KEY, ac.getInput());
-        params.put(AbstractAggrWriter.OUTPUT_PARAM_KEY, ac.getOutput());
+        params.put(OUTPUT_PARAM_KEY, ac.getOutput());
         params.put(AbstractKMeansAggregator.CENTROIDS_PARAM, String.valueOf(kac.getNumCentroids()));
         params.put(AbstractKMeansAggregator.ITERATIONS_PARAM, String.valueOf(kac.getIterations()));
         params.put(AbstractKMeansAggregator.METRIC_PARAM, kac.getDistanceMetricChoice().name());
@@ -82,7 +92,14 @@ public class AggrMain {
         AggrContext ctx;
         KMeansAggregator aggregator;
         if (ac.isSpark()) {
-            ctx = new AggrContext(params, getSparkContext(ac));
+            String hdfsUrl = System.getenv("HDFS_URL");
+            JavaSparkContext sparkCtx = getSparkContext(ac);
+            if (hdfsUrl != null) {
+                FileSystem hdfs = FileSystem.get(new URI(hdfsUrl), sparkCtx.hadoopConfiguration());
+                ctx = new AggrContext(params, sparkCtx, hdfs);
+            } else {
+                ctx = new AggrContext(params, sparkCtx);
+            }
             aggregator = new SparkKMeansAggregator();
         } else {
             ctx = new AggrContext(params);
@@ -93,7 +110,7 @@ public class AggrMain {
         Dataset dataset = new Dataset("kmeans_dataset");
         Iterable<Measurement> meas = getReader(ac).read(ctx);
         Iterable<AggregationResult<KMeansAggregation, Centroid>> results = aggregator.aggregate(dataset, meas, ctx);
-        AggrWriter writer = getWriter(ac);
+        AggrWriter writer = getWriter(ac, ctx);
 
         for (AggregationResult<KMeansAggregation, Centroid> res : results) {
             KMeansAggregation gag = res.getAggregation();
@@ -105,16 +122,23 @@ public class AggrMain {
         writer.writeDataset(dataset, ctx);
     }
 
-    private static void handleTimeCommand(AggrCommand ac, TimeAggrCommand tac) {
+    private static void handleTimeCommand(AggrCommand ac, TimeAggrCommand tac) throws URISyntaxException, IOException {
         Map<String, String> params = ac.getDynamicParameters();
         params.put(AbstractAggrReader.INPUT_PARAM_KEY, ac.getInput());
-        params.put(AbstractAggrWriter.OUTPUT_PARAM_KEY, ac.getOutput());
+        params.put(OUTPUT_PARAM_KEY, ac.getOutput());
         params.put(AbstractTimeAggregator.DETAIL_PARAM, String.valueOf(tac.getMaxDetail()));
 
         AggrContext ctx;
         TimeAggregator aggregator;
         if (ac.isSpark()) {
-            ctx = new AggrContext(params, getSparkContext(ac));
+            String hdfsUrl = System.getenv("HDFS_URL");
+            JavaSparkContext sparkCtx = getSparkContext(ac);
+            if (hdfsUrl != null) {
+                FileSystem hdfs = FileSystem.get(new URI(hdfsUrl), sparkCtx.hadoopConfiguration());
+                ctx = new AggrContext(params, sparkCtx, hdfs);
+            } else {
+                ctx = new AggrContext(params, sparkCtx);
+            }
             aggregator = new SparkTimeAggregator();
         } else {
             ctx = new AggrContext(params);
@@ -124,7 +148,7 @@ public class AggrMain {
         Dataset dataset = new Dataset("time_dataset");
         Iterable<Measurement> meas = getReader(ac).read(ctx);
         Iterable<AggregationResult<TimeAggregation, Measurement>> results = aggregator.aggregate(dataset, meas, ctx);
-        AggrWriter writer = getWriter(ac);
+        AggrWriter writer = getWriter(ac, ctx);
 
         for (AggregationResult<TimeAggregation, Measurement> res : results) {
             TimeAggregation tag = res.getAggregation();
@@ -137,16 +161,23 @@ public class AggrMain {
         writer.writeDataset(dataset, ctx);
     }
 
-    private static void handleGridCommand(AggrCommand ac, GridAggrCommand gac) {
+    private static void handleGridCommand(AggrCommand ac, GridAggrCommand gac) throws URISyntaxException, IOException {
         Map<String, String> params = ac.getDynamicParameters();
         params.put(AbstractAggrReader.INPUT_PARAM_KEY, ac.getInput());
-        params.put(AbstractAggrWriter.OUTPUT_PARAM_KEY, ac.getOutput());
+        params.put(OUTPUT_PARAM_KEY, ac.getOutput());
         params.put(AbstractGridAggregator.GRID_SIZE_PARAM, String.valueOf(gac.getGridSize()));
 
         AggrContext ctx;
         GridAggregator aggregator;
         if (ac.isSpark()) {
-            ctx = new AggrContext(params, getSparkContext(ac));
+            String hdfsUrl = System.getenv("HDFS_URL");
+            JavaSparkContext sparkCtx = getSparkContext(ac);
+            if (hdfsUrl != null) {
+                FileSystem hdfs = FileSystem.get(new URI(hdfsUrl), sparkCtx.hadoopConfiguration());
+                ctx = new AggrContext(params, sparkCtx, hdfs);
+            } else {
+                ctx = new AggrContext(params, sparkCtx);
+            }
             aggregator = new SparkGridAggregator();
         } else {
             ctx = new AggrContext(params);
@@ -156,7 +187,7 @@ public class AggrMain {
         Dataset dataset = new Dataset("grid_dataset");
         Iterable<Measurement> meas = getReader(ac).read(ctx);
         Iterable<AggregationResult<GridAggregation, Measurement>> results = aggregator.aggregate(dataset, meas, ctx);
-        AggrWriter writer = getWriter(ac);
+        AggrWriter writer = getWriter(ac, ctx);
 
         for (AggregationResult<GridAggregation, Measurement> res : results) {
             GridAggregation gag = res.getAggregation();
@@ -182,11 +213,27 @@ public class AggrMain {
         }
     }
 
-    private static AggrWriter getWriter(AggrCommand ac) {
+    private static AggrWriter getWriter(AggrCommand ac, AggrContext ctx) {
         if (ac.getOutput().toLowerCase().contains("sparql")) {
             return new Rdf4jAggrWriter(new SPARQLRepository(ac.getOutput()));
         } else {
-            throw new UnsupportedOperationException("CSV writers have not yet been implemented");
+            try {
+                String path = ctx.getParameters().getOrDefault(OUTPUT_PARAM_KEY, "output.csv");
+
+                if (ac.isSpark()) {
+                    if (path.toLowerCase().contains("hdfs")) {
+                        FSDataOutputStream os = ctx.getFileSystem().create(new Path(path), true);
+                        return new CsvAggrWriter(new PrintWriter(os));
+                    } else {
+                        return new CsvAggrWriter(new PrintWriter(new File(path)));
+                    }
+                } else {
+                    return new CsvAggrWriter(new PrintWriter(new File(path)));
+                }
+            } catch (IOException ex) {
+                ex.printStackTrace();
+                throw new RuntimeException(ex);
+            }
         }
     }
 }

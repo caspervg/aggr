@@ -96,7 +96,7 @@ public class CsvAggrReader extends AbstractAggrReader {
     }
 
     private Iterable<CSVRecord> parseRecords(Reader in) throws IOException {
-        return CSVFormat.RFC4180.withHeader().parse(in);
+        return CSVFormat.DEFAULT.withHeader().parse(in);
     }
 
     private String getPath(AggrContext context) {

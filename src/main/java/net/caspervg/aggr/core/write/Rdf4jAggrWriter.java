@@ -1,5 +1,6 @@
 package net.caspervg.aggr.core.write;
 
+import com.google.common.collect.Iterables;
 import net.caspervg.aggr.core.bean.Centroid;
 import net.caspervg.aggr.core.bean.Dataset;
 import net.caspervg.aggr.core.bean.Measurement;
@@ -15,7 +16,6 @@ import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.eclipse.rdf4j.repository.Repository;
 import org.eclipse.rdf4j.repository.RepositoryConnection;
 import org.eclipse.rdf4j.repository.sail.SailRepository;
-import org.eclipse.rdf4j.repository.sparql.SPARQLRepository;
 import org.eclipse.rdf4j.sail.memory.MemoryStore;
 
 import java.math.BigInteger;
@@ -61,6 +61,8 @@ public class Rdf4jAggrWriter extends AbstractSparqlAggrWriter {
     public void writeMeasurements(Iterable<Measurement> measurements, AggrContext context) {
         Set<Statement> statements = new HashSet<>();
 
+        if (Iterables.isEmpty(measurements)) return;
+
         for (Measurement measurement : measurements) {
             Resource measRes = measurementWithId(measurement.getUuid());
             statements.addAll(measurementStatements(measurement, measRes));
@@ -79,6 +81,8 @@ public class Rdf4jAggrWriter extends AbstractSparqlAggrWriter {
     @Override
     public void writeCentroids(Iterable<Centroid> centroids, AggrContext context) {
         Set<Statement> statements = new HashSet<>();
+
+        if (Iterables.isEmpty(centroids)) return;
 
         for (Centroid centroid : centroids) {
             Resource centRes = centroidWithId(centroid.getUuid());
