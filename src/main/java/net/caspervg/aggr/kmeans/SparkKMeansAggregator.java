@@ -20,11 +20,7 @@ import scala.Tuple2;
 import java.time.LocalDateTime;
 import java.util.*;
 
-public class SparkKMeansAggregator implements KMeansAggregator {
-
-    private static final String DEFAULT_DISTANCE_METRIC = "EUCLIDEAN";
-    private static final String DEFAULT_MAX_ITERATIONS = "50";
-    private static final String DEFAULT_NUM_CENTROIDS = "25";
+public class SparkKMeansAggregator extends AbstractKMeansAggregator {
 
     @Override
     public Iterable<AggregationResult<KMeansAggregation, Centroid>> aggregate(Dataset dataset,
@@ -33,14 +29,14 @@ public class SparkKMeansAggregator implements KMeansAggregator {
         Objects.requireNonNull(context.getSparkContext());
 
         DistanceMetric<Double> distanceMetric = DistanceMetricChoice.valueOf(
-                context.getParameters().getOrDefault("metric", DEFAULT_DISTANCE_METRIC)
+                context.getParameters().getOrDefault(METRIC_PARAM, DEFAULT_DISTANCE_METRIC)
         ).getMetric();
 
         int maxIterations = Integer.parseInt(
-                context.getParameters().getOrDefault("max_iterations", DEFAULT_MAX_ITERATIONS)
+                context.getParameters().getOrDefault(ITERATIONS_PARAM, DEFAULT_MAX_ITERATIONS)
         );
         int numCentroids = Integer.parseInt(
-                context.getParameters().getOrDefault("num_centroids", DEFAULT_NUM_CENTROIDS)
+                context.getParameters().getOrDefault(CENTROIDS_PARAM, DEFAULT_NUM_CENTROIDS)
         );
 
         JavaRDD<Measurement> measRDD = context.getSparkContext().parallelize(Lists.newArrayList(measurements));

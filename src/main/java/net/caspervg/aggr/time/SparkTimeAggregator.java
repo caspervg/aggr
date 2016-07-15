@@ -20,9 +20,7 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-public class SparkTimeAggregator implements TimeAggregator, Serializable {
-
-    private static final String DEFAULT_NUM_DETAIL = "8";
+public class SparkTimeAggregator extends AbstractTimeAggregator implements Serializable {
 
     @Override
     public Iterable<AggregationResult<TimeAggregation, Measurement>> aggregate(Dataset dataset,
@@ -38,7 +36,7 @@ public class SparkTimeAggregator implements TimeAggregator, Serializable {
         long duration = minTimestamp.until(maxTimestamp, ChronoUnit.MILLIS);
 
         Set<AggregationResult<TimeAggregation, Measurement>> aggregationResults = new HashSet<>();
-        int numDetail = Integer.parseInt(context.getParameters().getOrDefault("detail", DEFAULT_NUM_DETAIL));
+        int numDetail = Integer.parseInt(context.getParameters().getOrDefault(DETAIL_PARAM, DEFAULT_NUM_DETAIL));
         for (int detail = 1; detail <= numDetail; detail *= 2) {
             long timeStep = duration / detail;
 

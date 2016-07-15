@@ -14,9 +14,7 @@ import java.io.Serializable;
 import java.util.List;
 import java.util.Objects;
 
-public class SparkGridAggregator implements GridAggregator, Serializable {
-
-    private static final String DEFAULT_GRID_SIZE = "0.0005";
+public class SparkGridAggregator extends AbstractGridAggregator implements Serializable {
 
     @Override
     public Iterable<AggregationResult<GridAggregation, Measurement>> aggregate(Dataset dataset,
@@ -25,7 +23,7 @@ public class SparkGridAggregator implements GridAggregator, Serializable {
         Objects.requireNonNull(context.getSparkContext());
 
         double gridSize = Double.parseDouble(
-                context.getParameters().getOrDefault("grid_size", DEFAULT_GRID_SIZE)
+                context.getParameters().getOrDefault(GRID_SIZE_PARAM, DEFAULT_GRID_SIZE)
         );
 
         JavaRDD<Measurement> measRDD = context.getSparkContext().parallelize(Lists.newArrayList(measurements));

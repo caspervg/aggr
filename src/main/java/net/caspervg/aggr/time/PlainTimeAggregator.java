@@ -15,7 +15,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-public class PlainTimeAggregator implements TimeAggregator {
+public class PlainTimeAggregator extends AbstractTimeAggregator {
     @Override
     public Iterable<AggregationResult<TimeAggregation, Measurement>> aggregate(Dataset dataset,
                                                                                Iterable<Measurement> measurements,
@@ -28,7 +28,7 @@ public class PlainTimeAggregator implements TimeAggregator {
         long duration = minTimestamp.until(maxTimestamp, ChronoUnit.MILLIS);
 
         Set<AggregationResult<TimeAggregation, Measurement>> aggregationResults = new HashSet<>();
-        int numDetail = Integer.parseInt(context.getParameters().getOrDefault("detail", "8"));
+        int numDetail = Integer.parseInt(context.getParameters().getOrDefault(DETAIL_PARAM, DEFAULT_NUM_DETAIL));
 
         for (int detail = 1; detail <= numDetail; detail *= 2) {
             long timeStep = duration / detail;

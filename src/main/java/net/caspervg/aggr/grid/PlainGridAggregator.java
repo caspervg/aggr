@@ -11,16 +11,15 @@ import net.caspervg.aggr.core.util.AggrContext;
 import java.util.HashSet;
 import java.util.Set;
 
-public class PlainGridAggregator implements GridAggregator {
+public class PlainGridAggregator extends AbstractGridAggregator {
 
-    private static final String DEFAULT_GRID_SIZE = "0.0005";
 
     @Override
     public Iterable<AggregationResult<GridAggregation, Measurement>> aggregate(Dataset dataset,
                                                                                Iterable<Measurement> measurements,
                                                                                AggrContext context) {
         double gridSize = Double.parseDouble(
-                context.getParameters().getOrDefault("grid_size", DEFAULT_GRID_SIZE)
+                context.getParameters().getOrDefault(GRID_SIZE_PARAM, DEFAULT_GRID_SIZE)
         );
 
         Set<Measurement> roundedMeasurements = new HashSet<>();

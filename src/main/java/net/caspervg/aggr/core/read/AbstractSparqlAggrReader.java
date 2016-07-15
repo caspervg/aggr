@@ -25,7 +25,7 @@ public abstract class AbstractSparqlAggrReader extends AbstractAggrReader {
 
 
     protected String service(Map<String, String> parameters) {
-        return parameters.getOrDefault("service", DEFAULT_SERVICE);
+        return parameters.getOrDefault(INPUT_PARAM_KEY, DEFAULT_SERVICE);
     }
 
     protected String query(Map<String, String> parameters) {

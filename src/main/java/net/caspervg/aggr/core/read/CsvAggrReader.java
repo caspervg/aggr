@@ -100,6 +100,6 @@ public class CsvAggrReader extends AbstractAggrReader {
     }
 
     private String getPath(AggrContext context) {
-        return context.getParameters().getOrDefault("input_path", DEFAULT_INPUT_PATH);
+        return context.getParameters().getOrDefault(INPUT_PARAM_KEY, DEFAULT_INPUT_PATH);
     }
 }

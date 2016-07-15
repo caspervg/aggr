@@ -4,6 +4,7 @@ import java.util.Map;
 
 public abstract class AbstractAggrReader implements AggrReader {
 
+    public static final String INPUT_PARAM_KEY = "input";
     protected static final String DEFAULT_LAT_KEY = "latitude";
     protected static final String DEFAULT_LON_KEY = "longitude";
     protected static final String DEFAULT_TIMESTAMP_KEY = "timestamp";
