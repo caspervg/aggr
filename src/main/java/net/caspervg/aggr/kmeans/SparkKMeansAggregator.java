@@ -41,7 +41,10 @@ public class SparkKMeansAggregator extends AbstractKMeansAggregator {
 
         JavaRDD<Measurement> measRDD = context.getSparkContext().parallelize(Lists.newArrayList(measurements));
 
+        // Choose a number of measurements to act as first generation centroids
         List<Measurement> centroidSeeds = measRDD.takeSample(false, numCentroids);
+
+        // Convert these measurements into Centroid objects
         JavaRDD<Centroid> centroids = context.getSparkContext().parallelize(centroidSeeds).map(
                 (Function<Measurement, Centroid>) measurement ->
                         new Centroid(
@@ -55,12 +58,16 @@ public class SparkKMeansAggregator extends AbstractKMeansAggregator {
 
         int iterations = 0;
         while(iterations++ < maxIterations) {
+            // Find the closest centroid for each measurement
             JavaPairRDD<Centroid, Measurement> closest = measRDD.mapToPair(new SparkClosestCentroidStep(centroids.collect(), distanceMetric));
 
             centroids = closest
                     .mapValues((Function<Measurement, Tuple2<Measurement, Integer>>) measurement ->
+                            // Convert each measurement to a tuple of itself and a count of one
+                            // The count will be summed and is then used to calculate the total number of citizens
                             new Tuple2<>(measurement, 1)
                     ).reduceByKey((Function2<Tuple2<Measurement, Integer>, Tuple2<Measurement, Integer>, Tuple2<Measurement, Integer>>) (pair1, pair2) -> {
+                        // Sum the locations of all citizens
                         Point sum = new Point(new Double[]{
                                 pair1._1.getPoint().getVector()[0] + pair2._1.getPoint().getVector()[0],
                                 pair1._1.getPoint().getVector()[1] + pair2._1.getPoint().getVector()[1]
@@ -69,6 +76,7 @@ public class SparkKMeansAggregator extends AbstractKMeansAggregator {
                         Measurement sumMeas = new Measurement(sum, LocalDateTime.now());
                         return new Tuple2<>(sumMeas, pair1._2 + pair2._2);
                     }).map((Function<Tuple2<Centroid, Tuple2<Measurement, Integer>>, Centroid>) centroidTuple2Tuple2 -> {
+                        // Calculate the new position of the centroid (average of the citizen measurements)
                         Tuple2<Measurement, Integer> pair = centroidTuple2Tuple2._2;
                         Measurement sum = pair._1;
                         Integer amount = pair._2;
@@ -79,6 +87,7 @@ public class SparkKMeansAggregator extends AbstractKMeansAggregator {
                     });
         }
 
+        // After the iterations, do a final step that will map the initial measurements to their closest centroids
         JavaPairRDD<Centroid, Iterable<Measurement>> results = measRDD
                 .mapToPair(
                         new SparkClosestCentroidStep(centroids.collect(), distanceMetric)
@@ -92,6 +101,7 @@ public class SparkKMeansAggregator extends AbstractKMeansAggregator {
             )));
         }
 
+        // Return the result of the aggregation
         return Lists.newArrayList(
                 new AggregationResult<>(
                         new KMeansAggregation(

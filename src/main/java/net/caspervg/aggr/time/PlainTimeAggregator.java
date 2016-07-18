@@ -22,6 +22,7 @@ public class PlainTimeAggregator extends AbstractTimeAggregator {
                                                                                AggrContext context) {
         List<Measurement> measurementList = Lists.newArrayList(measurements);
 
+        // Find the time range
         // Assuming there is at least one measurement in the list!
         LocalDateTime minTimestamp = measurementList.parallelStream().min(new MeasurementTimeComparator()).get().getTimestamp();
         LocalDateTime maxTimestamp = measurementList.parallelStream().max(new MeasurementTimeComparator()).get().getTimestamp();
@@ -31,12 +32,14 @@ public class PlainTimeAggregator extends AbstractTimeAggregator {
         int numDetail = Integer.parseInt(context.getParameters().getOrDefault(DETAIL_PARAM, DEFAULT_NUM_DETAIL));
 
         for (int detail = 1; detail <= numDetail; detail *= 2) {
+            // Divide the total time range into multiple steps based on the required detail
             long timeStep = duration / detail;
 
             for (int i = 0; i < detail; i++) {
                 LocalDateTime start = minTimestamp.plus(timeStep * i, ChronoUnit.MILLIS);
                 LocalDateTime end = minTimestamp.plus(timeStep * (i + 1), ChronoUnit.MILLIS);
 
+                // Filter only the measurements that fall within the desired time bounds
                 List<Measurement> childMeasurements =
                         measurementList
                                 .stream()
@@ -49,6 +52,7 @@ public class PlainTimeAggregator extends AbstractTimeAggregator {
                                 })
                                 .collect(Collectors.toList());
 
+                // Add this aggregation to the result
                 aggregationResults.add(new AggregationResult<>(
                         new TimeAggregation(dataset, start, end, childMeasurements),
                         childMeasurements

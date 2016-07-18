@@ -8,6 +8,10 @@ import net.caspervg.aggr.core.bean.aggregation.KMeansAggregation;
 import net.caspervg.aggr.core.bean.aggregation.TimeAggregation;
 import net.caspervg.aggr.core.util.AggrContext;
 
+/**
+ * Implementation of the {@link AggrWriter} interface that doesn't write anything.
+ * Could be useful if you don't care about certain results (e.g. metadata)
+ */
 public class NullWriter implements AggrWriter {
     @Override
     public void writeMeasurement(Measurement measurement, AggrContext context) {

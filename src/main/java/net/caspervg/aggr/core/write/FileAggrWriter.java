@@ -6,6 +6,10 @@ import net.caspervg.aggr.core.bean.aggregation.KMeansAggregation;
 import net.caspervg.aggr.core.bean.aggregation.TimeAggregation;
 import net.caspervg.aggr.core.util.AggrContext;
 
+/**
+ * Implementation of the {@link AggrWriter} interface that does not allow
+ * writing metadata (aggregations, datasets).
+ */
 public abstract class FileAggrWriter extends AbstractAggrWriter {
     @Override
     public void writeAggregation(TimeAggregation aggregation, AggrContext context) {
@@ -28,6 +32,6 @@ public abstract class FileAggrWriter extends AbstractAggrWriter {
     }
 
     private void notSupported() {
-        //throw new UnsupportedOperationException("Writing aggegrations or datasets to CSV is not supported");
+        throw new UnsupportedOperationException("Writing aggregations or datasets to CSV is not supported");
     }
 }

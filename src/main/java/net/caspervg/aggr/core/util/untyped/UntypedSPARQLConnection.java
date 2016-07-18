@@ -73,9 +73,11 @@ import org.eclipse.rdf4j.query.Update;
 import org.eclipse.rdf4j.query.UpdateExecutionException;
 
 /**
- * Provides a {@link RepositoryConnection} interface to any SPARQL endpoint.
+ * Provides a {@link RepositoryConnection} interface to any SPARQL endpoint, that allows inserting
+ * simple (untyped) literals into the SPARQL store. Necessary for a hack in RDF4J to allow simple literal insertion.
  *
  * @author James Leigh
+ * @author Casper Van Gheluwe
  */
 public class UntypedSPARQLConnection extends AbstractRepositoryConnection implements HttpClientDependent {
 

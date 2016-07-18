@@ -24,6 +24,10 @@ import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.*;
 
+/**
+ * Implementation of the {@link AggrWriter} interface that writes items to
+ * a SPARQL endpoint through RDF4J.
+ */
 public class Rdf4jAggrWriter extends AbstractSparqlAggrWriter {
 
     private static final String DEFAULT_SERVICE = "http://localhost:8890/sparql/";
@@ -413,26 +417,63 @@ public class Rdf4jAggrWriter extends AbstractSparqlAggrWriter {
         add(statements);
     }
 
+    /**
+     * Lazily creates or retrieves a Dataset resource with given id
+     *
+     * @param id id of the dataset
+     * @return RDF4J resource for the dataset
+     */
     private Resource datasetWithId(String id) {
         return valueFactory.createIRI(DATASET_URI_PREFIX, id);
     }
 
+    /**
+     * Lazily creates or retrieves an Aggregation resource with given id
+     *
+     * @param id id of the aggregation
+     * @return RDF4J resource for the aggregation
+     */
     private Resource aggregationWithId(String id) {
         return valueFactory.createIRI(AGGREGATION_URI_PREFIX, id);
     }
 
+    /**
+     * Lazily creates or retrieves a Measurement resource with given id
+     *
+     * @param id id of the measurement
+     * @return RDF4J resource for the measurement
+     */
     private Resource measurementWithId(String id) {
         return valueFactory.createIRI(MEASUREMENT_URI_PREFIX, id);
     }
 
+    /**
+     * Lazily creates or retrieves a Centroid resource with given id
+     *
+     * @param id id of the centroid
+     * @return RDF4J resource for the centroid
+     */
     private Resource centroidWithId(String id) {
         return valueFactory.createIRI(CENTROID_URI_PREFIX, id);
     }
 
+    /**
+     * Creates a {@link UntypedLiteral} that wraps the content, as a workaround for RDF4J's strong typing
+     * of all strings as <code>xsd:string</code>.
+     *
+     * @param content Content to wrap
+     * @return Wrapped untyped literal
+     */
     private Value stringLiteral(String content) {
         return new UntypedLiteral(content);
     }
 
+    /**
+     * Converts a {@link LocalDateTime} instance to a {@link Literal}.
+     *
+     * @param dateTime Date time to convert
+     * @return Converted literal
+     */
     private Literal literalTimestamp(LocalDateTime dateTime) {
         return valueFactory.createLiteral(
                 Date.from(
@@ -443,6 +484,11 @@ public class Rdf4jAggrWriter extends AbstractSparqlAggrWriter {
         );
     }
 
+    /**
+     * Adds a collection of {@link Statement} to the SPARQL repository.
+     *
+     * @param statements Statements to add
+     */
     private void add(Collection<Statement> statements) {
         try (RepositoryConnection conn = getConnection()) {
             conn.add(statements, valueFactory.createIRI(DEFAULT_GRAPH));

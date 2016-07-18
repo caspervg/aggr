@@ -7,13 +7,18 @@ import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
 
 import java.io.IOException;
-import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 
 import static net.caspervg.aggr.core.util.Constants.*;
 
+/**
+ * Implementation fo the {@link AggrWriter} interface that writes data
+ * to CSV-formatted files.
+ *
+ * @implNote Only supports writing actual data (measurements, centroids), not metadata
+ */
 public class CsvAggrWriter extends FileAggrWriter {
 
     private static final String[] MEAS_HEADERS = new String[]{DEFAULT_ID_KEY, DEFAULT_LAT_KEY, DEFAULT_LON_KEY,

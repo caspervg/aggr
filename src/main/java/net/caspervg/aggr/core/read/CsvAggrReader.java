@@ -16,12 +16,21 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
+/**
+ * Implementation of the {@link AggrReader} interface that
+ * reads from a CSV-formatted file.
+ *
+ * @implNote Expects timestamps to be in {@value DateTimeFormatter#ISO_DATE_TIME} format
+ */
 public class CsvAggrReader extends AbstractAggrReader {
-
-    private static final String DEFAULT_INPUT_PATH = "input.csv";
 
     private Reader in;
 
+    /**
+     * Creates a new CsvAggrReader that will read from given {@link Reader}
+     *
+     * @param in Reader to use
+     */
     public CsvAggrReader(Reader in) {
         this.in = in;
     }

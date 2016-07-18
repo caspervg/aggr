@@ -27,8 +27,11 @@ import org.eclipse.rdf4j.repository.sparql.SPARQLConnection;
 import org.eclipse.rdf4j.repository.sparql.SPARQLRepository;
 
 /**
- * A proxy class to access any SPARQL endpoint. The instance must be initialized prior to using it.
+ * A proxy class to access any SPARQL endpoint, that allows inserting
+ * simple (untyped) literals into the SPARQL store. Necessary for a hack in RDF4J to allow simple literal insertion.
+ * The instance must be initialized prior to using it.
  *
+ * @see AbstractRepository#initialize()
  * @author James Leigh
  */
 public class UntypedSPARQLRepository extends AbstractRepository

@@ -9,16 +9,33 @@ import net.caspervg.aggr.core.bean.aggregation.KMeansAggregation;
 import net.caspervg.aggr.core.bean.aggregation.TimeAggregation;
 import net.caspervg.aggr.core.util.AggrContext;
 
+/**
+ * Implementation of the {@link AggrResultWriter} interface that supports
+ * writing metadata (e.g. provenance, used parameters, ...) to a separate channel
+ * than the actual data (computed aggregation results).
+ */
 public class CompositeAggrWriter implements AggrResultWriter {
-
 
     private AggrWriter dataWriter;
     private AggrWriter metaWriter;
 
+    /**
+     * Create a new CompositeAggrWriter that will write all
+     * information to the same channel.
+     *
+     * @param writer Channel to send all data to
+     */
     public CompositeAggrWriter(AggrWriter writer) {
         this(writer, writer);
     }
 
+    /**
+     * Create a new CompositeAggrWriter that will send information
+     * to different channels.
+     *
+     * @param dataWriter Channel to use for actual data
+     * @param metaWriter Channel to use for metadata
+     */
     public CompositeAggrWriter(AggrWriter dataWriter, AggrWriter metaWriter) {
         this.dataWriter = dataWriter;
         this.metaWriter = metaWriter;

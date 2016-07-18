@@ -9,6 +9,11 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.Optional;
 
+/**
+ * Literal that does not have a datatype. Necessary for a hack in RDF4J to allow simple literal insertion.
+ *
+ * {@inheritDoc}
+ */
 public class UntypedLiteral implements Literal, Serializable {
 
     private String value;

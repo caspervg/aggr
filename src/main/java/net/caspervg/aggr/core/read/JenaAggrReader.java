@@ -14,6 +14,10 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
+/**
+ * Implementation of the {@link AggrReader} interface that reads measurements through Jena, through either
+ * a JDBC connection to a remote Virtuoso instance, or an in-memory ontology (e.g. from a .ttl file)
+ */
 public class JenaAggrReader extends AbstractSparqlAggrReader {
 
     @Override
