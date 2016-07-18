@@ -6,7 +6,7 @@
 
     <groupId>net.caspervg</groupId>
     <artifactId>aggr</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
+    <version>0.1.0</version>
 
     <properties>
         <spark.version>1.5.2</spark.version>

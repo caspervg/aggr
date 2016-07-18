@@ -60,3 +60,13 @@ fabric.properties
 
 # virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
 hs_err_pid*
+
+# Docker
+data/db/virtuoso*
+data/db/dumps/
+data/db/clean-logs.sh
+data/db/http*
+data/hadoop/historyserver/*
+data/hadoop/namenode/*
+
+target/
