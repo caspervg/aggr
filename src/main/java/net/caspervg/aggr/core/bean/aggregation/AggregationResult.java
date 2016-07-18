@@ -2,8 +2,20 @@ package net.caspervg.aggr.core.bean.aggregation;
 
 import java.util.Objects;
 
+/**
+ * Combines an AbstractAggregation with its result
+ *
+ * @param <A> Type of aggregation
+ * @param <M> Type of the result
+ */
 public class AggregationResult<A extends AbstractAggregation, M> {
 
+    /**
+     * Constructs a new AggregationResult
+     *
+     * @param aggregation Aggregation that was executed
+     * @param results Results of the aggregation
+     */
     public AggregationResult(A aggregation, Iterable<M> results) {
         Objects.requireNonNull(aggregation);
         Objects.requireNonNull(results);
@@ -15,10 +27,20 @@ public class AggregationResult<A extends AbstractAggregation, M> {
     private A aggregation;
     private Iterable<M> results;
 
+    /**
+     * Return the aggregation
+     *
+     * @return the aggregation
+     */
     public A getAggregation() {
         return aggregation;
     }
 
+    /**
+     * Return the results of the aggregation
+     *
+     * @return the aggregation results
+     */
     public Iterable<M> getResults() {
         return results;
     }
