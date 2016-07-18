@@ -30,6 +30,7 @@ import net.caspervg.aggr.time.util.TimeAggrCommand;
 import org.apache.hadoop.fs.FSDataOutputStream;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
+import org.apache.spark.JsonRelay;
 import org.apache.spark.SparkConf;
 import org.apache.spark.api.java.JavaSparkContext;
 
@@ -89,6 +90,8 @@ public class AggrMain {
         if (ac.isSpark()) {
             String hdfsUrl = System.getenv("HDFS_URL");
             JavaSparkContext sparkCtx = getSparkContext(ac);
+            sparkCtx.sc().addSparkListener(new JsonRelay(sparkCtx.getConf()));
+
             if (hdfsUrl != null) {
                 FileSystem hdfs = FileSystem.get(new URI(hdfsUrl), sparkCtx.hadoopConfiguration());
                 ctx = new AggrContext(params, sparkCtx, hdfs);
@@ -129,6 +132,8 @@ public class AggrMain {
         if (ac.isSpark()) {
             String hdfsUrl = System.getenv("HDFS_URL");
             JavaSparkContext sparkCtx = getSparkContext(ac);
+            sparkCtx.sc().addSparkListener(new JsonRelay(sparkCtx.getConf()));
+
             if (hdfsUrl != null) {
                 FileSystem hdfs = FileSystem.get(new URI(hdfsUrl), sparkCtx.hadoopConfiguration());
                 ctx = new AggrContext(params, sparkCtx, hdfs);
@@ -168,6 +173,8 @@ public class AggrMain {
         if (ac.isSpark()) {
             String hdfsUrl = System.getenv("HDFS_URL");
             JavaSparkContext sparkCtx = getSparkContext(ac);
+            sparkCtx.sc().addSparkListener(new JsonRelay(sparkCtx.getConf()));
+
             if (hdfsUrl != null) {
                 FileSystem hdfs = FileSystem.get(new URI(hdfsUrl), sparkCtx.hadoopConfiguration());
                 ctx = new AggrContext(params, sparkCtx, hdfs);
