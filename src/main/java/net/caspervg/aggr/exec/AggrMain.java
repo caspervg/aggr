@@ -4,10 +4,7 @@ import com.beust.jcommander.JCommander;
 import net.caspervg.aggr.core.bean.Centroid;
 import net.caspervg.aggr.core.bean.Dataset;
 import net.caspervg.aggr.core.bean.Measurement;
-import net.caspervg.aggr.core.bean.aggregation.AggregationResult;
-import net.caspervg.aggr.core.bean.aggregation.GridAggregation;
-import net.caspervg.aggr.core.bean.aggregation.KMeansAggregation;
-import net.caspervg.aggr.core.bean.aggregation.TimeAggregation;
+import net.caspervg.aggr.core.bean.aggregation.*;
 import net.caspervg.aggr.core.read.AbstractAggrReader;
 import net.caspervg.aggr.core.read.AggrReader;
 import net.caspervg.aggr.core.read.CsvAggrReader;
@@ -15,9 +12,7 @@ import net.caspervg.aggr.core.read.JenaAggrReader;
 import net.caspervg.aggr.core.util.AggrCommand;
 import net.caspervg.aggr.core.util.AggrContext;
 import net.caspervg.aggr.core.util.untyped.UntypedSPARQLRepository;
-import net.caspervg.aggr.core.write.AggrWriter;
-import net.caspervg.aggr.core.write.CsvAggrWriter;
-import net.caspervg.aggr.core.write.Rdf4jAggrWriter;
+import net.caspervg.aggr.core.write.*;
 import net.caspervg.aggr.grid.AbstractGridAggregator;
 import net.caspervg.aggr.grid.GridAggregator;
 import net.caspervg.aggr.grid.PlainGridAggregator;
@@ -110,16 +105,17 @@ public class AggrMain {
         Dataset dataset = new Dataset("kmeans_dataset");
         Iterable<Measurement> meas = getReader(ac).read(ctx);
         Iterable<AggregationResult<KMeansAggregation, Centroid>> results = aggregator.aggregate(dataset, meas, ctx);
-        AggrWriter writer = getWriter(ac, ctx);
 
+        AggrResultWriter writer = null;
         for (AggregationResult<KMeansAggregation, Centroid> res : results) {
-            KMeansAggregation gag = res.getAggregation();
-            Iterable<Centroid> centroids = res.getResults();
+            writer = getWriter(res, ac, ctx);
 
-            writer.writeAggregation(gag, ctx);
-            writer.writeCentroids(centroids, ctx);
+            writer.writeKMeansAggregation(res, ctx);
         }
-        writer.writeDataset(dataset, ctx);
+
+        if (writer != null) {
+            writer.writeDataset(dataset, ctx);
+        }
     }
 
     private static void handleTimeCommand(AggrCommand ac, TimeAggrCommand tac) throws URISyntaxException, IOException {
@@ -148,17 +144,17 @@ public class AggrMain {
         Dataset dataset = new Dataset("time_dataset");
         Iterable<Measurement> meas = getReader(ac).read(ctx);
         Iterable<AggregationResult<TimeAggregation, Measurement>> results = aggregator.aggregate(dataset, meas, ctx);
-        AggrWriter writer = getWriter(ac, ctx);
 
+        AggrResultWriter writer = null;
         for (AggregationResult<TimeAggregation, Measurement> res : results) {
-            TimeAggregation tag = res.getAggregation();
-            Iterable<Measurement> resMeas = res.getResults();
+            writer = getWriter(res, ac, ctx);
 
-            writer.writeAggregation(tag, ctx);
-            writer.writeMeasurements(resMeas, ctx);
+            writer.writeTimeAggregation(res, ctx);
         }
 
-        writer.writeDataset(dataset, ctx);
+        if (writer != null) {
+            writer.writeDataset(dataset, ctx);
+        }
     }
 
     private static void handleGridCommand(AggrCommand ac, GridAggrCommand gac) throws URISyntaxException, IOException {
@@ -187,17 +183,17 @@ public class AggrMain {
         Dataset dataset = new Dataset("grid_dataset");
         Iterable<Measurement> meas = getReader(ac).read(ctx);
         Iterable<AggregationResult<GridAggregation, Measurement>> results = aggregator.aggregate(dataset, meas, ctx);
-        AggrWriter writer = getWriter(ac, ctx);
 
+        AggrResultWriter writer = null;
         for (AggregationResult<GridAggregation, Measurement> res : results) {
-            GridAggregation gag = res.getAggregation();
-            Iterable<Measurement> resMeas = res.getResults();
+            writer = getWriter(res, ac, ctx);
 
-            writer.writeAggregation(gag, ctx);
-            writer.writeMeasurements(resMeas, ctx);
+            writer.writeGridAggregation(res, ctx);
         }
 
-        writer.writeDataset(dataset, ctx);
+        if (writer != null) {
+            writer.writeDataset(dataset, ctx);
+        }
     }
 
     private static JavaSparkContext getSparkContext(AggrCommand ac) {
@@ -213,27 +209,36 @@ public class AggrMain {
         }
     }
 
-    private static AggrWriter getWriter(AggrCommand ac, AggrContext ctx) {
-        if (ac.getOutput().toLowerCase().contains("sparql")) {
-            return new Rdf4jAggrWriter(new UntypedSPARQLRepository(ac.getOutput()));
-        } else {
-            try {
-                String path = ctx.getParameters().getOrDefault(OUTPUT_PARAM_KEY, "output.csv");
+    private static <A extends AbstractAggregation, M> AggrResultWriter getWriter(
+            AggregationResult<A, M> aggrResult,
+            AggrCommand ac,
+            AggrContext ctx) {
 
-                if (ac.isSpark()) {
-                    if (path.toLowerCase().contains("hdfs")) {
-                        FSDataOutputStream os = ctx.getFileSystem().create(new Path(path), true);
-                        return new CsvAggrWriter(new PrintWriter(os));
-                    } else {
-                        return new CsvAggrWriter(new PrintWriter(new File(path)));
-                    }
+        AggrWriter metaWriter = new Rdf4jAggrWriter(new UntypedSPARQLRepository(ac.getService()));
+        AggrWriter dataWriter;
+
+        try {
+            String dirPath = ac.getOutput();
+            String fileName = aggrResult.getAggregation().getUuid() + ".csv";
+
+            if (ac.isSpark()) {
+                if (dirPath.toLowerCase().contains("hdfs")) {
+                    Path parent = new Path(dirPath);
+                    Path child = new Path(parent, fileName);
+                    FSDataOutputStream os = ctx.getFileSystem().create(child, false);
+                    dataWriter = new CsvAggrWriter(new PrintWriter(os));
                 } else {
-                    return new CsvAggrWriter(new PrintWriter(new File(path)));
+                    dataWriter = new CsvAggrWriter(new PrintWriter(new File(dirPath + "/" + fileName)));
                 }
-            } catch (IOException ex) {
-                ex.printStackTrace();
-                throw new RuntimeException(ex);
+            } else {
+                dataWriter = new CsvAggrWriter(new PrintWriter(new File(dirPath + "/" + fileName)));
             }
+        } catch (IOException ex) {
+            ex.printStackTrace();
+            throw new RuntimeException(ex);
         }
+
+        return new CompositeAggrWriter(dataWriter, metaWriter); // Split data to CSV, metadata to triple store
+        // return new CompositeAggrWriter(metaWriter, metaWriter); // All to triple store
     }
 }

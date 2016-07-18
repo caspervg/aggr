@@ -31,6 +31,9 @@ public class Rdf4jAggrWriter extends AbstractSparqlAggrWriter {
     private Repository repository;
     private ValueFactory valueFactory;
     private IRI geoPoint;
+    private IRI ownGridAggr;
+    private IRI ownKMeansAggr;
+    private IRI ownTimeAggr;
     private IRI geoLat;
     private IRI geoLon;
     private IRI ownWeight;
@@ -41,6 +44,9 @@ public class Rdf4jAggrWriter extends AbstractSparqlAggrWriter {
         this.valueFactory = SimpleValueFactory.getInstance();
 
         this.geoPoint = valueFactory.createIRI(GEO_PREFIX, "Point");
+        this.ownGridAggr = valueFactory.createIRI(OWN_CLASS, "GridAggregation");
+        this.ownKMeansAggr = valueFactory.createIRI(OWN_CLASS, "KMeansAggregation");
+        this.ownTimeAggr = valueFactory.createIRI(OWN_CLASS, "TimeAggregation");
         this.geoLat = valueFactory.createIRI(GEO_PREFIX, "lat");
         this.geoLon = valueFactory.createIRI(GEO_PREFIX, "long");
         this.ownWeight = valueFactory.createIRI(WEIGHT_PROPERTY);
@@ -121,6 +127,15 @@ public class Rdf4jAggrWriter extends AbstractSparqlAggrWriter {
                 )
         );
 
+        // Type of the aggregation
+        statements.add(
+                valueFactory.createStatement(
+                        aggRes,
+                        RDF.TYPE,
+                        this.ownTimeAggr
+                )
+        );
+
         add(statements);
     }
 
@@ -152,6 +167,15 @@ public class Rdf4jAggrWriter extends AbstractSparqlAggrWriter {
                 )
         );
 
+        // Type of the aggregation
+        statements.add(
+                valueFactory.createStatement(
+                        aggRes,
+                        RDF.TYPE,
+                        this.ownKMeansAggr
+                )
+        );
+
         add(statements);
     }
 
@@ -170,6 +194,15 @@ public class Rdf4jAggrWriter extends AbstractSparqlAggrWriter {
                         aggRes,
                         ownGridSize,
                         valueFactory.createLiteral(aggregation.getGridSize())
+                )
+        );
+
+        // Type of the aggregation
+        statements.add(
+                valueFactory.createStatement(
+                        aggRes,
+                        RDF.TYPE,
+                        this.ownGridAggr
                 )
         );
 
@@ -199,7 +232,7 @@ public class Rdf4jAggrWriter extends AbstractSparqlAggrWriter {
                 valueFactory.createStatement(
                         measRes,
                         this.muUUID,
-                        new UntypedLiteral(id)
+                        stringLiteral(id)
                 )
         );
 
@@ -208,10 +241,7 @@ public class Rdf4jAggrWriter extends AbstractSparqlAggrWriter {
                 valueFactory.createStatement(
                         measRes,
                         this.geoLat,
-                        valueFactory.createLiteral(
-                                String.valueOf(latitude),  // Spec requires string for latitude
-                                (IRI) null
-                        )
+                        stringLiteral(String.valueOf(latitude))    // Spec requires string for latitude
                 )
         );
 
@@ -220,10 +250,7 @@ public class Rdf4jAggrWriter extends AbstractSparqlAggrWriter {
                 valueFactory.createStatement(
                         measRes,
                         this.geoLon,
-                        valueFactory.createLiteral(
-                                String.valueOf(longitude), // Spec requires string for longitude
-                                (IRI) null
-                        )
+                        stringLiteral(String.valueOf(longitude))    // Spec requires string for longitude
                 )
         );
 
@@ -271,10 +298,7 @@ public class Rdf4jAggrWriter extends AbstractSparqlAggrWriter {
                 valueFactory.createStatement(
                         centRes,
                         this.geoLat,
-                        valueFactory.createLiteral(
-                                String.valueOf(latitude),  // Spec requires string for latitude
-                                (IRI) null
-                        )
+                        stringLiteral(String.valueOf(latitude))     // Spec requires string for latitude
                 )
         );
 
@@ -283,10 +307,7 @@ public class Rdf4jAggrWriter extends AbstractSparqlAggrWriter {
                 valueFactory.createStatement(
                         centRes,
                         this.geoLon,
-                        valueFactory.createLiteral(
-                                String.valueOf(longitude), // Spec requires string for longitude
-                                (IRI) null
-                        )
+                        stringLiteral(String.valueOf(longitude))    // Spec requires string for longitude
                 )
         );
 
@@ -304,10 +325,7 @@ public class Rdf4jAggrWriter extends AbstractSparqlAggrWriter {
                 valueFactory.createStatement(
                         centRes,
                         this.muUUID,
-                        valueFactory.createLiteral(
-                                centroid.getUuid(),
-                                (IRI) null
-                        )
+                        stringLiteral(centroid.getUuid())
                 )
         );
 
@@ -333,19 +351,7 @@ public class Rdf4jAggrWriter extends AbstractSparqlAggrWriter {
                 valueFactory.createStatement(
                         aggRes,
                         muUUID,
-                        valueFactory.createLiteral(aggregation.getUuid(), (IRI) null)
-                )
-        );
-
-        // Type of the aggregation
-        statements.add(
-                valueFactory.createStatement(
-                        aggRes,
-                        DCTERMS.TYPE,
-                        valueFactory.createLiteral(
-                                aggregation.getAggregationType().getSerialization(),
-                                (IRI) null
-                        )
+                        stringLiteral(aggregation.getUuid())
                 )
         );
 
@@ -391,7 +397,7 @@ public class Rdf4jAggrWriter extends AbstractSparqlAggrWriter {
                 valueFactory.createStatement(
                         dsRes,
                         muUUID,
-                        valueFactory.createLiteral(dataset.getUuid(), (IRI) null)
+                        stringLiteral(dataset.getUuid())
                 )
         );
 
@@ -400,7 +406,7 @@ public class Rdf4jAggrWriter extends AbstractSparqlAggrWriter {
                 valueFactory.createStatement(
                         dsRes,
                         DCTERMS.TITLE,
-                        valueFactory.createLiteral(dataset.getTitle(), (IRI) null)
+                        stringLiteral(dataset.getTitle())
                 )
         );
 
@@ -421,6 +427,10 @@ public class Rdf4jAggrWriter extends AbstractSparqlAggrWriter {
 
     private Resource centroidWithId(String id) {
         return valueFactory.createIRI(CENTROID_URI_PREFIX, id);
+    }
+
+    private Value stringLiteral(String content) {
+        return new UntypedLiteral(content);
     }
 
     private Literal literalTimestamp(LocalDateTime dateTime) {

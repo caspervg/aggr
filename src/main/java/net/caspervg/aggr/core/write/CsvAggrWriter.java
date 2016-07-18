@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
+import java.util.Arrays;
 
 import static net.caspervg.aggr.core.util.Constants.*;
 
@@ -73,7 +74,8 @@ public class CsvAggrWriter extends FileAggrWriter {
                 measurement.getPoint().getVector()[0],
                 measurement.getPoint().getVector()[1],
                 measurement.getTimestamp().atZone(ZoneOffset.UTC).format(DateTimeFormatter.ISO_DATE_TIME),
-                measurement.getParent().orElse(""));
+                measurement.getParent().orElse("")
+        );
     }
 
     private void printCentroid(CSVPrinter printer, Centroid centroid) throws IOException {
@@ -82,6 +84,7 @@ public class CsvAggrWriter extends FileAggrWriter {
                 centroid.getVector()[0],
                 centroid.getVector()[1],
                 "",
-                centroid.getMeasurements().stream().map(Measurement::getUuid).toArray());
+                Arrays.toString(centroid.getMeasurements().stream().map(Measurement::getUuid).toArray())
+        );
     }
 }
