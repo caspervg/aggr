@@ -21,6 +21,10 @@ public class AggrCommand {
     @Parameter(names = {"-s", "--service"}, description = "SPARQL endpoint to store results (metadata) in")
     private String service = "";
 
+    @Parameter(names = {"--write-data-csv"}, description = "Write data to CSV instead of the triple store (metadata will " +
+            "still go to the triple store", arity = 1)
+    private boolean writeDataCsv = true;
+
     @DynamicParameter(names ={"-D"}, description = "Additional dynamic parameters that could be useful for some " +
             "aggregation command, data reader and/or writer. e.g. 'query', 'latitude_key', ...")
     protected Map<String, String> dynamicParameters = new HashMap<>();
@@ -43,6 +47,10 @@ public class AggrCommand {
 
     public String getService() {
         return service;
+    }
+
+    public boolean isWriteDataCsv() {
+        return writeDataCsv;
     }
 
     public Map<String, String> getDynamicParameters() {

@@ -90,7 +90,6 @@ public class AggrMain {
         if (ac.isSpark()) {
             String hdfsUrl = System.getenv("HDFS_URL");
             JavaSparkContext sparkCtx = getSparkContext(ac);
-            sparkCtx.sc().addSparkListener(new JsonRelay(sparkCtx.getConf()));
 
             if (hdfsUrl != null) {
                 FileSystem hdfs = FileSystem.get(new URI(hdfsUrl), sparkCtx.hadoopConfiguration());
@@ -132,7 +131,6 @@ public class AggrMain {
         if (ac.isSpark()) {
             String hdfsUrl = System.getenv("HDFS_URL");
             JavaSparkContext sparkCtx = getSparkContext(ac);
-            sparkCtx.sc().addSparkListener(new JsonRelay(sparkCtx.getConf()));
 
             if (hdfsUrl != null) {
                 FileSystem hdfs = FileSystem.get(new URI(hdfsUrl), sparkCtx.hadoopConfiguration());
@@ -173,7 +171,6 @@ public class AggrMain {
         if (ac.isSpark()) {
             String hdfsUrl = System.getenv("HDFS_URL");
             JavaSparkContext sparkCtx = getSparkContext(ac);
-            sparkCtx.sc().addSparkListener(new JsonRelay(sparkCtx.getConf()));
 
             if (hdfsUrl != null) {
                 FileSystem hdfs = FileSystem.get(new URI(hdfsUrl), sparkCtx.hadoopConfiguration());
@@ -205,7 +202,9 @@ public class AggrMain {
 
     private static JavaSparkContext getSparkContext(AggrCommand ac) {
         SparkConf conf = new SparkConf().setAppName("KMeansAggr").setMaster(ac.getSparkMaster());
-        return new JavaSparkContext(conf);
+        JavaSparkContext sparkCtx = new JavaSparkContext(conf);
+        sparkCtx.sc().addSparkListener(new JsonRelay(sparkCtx.getConf()));
+        return sparkCtx;
     }
 
     private static AggrReader getReader(AggrCommand ac) {
@@ -224,28 +223,31 @@ public class AggrMain {
         AggrWriter metaWriter = new Rdf4jAggrWriter(new UntypedSPARQLRepository(ac.getService()));
         AggrWriter dataWriter;
 
-        try {
-            String dirPath = ac.getOutput();
-            String fileName = aggrResult.getAggregation().getUuid() + ".csv";
+        if (ac.isWriteDataCsv()) {
+            try {
+                String dirPath = ac.getOutput();
+                String fileName = aggrResult.getAggregation().getUuid() + ".csv";
 
-            if (ac.isSpark()) {
-                if (dirPath.toLowerCase().contains("hdfs")) {
-                    Path parent = new Path(dirPath);
-                    Path child = new Path(parent, fileName);
-                    FSDataOutputStream os = ctx.getFileSystem().create(child, false);
-                    dataWriter = new CsvAggrWriter(new PrintWriter(os));
+                if (ac.isSpark()) {
+                    if (dirPath.toLowerCase().contains("hdfs")) {
+                        Path parent = new Path(dirPath);
+                        Path child = new Path(parent, fileName);
+                        FSDataOutputStream os = ctx.getFileSystem().create(child, false);
+                        dataWriter = new CsvAggrWriter(new PrintWriter(os));
+                    } else {
+                        dataWriter = new CsvAggrWriter(new PrintWriter(new File(dirPath + "/" + fileName)));
+                    }
                 } else {
                     dataWriter = new CsvAggrWriter(new PrintWriter(new File(dirPath + "/" + fileName)));
                 }
-            } else {
-                dataWriter = new CsvAggrWriter(new PrintWriter(new File(dirPath + "/" + fileName)));
+            } catch (IOException ex) {
+                ex.printStackTrace();
+                throw new RuntimeException(ex);
             }
-        } catch (IOException ex) {
-            ex.printStackTrace();
-            throw new RuntimeException(ex);
+
+            return new CompositeAggrWriter(dataWriter, metaWriter);     // Split data to CSV, metadata to triple store
         }
 
-        return new CompositeAggrWriter(dataWriter, metaWriter); // Split data to CSV, metadata to triple store
-        // return new CompositeAggrWriter(metaWriter, metaWriter); // All to triple store
+        return new CompositeAggrWriter(metaWriter, metaWriter);         // Write data and metadata to the triple store
     }
 }
