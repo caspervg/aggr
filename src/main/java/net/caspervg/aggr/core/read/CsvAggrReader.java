@@ -66,7 +66,10 @@ public class CsvAggrReader extends AbstractAggrReader {
         String srcKey = sourceKey(params);
         String timeKey = timestampKey(params);
 
-        String id = record.get(idKey);
+        String id = null;
+        if (record.isSet(idKey)) {
+            id = record.get(idKey);
+        }
         String latStr = record.get(latKey);
         String lonStr = record.get(lonKey);
         String timeStr = record.get(timeKey);
@@ -78,7 +81,10 @@ public class CsvAggrReader extends AbstractAggrReader {
         double lat = Double.parseDouble(latStr);
         double lon = Double.parseDouble(lonStr);
         LocalDateTime time = LocalDateTime.parse(timeStr, DateTimeFormatter.ISO_DATE_TIME);
-        String parent = record.get(srcKey);
+        String parent = null;
+        if (record.isSet(srcKey)) {
+            parent = record.get(srcKey);
+        }
 
         Point point = new Point(new Double[]{lat, lon});
         if (id == null) {
