@@ -8,6 +8,8 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
@@ -28,7 +30,7 @@ public class CsvAggrReaderTests {
         params.put("input_path", CsvAggrReaderTests.class.getResource("/measurements.csv").getPath());
 
         ctx = new AggrContext(params);
-        reader = new CsvAggrReader();
+        reader = new CsvAggrReader(new BufferedReader(new InputStreamReader(CsvAggrReader.class.getResourceAsStream("/measurements.csv"))));
     }
 
     @Test

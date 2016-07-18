@@ -27,6 +27,7 @@ import net.caspervg.aggr.time.PlainTimeAggregator;
 import net.caspervg.aggr.time.SparkTimeAggregator;
 import net.caspervg.aggr.time.TimeAggregator;
 import net.caspervg.aggr.time.util.TimeAggrCommand;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.fs.FSDataOutputStream;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -34,9 +35,7 @@ import org.apache.spark.JsonRelay;
 import org.apache.spark.SparkConf;
 import org.apache.spark.api.java.JavaSparkContext;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.PrintWriter;
+import java.io.*;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Map;
@@ -88,10 +87,10 @@ public class AggrMain {
         AggrContext ctx;
         KMeansAggregator aggregator;
         if (ac.isSpark()) {
-            String hdfsUrl = System.getenv("HDFS_URL");
+            String hdfsUrl = ac.getHdfsUrl();
             JavaSparkContext sparkCtx = getSparkContext(ac);
 
-            if (hdfsUrl != null) {
+            if (StringUtils.isNotBlank(hdfsUrl)) {
                 FileSystem hdfs = FileSystem.get(new URI(hdfsUrl), sparkCtx.hadoopConfiguration());
                 ctx = new AggrContext(params, sparkCtx, hdfs);
             } else {
@@ -105,7 +104,7 @@ public class AggrMain {
         }
 
         Dataset dataset = new Dataset("kmeans_dataset");
-        Iterable<Measurement> meas = getReader(ac).read(ctx);
+        Iterable<Measurement> meas = getReader(ac, ctx).read(ctx);
         Iterable<AggregationResult<KMeansAggregation, Centroid>> results = aggregator.aggregate(dataset, meas, ctx);
 
         AggrResultWriter writer = null;
@@ -129,10 +128,10 @@ public class AggrMain {
         AggrContext ctx;
         TimeAggregator aggregator;
         if (ac.isSpark()) {
-            String hdfsUrl = System.getenv("HDFS_URL");
+            String hdfsUrl = ac.getHdfsUrl();
             JavaSparkContext sparkCtx = getSparkContext(ac);
 
-            if (hdfsUrl != null) {
+            if (StringUtils.isNotBlank(hdfsUrl)) {
                 FileSystem hdfs = FileSystem.get(new URI(hdfsUrl), sparkCtx.hadoopConfiguration());
                 ctx = new AggrContext(params, sparkCtx, hdfs);
             } else {
@@ -145,7 +144,7 @@ public class AggrMain {
         }
 
         Dataset dataset = new Dataset("time_dataset");
-        Iterable<Measurement> meas = getReader(ac).read(ctx);
+        Iterable<Measurement> meas = getReader(ac, ctx).read(ctx);
         Iterable<AggregationResult<TimeAggregation, Measurement>> results = aggregator.aggregate(dataset, meas, ctx);
 
         AggrResultWriter writer = null;
@@ -169,10 +168,10 @@ public class AggrMain {
         AggrContext ctx;
         GridAggregator aggregator;
         if (ac.isSpark()) {
-            String hdfsUrl = System.getenv("HDFS_URL");
+            String hdfsUrl = ac.getHdfsUrl();
             JavaSparkContext sparkCtx = getSparkContext(ac);
 
-            if (hdfsUrl != null) {
+            if (StringUtils.isNotBlank(hdfsUrl)) {
                 FileSystem hdfs = FileSystem.get(new URI(hdfsUrl), sparkCtx.hadoopConfiguration());
                 ctx = new AggrContext(params, sparkCtx, hdfs);
             } else {
@@ -185,7 +184,7 @@ public class AggrMain {
         }
 
         Dataset dataset = new Dataset("grid_dataset");
-        Iterable<Measurement> meas = getReader(ac).read(ctx);
+        Iterable<Measurement> meas = getReader(ac, ctx).read(ctx);
         Iterable<AggregationResult<GridAggregation, Measurement>> results = aggregator.aggregate(dataset, meas, ctx);
 
         AggrResultWriter writer = null;
@@ -201,17 +200,24 @@ public class AggrMain {
     }
 
     private static JavaSparkContext getSparkContext(AggrCommand ac) {
-        SparkConf conf = new SparkConf().setAppName("KMeansAggr").setMaster(ac.getSparkMaster());
+        SparkConf conf = new SparkConf().setAppName("KMeansAggr").setMaster(ac.getSparkMasterUrl());
         JavaSparkContext sparkCtx = new JavaSparkContext(conf);
-        sparkCtx.sc().addSparkListener(new JsonRelay(sparkCtx.getConf()));
+        //sparkCtx.sc().addSparkListener(new JsonRelay(sparkCtx.getConf()));
         return sparkCtx;
     }
 
-    private static AggrReader getReader(AggrCommand ac) {
+    private static AggrReader getReader(AggrCommand ac, AggrContext ctx) throws IOException {
         if (ac.getInput().toLowerCase().contains("sparql")) {
             return new JenaAggrReader();
         } else {
-            return new CsvAggrReader();
+            if (!ac.isHdfs()) {
+                BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(ac.getInput())));
+                return new CsvAggrReader(reader);
+            } else {
+                Path path = new Path(/*ac.getHdfsUrl() + */ac.getInput());
+                BufferedReader reader = new BufferedReader(new InputStreamReader(ctx.getFileSystem().open(path)));
+                return new CsvAggrReader(reader);
+            }
         }
     }
 
@@ -225,11 +231,12 @@ public class AggrMain {
 
         if (ac.isWriteDataCsv()) {
             try {
+                String hdfsUrl = ac.getHdfsUrl();
                 String dirPath = ac.getOutput();
                 String fileName = aggrResult.getAggregation().getUuid() + ".csv";
 
                 if (ac.isSpark()) {
-                    if (dirPath.toLowerCase().contains("hdfs")) {
+                    if (StringUtils.isNotBlank(hdfsUrl)) {
                         Path parent = new Path(dirPath);
                         Path child = new Path(parent, fileName);
                         FSDataOutputStream os = ctx.getFileSystem().create(child, false);

@@ -20,13 +20,19 @@ public class CsvAggrReader extends AbstractAggrReader {
 
     private static final String DEFAULT_INPUT_PATH = "input.csv";
 
+    private Reader in;
+
+    public CsvAggrReader(Reader in) {
+        this.in = in;
+    }
+
     @Override
     public Optional<Measurement> read(String id, AggrContext context) {
         Map<String, String> params = context.getParameters();
         String idKey = idKey(params);
 
-        try (Reader in = new FileReader(getPath(context))) {
-            Iterable<CSVRecord> records = parseRecords(in);
+        try {
+            Iterable<CSVRecord> records = parseRecords(this.in);
 
             for (CSVRecord record : records) {
                 if (id.equals(record.get(idKey))) {
@@ -44,8 +50,8 @@ public class CsvAggrReader extends AbstractAggrReader {
     public Iterable<Measurement> read(AggrContext context) {
         Set<Measurement> measurements = new HashSet<>();
 
-        try (Reader in = new FileReader(getPath(context))) {
-            Iterable<CSVRecord> records = parseRecords(in);
+        try {
+            Iterable<CSVRecord> records = parseRecords(this.in);
 
             for (CSVRecord record : records) {
                 measurements.add(measurementFromRecord(context, record));
@@ -104,9 +110,5 @@ public class CsvAggrReader extends AbstractAggrReader {
 
     private Iterable<CSVRecord> parseRecords(Reader in) throws IOException {
         return CSVFormat.DEFAULT.withHeader().parse(in);
-    }
-
-    private String getPath(AggrContext context) {
-        return context.getParameters().getOrDefault(INPUT_PARAM_KEY, DEFAULT_INPUT_PATH);
     }
 }

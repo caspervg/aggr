@@ -6,11 +6,17 @@ import org.apache.commons.lang3.StringUtils;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 public class AggrCommand {
 
-    @Parameter(names = {"-m", "--master"}, description = "Location of the Spark master. If left blank, plain algorithms will be used instead")
-    private String sparkMaster = null;
+    public static final String SPARK_URL;
+    public static final String HDFS_URL;
+
+    static {
+        SPARK_URL = Optional.ofNullable(System.getenv("SPARK_MASTER_URL")).orElse("");
+        HDFS_URL = Optional.ofNullable(System.getenv("HDFS_URL")).orElse("");
+    }
 
     @Parameter(names = {"-i", "--input"}, description = "Input file (CSV) or SPARQL endpoint to retrieve source data from")
     private String input = "";
@@ -29,12 +35,20 @@ public class AggrCommand {
             "aggregation command, data reader and/or writer. e.g. 'query', 'latitude_key', ...")
     protected Map<String, String> dynamicParameters = new HashMap<>();
 
-    public String getSparkMaster() {
-        return sparkMaster;
+    public String getSparkMasterUrl() {
+        return SPARK_URL;
+    }
+
+    public String getHdfsUrl() {
+        return HDFS_URL;
+    }
+
+    public boolean isHdfs() {
+        return StringUtils.isNotBlank(HDFS_URL);
     }
 
     public boolean isSpark() {
-        return !StringUtils.isBlank(this.sparkMaster);
+        return StringUtils.isNotBlank(SPARK_URL);
     }
 
     public String getInput() {
