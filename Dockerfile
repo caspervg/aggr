@@ -3,7 +3,7 @@ FROM caspervg/docker-spark-java-template:latest
 MAINTAINER Casper Van Gheluwe <caspervg@gmail.com>
 
 ENV SPARK_APPLICATION_MAIN_CLASS net.caspervg.aggr.exec.AggrMain
-ENV SPARK_APPLICATION_JAR_NAME aggr-0.1.0-with-dependencies
+ENV SPARK_APPLICATION_JAR_NAME aggr-0.1.1-with-dependencies
 
 # Global
 ENV APP_ARGS_INPUT=/user/test/localhost.csv
