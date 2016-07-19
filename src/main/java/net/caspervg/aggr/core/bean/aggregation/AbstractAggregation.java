@@ -1,10 +1,13 @@
 package net.caspervg.aggr.core.bean.aggregation;
 
 import net.caspervg.aggr.core.bean.Dataset;
+import net.caspervg.aggr.core.bean.Identifiable;
 import net.caspervg.aggr.core.bean.Measurement;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.UUID;
 
 /**
@@ -15,6 +18,7 @@ public abstract class AbstractAggregation implements Serializable {
     private String uuid;
     private Dataset dataset;
     private Collection<Measurement> sources;
+    private Collection<? extends Identifiable> components;
     private AggregationType aggregationType;
 
     public AbstractAggregation(AggregationType type, Dataset dataset, Collection<Measurement> sources) {
@@ -26,6 +30,7 @@ public abstract class AbstractAggregation implements Serializable {
         this.dataset = dataset;
         this.sources = sources;
         this.aggregationType = type;
+        this.components = new ArrayList<>();
     }
 
     /**
@@ -62,5 +67,13 @@ public abstract class AbstractAggregation implements Serializable {
      */
     public Collection<Measurement> getSources() {
         return sources;
+    }
+
+    public Collection<? extends Identifiable> getComponents() {
+        return components;
+    }
+
+    public void setComponents(Collection<? extends Identifiable> components) {
+        this.components = components;
     }
 }

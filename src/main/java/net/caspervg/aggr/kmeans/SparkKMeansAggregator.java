@@ -102,14 +102,17 @@ public class SparkKMeansAggregator extends AbstractKMeansAggregator {
         }
 
         // Return the result of the aggregation
+        KMeansAggregation aggr = new KMeansAggregation(
+                dataset,
+                numCentroids,
+                maxIterations,
+                Lists.newArrayList(measurements)
+        );
+        aggr.setComponents(finalCentroids);
+
         return Lists.newArrayList(
                 new AggregationResult<>(
-                        new KMeansAggregation(
-                                dataset,
-                                numCentroids,
-                                maxIterations,
-                                Lists.newArrayList(measurements)
-                        ),
+                        aggr,
                         finalCentroids
                 )
         );

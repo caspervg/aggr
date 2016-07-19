@@ -9,6 +9,9 @@ import net.caspervg.aggr.core.bean.aggregation.KMeansAggregation;
 import net.caspervg.aggr.core.bean.aggregation.TimeAggregation;
 import net.caspervg.aggr.core.util.AggrContext;
 
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
+
 /**
  * Implementation of the {@link AggrResultWriter} interface that supports
  * writing metadata (e.g. provenance, used parameters, ...) to a separate channel
@@ -18,6 +21,7 @@ public class CompositeAggrWriter implements AggrResultWriter {
 
     private AggrWriter dataWriter;
     private AggrWriter metaWriter;
+    private boolean writeProvenance;
 
     /**
      * Create a new CompositeAggrWriter that will write all
@@ -37,8 +41,13 @@ public class CompositeAggrWriter implements AggrResultWriter {
      * @param metaWriter Channel to use for metadata
      */
     public CompositeAggrWriter(AggrWriter dataWriter, AggrWriter metaWriter) {
+        this(dataWriter, metaWriter, false);
+    }
+
+    public CompositeAggrWriter(AggrWriter dataWriter, AggrWriter metaWriter, boolean writeProvenance) {
         this.dataWriter = dataWriter;
         this.metaWriter = metaWriter;
+        this.writeProvenance = writeProvenance;
     }
 
     @Override
@@ -49,8 +58,15 @@ public class CompositeAggrWriter implements AggrResultWriter {
 
     @Override
     public void writeKMeansAggregation(AggregationResult<KMeansAggregation, Centroid> result, AggrContext context) {
-        dataWriter.writeCentroids(result.getResults(), context);
+        Iterable<Centroid> centroids = result.getResults();
+        dataWriter.writeCentroids(centroids, context);
         metaWriter.writeAggregation(result.getAggregation(), context);
+
+        if (writeProvenance) {
+            for (Centroid centroid : centroids) {
+                metaWriter.writeMeasurements(centroid.getMeasurements(), context);
+            }
+        }
     }
 
     @Override

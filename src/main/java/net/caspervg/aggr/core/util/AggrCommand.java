@@ -31,6 +31,14 @@ public class AggrCommand {
             "still go to the triple store", arity = 1)
     private boolean writeDataCsv = true;
 
+    @Parameter(names = {"--write-provenance"}, description = "Write data on the provenance of centroids, measurements and aggregations." +
+            "Enabling this will greatly increase the time taken to write to the triple store")
+    private boolean writeProvenance = false;
+
+    @Parameter(names = {"-d", "--dataset-id"}, description = "Identifier of the dataset that the aggregations are based" +
+            "on", required = true)
+    private String datasetId;
+
     @DynamicParameter(names ={"-D"}, description = "Additional dynamic parameters that could be useful for some " +
             "aggregation command, data reader and/or writer. e.g. 'query', 'latitude_key', ...")
     protected Map<String, String> dynamicParameters = new HashMap<>();
@@ -65,6 +73,14 @@ public class AggrCommand {
 
     public boolean isWriteDataCsv() {
         return writeDataCsv;
+    }
+
+    public boolean isWriteProvenance() {
+        return writeProvenance;
+    }
+
+    public String getDatasetId() {
+        return datasetId;
     }
 
     public Map<String, String> getDynamicParameters() {

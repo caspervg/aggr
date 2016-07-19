@@ -11,7 +11,7 @@ import java.util.UUID;
 /**
  * Result of a KMeans aggregation
  */
-public class Centroid implements Serializable {
+public class Centroid implements Serializable, Identifiable {
 
     private String uuid;
     private Double[] vector;
@@ -124,5 +124,10 @@ public class Centroid implements Serializable {
                 ", vector=" + Arrays.toString(vector) +
                 ", measurements=" + measurements +
                 '}';
+    }
+
+    @Override
+    public String getId() {
+        return getUuid();
     }
 }

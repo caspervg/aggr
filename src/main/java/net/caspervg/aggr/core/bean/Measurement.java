@@ -7,7 +7,7 @@ import java.time.LocalDateTime;
 import java.util.Optional;
 import java.util.UUID;
 
-public class Measurement implements Serializable {
+public class Measurement implements Serializable, Identifiable {
 
     private Point point;
     private String uuid;
@@ -85,5 +85,10 @@ public class Measurement implements Serializable {
                 ", parent='" + parent + '\'' +
                 ", timestamp=" + timestamp +
                 '}';
+    }
+
+    @Override
+    public String getId() {
+        return getUuid();
     }
 }

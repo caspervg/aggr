@@ -117,6 +117,8 @@ public class AggrMain {
         if (writer != null) {
             writer.writeDataset(dataset, ctx);
         }
+
+        stop(ctx);
     }
 
     private static void handleTimeCommand(AggrCommand ac, TimeAggrCommand tac) throws URISyntaxException, IOException {
@@ -157,6 +159,8 @@ public class AggrMain {
         if (writer != null) {
             writer.writeDataset(dataset, ctx);
         }
+
+        stop(ctx);
     }
 
     private static void handleGridCommand(AggrCommand ac, GridAggrCommand gac) throws URISyntaxException, IOException {
@@ -197,15 +201,32 @@ public class AggrMain {
         if (writer != null) {
             writer.writeDataset(dataset, ctx);
         }
+
+        stop(ctx);
     }
 
+    /**
+     * Builds a Spark context for Java execution
+     * @param ac Demands of the user
+     * @return Spark Context with some
+     */
     private static JavaSparkContext getSparkContext(AggrCommand ac) {
-        SparkConf conf = new SparkConf().setAppName("KMeansAggr").setMaster(ac.getSparkMasterUrl());
-        JavaSparkContext sparkCtx = new JavaSparkContext(conf);
-        //sparkCtx.sc().addSparkListener(new JsonRelay(sparkCtx.getConf()));
-        return sparkCtx;
+        SparkConf conf = new SparkConf()
+                .setAppName("KMeansAggr")
+                .setMaster(ac.getSparkMasterUrl())
+                .set("spark.eventLog.enabled", "true")
+                .set("eventLog.enabled", "true");
+        return new JavaSparkContext(conf);
     }
 
+    /**
+     * Retrieve a suitable {@link AggrReader} based on the user's demands
+     *
+     * @param ac Demands of the user
+     * @param ctx Context of the execution
+     * @return Suitable instance of {@link AggrReader} with a pre-set {@link BufferedReader}
+     * @throws IOException if the input cannot be opened or read
+     */
     private static AggrReader getReader(AggrCommand ac, AggrContext ctx) throws IOException {
         if (ac.getInput().toLowerCase().contains("sparql")) {
             return new JenaAggrReader();
@@ -214,19 +235,29 @@ public class AggrMain {
                 BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(ac.getInput())));
                 return new CsvAggrReader(reader);
             } else {
-                Path path = new Path(/*ac.getHdfsUrl() + */ac.getInput());
+                Path path = new Path(ac.getInput());
                 BufferedReader reader = new BufferedReader(new InputStreamReader(ctx.getFileSystem().open(path)));
                 return new CsvAggrReader(reader);
             }
         }
     }
 
+    /**
+     * Retrieve a suitable AggrResultWriter based on the user's demands
+     *
+     * @param aggrResult Type of the aggregation result
+     * @param ac Demands of the user
+     * @param ctx Execution context
+     * @param <A> Type of the aggregation
+     * @param <M> Type of the aggregation result
+     * @return Suitable writer, possibly a composite {@link AggrWriter} that selects different channels for different
+     * types of output
+     */
     private static <A extends AbstractAggregation, M> AggrResultWriter getWriter(
             AggregationResult<A, M> aggrResult,
             AggrCommand ac,
             AggrContext ctx) {
-
-        AggrWriter metaWriter = new Rdf4jAggrWriter(new UntypedSPARQLRepository(ac.getService()));
+        AggrWriter metaWriter = new Rdf4jAggrWriter(new UntypedSPARQLRepository(ac.getService()), ac.isWriteProvenance());
         AggrWriter dataWriter;
 
         if (ac.isWriteDataCsv()) {
@@ -252,9 +283,19 @@ public class AggrMain {
                 throw new RuntimeException(ex);
             }
 
-            return new CompositeAggrWriter(dataWriter, metaWriter);     // Split data to CSV, metadata to triple store
+            return new CompositeAggrWriter(dataWriter, metaWriter, ac.isWriteProvenance());     // Split data to CSV, metadata to triple store
         }
 
-        return new CompositeAggrWriter(metaWriter, metaWriter);         // Write data and metadata to the triple store
+        return new CompositeAggrWriter(metaWriter, metaWriter, ac.isWriteProvenance());         // Write data and metadata to the triple store
+    }
+
+    /**
+     * Stop the Spark Context if it exists
+     * @param context Context of the execution
+     */
+    private static void stop(AggrContext context) {
+        if (context.getSparkContext() != null) {
+            context.getSparkContext().stop();
+        }
     }
 }

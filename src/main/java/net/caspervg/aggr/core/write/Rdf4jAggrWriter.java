@@ -1,8 +1,10 @@
 package net.caspervg.aggr.core.write;
 
 import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
 import net.caspervg.aggr.core.bean.Centroid;
 import net.caspervg.aggr.core.bean.Dataset;
+import net.caspervg.aggr.core.bean.Identifiable;
 import net.caspervg.aggr.core.bean.Measurement;
 import net.caspervg.aggr.core.bean.aggregation.AbstractAggregation;
 import net.caspervg.aggr.core.bean.aggregation.GridAggregation;
@@ -31,10 +33,16 @@ import java.util.*;
 public class Rdf4jAggrWriter extends AbstractSparqlAggrWriter {
 
     private static final String DEFAULT_SERVICE = "http://localhost:8890/sparql/";
+    private static final int QUERY_PARTITION = 1000;
 
+    private boolean writeProvenance;
     private Repository repository;
     private ValueFactory valueFactory;
     private IRI geoPoint;
+    private IRI ownMeas;
+    private IRI ownCentroid;
+    private IRI ownDs;
+    private IRI ownAggr;
     private IRI ownGridAggr;
     private IRI ownKMeansAggr;
     private IRI ownTimeAggr;
@@ -43,11 +51,17 @@ public class Rdf4jAggrWriter extends AbstractSparqlAggrWriter {
     private IRI ownWeight;
     private IRI muUUID;
 
-    public Rdf4jAggrWriter(Repository repository) {
+    public Rdf4jAggrWriter(Repository repository, boolean writeProvenance) {
         this.repository = repository;
+        this.writeProvenance = writeProvenance;
+
         this.valueFactory = SimpleValueFactory.getInstance();
 
         this.geoPoint = valueFactory.createIRI(GEO_PREFIX, "Point");
+        this.ownMeas = valueFactory.createIRI(OWN_CLASS, "Measurement");
+        this.ownCentroid = valueFactory.createIRI(OWN_CLASS, "Centroid");
+        this.ownDs = valueFactory.createIRI(OWN_CLASS, "Dataset");
+        this.ownAggr = valueFactory.createIRI(OWN_CLASS, "Aggregation");
         this.ownGridAggr = valueFactory.createIRI(OWN_CLASS, "GridAggregation");
         this.ownKMeansAggr = valueFactory.createIRI(OWN_CLASS, "KMeansAggregation");
         this.ownTimeAggr = valueFactory.createIRI(OWN_CLASS, "TimeAggregation");
@@ -55,6 +69,10 @@ public class Rdf4jAggrWriter extends AbstractSparqlAggrWriter {
         this.geoLon = valueFactory.createIRI(GEO_PREFIX, "long");
         this.ownWeight = valueFactory.createIRI(WEIGHT_PROPERTY);
         this.muUUID = valueFactory.createIRI(MU_PREFIX, "uuid");
+    }
+
+    public Rdf4jAggrWriter(Repository repository) {
+        this(repository, false);
     }
 
     public Rdf4jAggrWriter() {
@@ -222,12 +240,20 @@ public class Rdf4jAggrWriter extends AbstractSparqlAggrWriter {
         String id = measurement.getUuid();
         Optional<String> parent = measurement.getParent();
 
-        // Type of the measurement
+        // Types of the measurement
         statements.add(
                 valueFactory.createStatement(
                         measRes,
                         RDF.TYPE,
                         this.geoPoint
+                )
+        );
+
+        statements.add(
+                valueFactory.createStatement(
+                        measRes,
+                        RDF.TYPE,
+                        this.ownMeas
                 )
         );
 
@@ -267,15 +293,17 @@ public class Rdf4jAggrWriter extends AbstractSparqlAggrWriter {
                 )
         );
 
-        // Link to the parent measurement, if present
-        if (parent.isPresent()) {
-            statements.add(
-                    valueFactory.createStatement(
-                            measRes,
-                            DCTERMS.SOURCE,
-                            measurementWithId(parent.get())
-                    )
-            );
+        if (writeProvenance) {
+            // Link to the parent measurement, if present
+            if (parent.isPresent()) {
+                statements.add(
+                        valueFactory.createStatement(
+                                measRes,
+                                DCTERMS.SOURCE,
+                                measurementWithId(parent.get())
+                        )
+                );
+            }
         }
 
         return statements;
@@ -288,12 +316,20 @@ public class Rdf4jAggrWriter extends AbstractSparqlAggrWriter {
         double longitude = centroid.getVector()[1];
         int weight = centroid.getMeasurements().size();
 
-        // Type of the centroid
+        // Types of the centroid
         statements.add(
                 valueFactory.createStatement(
                         centRes,
                         RDF.TYPE,
                         this.geoPoint
+                )
+        );
+
+        statements.add(
+                valueFactory.createStatement(
+                        centRes,
+                        RDF.TYPE,
+                        this.ownCentroid
                 )
         );
 
@@ -333,15 +369,17 @@ public class Rdf4jAggrWriter extends AbstractSparqlAggrWriter {
                 )
         );
 
-        // Source measurements of the centroids
-        for (Measurement measurement : centroid.getMeasurements()) {
-            statements.add(
-                    valueFactory.createStatement(
-                            centRes,
-                            DCTERMS.SOURCE,
-                            measurementWithId(measurement.getUuid())
-                    )
-            );
+        if (writeProvenance) {
+            // Source measurements of the centroids
+            for (Measurement measurement : centroid.getMeasurements()) {
+                statements.add(
+                        valueFactory.createStatement(
+                                centRes,
+                                DCTERMS.SOURCE,
+                                measurementWithId(measurement.getUuid())
+                        )
+                );
+            }
         }
 
         return statements;
@@ -368,23 +406,36 @@ public class Rdf4jAggrWriter extends AbstractSparqlAggrWriter {
                 )
         );
 
-        // Sources of the aggregation
-        for (Measurement measurement : aggregation.getSources()) {
-            statements.add(
-                    valueFactory.createStatement(
-                            aggRes,
-                            DCTERMS.SOURCE,
-                            measurementWithId(measurement.getUuid())
-                    )
-            );
+        // Supertype of the aggregation
+        statements.add(
+                valueFactory.createStatement(
+                        aggRes,
+                        RDF.TYPE,
+                        this.ownAggr
+                )
+        );
 
-            statements.add(
-                    valueFactory.createStatement(
-                            measurementWithId(measurement.getUuid()),
-                            DCTERMS.IS_PART_OF,
-                            aggRes
-                    )
-            );
+        if (writeProvenance) {
+            // Sources of the aggregation
+            for (Measurement measurement : aggregation.getSources()) {
+                statements.add(
+                        valueFactory.createStatement(
+                                measurementWithId(measurement.getUuid()),
+                                DCTERMS.IS_REPLACED_BY,
+                                aggRes
+                        )
+                );
+            }
+
+            for (Identifiable identifiable : aggregation.getComponents()) {
+                statements.add(
+                        valueFactory.createStatement(
+                                centroidWithId(identifiable.getId()),
+                                DCTERMS.IS_PART_OF,
+                                aggRes
+                        )
+                );
+            }
         }
 
         return statements;
@@ -411,6 +462,15 @@ public class Rdf4jAggrWriter extends AbstractSparqlAggrWriter {
                         dsRes,
                         DCTERMS.TITLE,
                         stringLiteral(dataset.getTitle())
+                )
+        );
+
+        // Type of the daatset
+        statements.add(
+                valueFactory.createStatement(
+                        dsRes,
+                        RDF.TYPE,
+                        this.ownDs
                 )
         );
 
@@ -490,8 +550,14 @@ public class Rdf4jAggrWriter extends AbstractSparqlAggrWriter {
      * @param statements Statements to add
      */
     private void add(Collection<Statement> statements) {
+        List<Statement> statementList = new ArrayList<>(statements);
+        List<List<Statement>> statementPartitions = Lists.partition(statementList, QUERY_PARTITION);
+
         try (RepositoryConnection conn = getConnection()) {
-            conn.add(statements, valueFactory.createIRI(DEFAULT_GRAPH));
+            IRI graphIri = valueFactory.createIRI(DEFAULT_GRAPH);
+            for (List<Statement> partition : statementPartitions) {
+                conn.add(partition, graphIri);
+            }
         }
     }
 
