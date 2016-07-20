@@ -73,7 +73,7 @@ public class SparkKMeansAggregator extends AbstractKMeansAggregator {
                                 pair1._1.getPoint().getVector()[1] + pair2._1.getPoint().getVector()[1]
                         });
 
-                        Measurement sumMeas = new Measurement(sum, LocalDateTime.now());
+                        Measurement sumMeas = new Measurement(sum);
                         return new Tuple2<>(sumMeas, pair1._2 + pair2._2);
                     }).map((Function<Tuple2<Centroid, Tuple2<Measurement, Integer>>, Centroid>) centroidTuple2Tuple2 -> {
                         // Calculate the new position of the centroid (average of the citizen measurements)

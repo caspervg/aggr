@@ -2,10 +2,7 @@ package net.caspervg.aggr.core.write;
 
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
-import net.caspervg.aggr.core.bean.Centroid;
-import net.caspervg.aggr.core.bean.Dataset;
-import net.caspervg.aggr.core.bean.Identifiable;
-import net.caspervg.aggr.core.bean.Measurement;
+import net.caspervg.aggr.core.bean.*;
 import net.caspervg.aggr.core.bean.aggregation.AbstractAggregation;
 import net.caspervg.aggr.core.bean.aggregation.GridAggregation;
 import net.caspervg.aggr.core.bean.aggregation.KMeansAggregation;
@@ -236,9 +233,13 @@ public class Rdf4jAggrWriter extends AbstractSparqlAggrWriter {
 
         double latitude = measurement.getPoint().getVector()[0];
         double longitude = measurement.getPoint().getVector()[1];
-        LocalDateTime timestamp = measurement.getTimestamp();
+        LocalDateTime timestamp = null;
+        if (measurement instanceof TimedMeasurement) {
+            timestamp = ((TimedMeasurement) measurement).getTimestamp();
+        }
         String id = measurement.getUuid();
-        Optional<String> parent = measurement.getParent();
+        Optional<Measurement> parent = Optional.ofNullable(Iterables.getFirst(measurement.getParents(), null));
+        String parentId = parent.orElse(new Measurement("")).getUuid();
 
         // Types of the measurement
         statements.add(
@@ -284,14 +285,16 @@ public class Rdf4jAggrWriter extends AbstractSparqlAggrWriter {
                 )
         );
 
-        // Timestamp of the measurement
-        statements.add(
-                valueFactory.createStatement(
-                        measRes,
-                        DCTERMS.DATE,
-                        literalTimestamp(timestamp)
-                )
-        );
+        if (timestamp != null) {
+            // Timestamp of the measurement
+            statements.add(
+                    valueFactory.createStatement(
+                            measRes,
+                            DCTERMS.DATE,
+                            literalTimestamp(timestamp)
+                    )
+            );
+        }
 
         if (writeProvenance) {
             // Link to the parent measurement, if present
@@ -300,7 +303,7 @@ public class Rdf4jAggrWriter extends AbstractSparqlAggrWriter {
                         valueFactory.createStatement(
                                 measRes,
                                 DCTERMS.SOURCE,
-                                measurementWithId(parent.get())
+                                measurementWithId(parentId)
                         )
                 );
             }

@@ -1,9 +1,7 @@
 package net.caspervg.aggr.grid;
 
 import com.google.common.collect.Lists;
-import net.caspervg.aggr.core.bean.Dataset;
-import net.caspervg.aggr.core.bean.Measurement;
-import net.caspervg.aggr.core.bean.Point;
+import net.caspervg.aggr.core.bean.*;
 import net.caspervg.aggr.core.bean.aggregation.AggregationResult;
 import net.caspervg.aggr.core.bean.aggregation.GridAggregation;
 import net.caspervg.aggr.core.util.AggrContext;
@@ -32,7 +30,12 @@ public class PlainGridAggregator extends AbstractGridAggregator {
             double roundedLongitude = (double) Math.round(longitude / gridSize) * gridSize;
 
             Point roundedPoint = new Point(new Double[]{roundedLatitude, roundedLongitude});
-            roundedMeasurements.add(new Measurement(roundedPoint, parent.getUuid(), parent.getTimestamp()));
+            if (parent instanceof TimedMeasurement) {
+                TimedMeasurement timedParent = (TimedMeasurement) parent;
+                roundedMeasurements.add(new TimedMeasurement(roundedPoint, timedParent.getUuid(), timedParent.getTimestamp()));
+            } else {
+                roundedMeasurements.add(new Measurement(roundedPoint, parent.getUuid()));
+            }
         }
 
         return Lists.newArrayList(

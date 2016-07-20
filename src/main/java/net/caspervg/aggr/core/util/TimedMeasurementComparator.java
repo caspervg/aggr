@@ -1,13 +1,13 @@
 package net.caspervg.aggr.core.util;
 
-import net.caspervg.aggr.core.bean.Measurement;
+import net.caspervg.aggr.core.bean.TimedMeasurement;
 
 import java.io.Serializable;
 import java.util.Comparator;
 
-public class MeasurementTimeComparator implements Comparator<Measurement>, Serializable {
+public class TimedMeasurementComparator implements Comparator<TimedMeasurement>, Serializable {
     @Override
-    public int compare(Measurement o1, Measurement o2) {
+    public int compare(TimedMeasurement o1, TimedMeasurement o2) {
         if(o1 == null && o2 == null) {
             return 0;
         } else if(o1 == null || o1.getTimestamp() == null) {

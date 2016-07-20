@@ -1,9 +1,11 @@
 package net.caspervg.aggr.core.bean;
 
+import com.beust.jcommander.internal.Lists;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.Serializable;
-import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -11,34 +13,42 @@ public class Measurement implements Serializable, Identifiable {
 
     private Point point;
     private String uuid;
-    private String parent;
-    private LocalDateTime timestamp;
+    private Iterable<Measurement> parents;
 
-    public Measurement(Point point, LocalDateTime timestamp) {
-        this(UUID.randomUUID().toString(), point, timestamp);
+    public Measurement(String uuid) {
+        this.uuid = uuid;
+        this.point = new Point(new Double[]{-1.0, -1.0});
+        this.parents = new ArrayList<>();
     }
 
-    public Measurement(String uuid, Point point, LocalDateTime timestamp) {
-        this(uuid, point, null, timestamp);
+    public Measurement(Point point) {
+        this(UUID.randomUUID().toString(), point);
     }
 
-    public Measurement(Point point, String parent, LocalDateTime timestamp) {
-        this(UUID.randomUUID().toString(), point, parent, timestamp);
+    public Measurement(String uuid, Point point) {
+        this(uuid, point, null);
     }
 
-    public Measurement(String uuid, Point point, String parent, LocalDateTime timestamp) {
+    public Measurement(Point point, String parentId) {
+        this(point, Lists.newArrayList(new Measurement(parentId)));
+    }
+
+    public Measurement(Point point, Iterable<Measurement> parents) {
+        this(UUID.randomUUID().toString(), point, parents);
+    }
+
+    public Measurement(String uuid, Point point, Iterable<Measurement> parents) {
         this.point = point;
         if (StringUtils.isBlank(uuid)) {
             this.uuid = UUID.randomUUID().toString();
         } else {
             this.uuid = uuid;
         }
-        if (StringUtils.isBlank(parent)) {
-            this.parent = null;
+        if (parents == null) {
+            this.parents = new HashSet<>();
         } else {
-            this.parent = parent;
+            this.parents = parents;
         }
-        this.timestamp = timestamp;
     }
 
     public Point getPoint() {
@@ -49,12 +59,8 @@ public class Measurement implements Serializable, Identifiable {
         return uuid;
     }
 
-    public LocalDateTime getTimestamp() {
-        return timestamp;
-    }
-
-    public Optional<String> getParent() {
-        return Optional.ofNullable(this.parent);
+    public Iterable<Measurement> getParents() {
+        return parents;
     }
 
     @Override
@@ -66,14 +72,13 @@ public class Measurement implements Serializable, Identifiable {
 
         if (point != null ? !point.equals(that.point) : that.point != null) return false;
         if (uuid != null ? !uuid.equals(that.uuid) : that.uuid != null) return false;
-        return timestamp != null ? timestamp.equals(that.timestamp) : that.timestamp == null;
+        return true;
     }
 
     @Override
     public int hashCode() {
         int result = point != null ? point.hashCode() : 0;
         result = 31 * result + (uuid != null ? uuid.hashCode() : 0);
-        result = 31 * result + (timestamp != null ? timestamp.hashCode() : 0);
         return result;
     }
 
@@ -82,8 +87,7 @@ public class Measurement implements Serializable, Identifiable {
         return "Measurement{" +
                 "point=" + point +
                 ", uuid='" + uuid + '\'' +
-                ", parent='" + parent + '\'' +
-                ", timestamp=" + timestamp +
+                ", parent='" + parents + '\'' +
                 '}';
     }
 

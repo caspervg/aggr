@@ -6,4 +6,5 @@ public class Constants {
     public static final String DEFAULT_TIMESTAMP_KEY = "timestamp";
     public static final String DEFAULT_ID_KEY = "id";
     public static final String DEFAULT_SOURCE_KEY = "source";
+    public static final String DEFAULT_TYPE_KEY = "type";
 }

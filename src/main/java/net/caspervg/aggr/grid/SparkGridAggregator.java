@@ -4,6 +4,7 @@ import com.google.common.collect.Lists;
 import net.caspervg.aggr.core.bean.Dataset;
 import net.caspervg.aggr.core.bean.Measurement;
 import net.caspervg.aggr.core.bean.Point;
+import net.caspervg.aggr.core.bean.TimedMeasurement;
 import net.caspervg.aggr.core.bean.aggregation.AggregationResult;
 import net.caspervg.aggr.core.bean.aggregation.GridAggregation;
 import net.caspervg.aggr.core.util.AggrContext;
@@ -37,7 +38,12 @@ public class SparkGridAggregator extends AbstractGridAggregator implements Seria
             double roundedLongitude = (double) Math.round(longitude / gridSize) * gridSize;
 
             Point roundedPoint = new Point(new Double[]{roundedLatitude, roundedLongitude});
-            return new Measurement(roundedPoint, parent.getUuid(), parent.getTimestamp());
+
+            if (parent instanceof TimedMeasurement) {
+                return new TimedMeasurement(roundedPoint, parent.getUuid(), ((TimedMeasurement) parent).getTimestamp());
+            } else {
+                return new Measurement(roundedPoint, parent.getUuid());
+            }
         });
 
         List<Measurement> childMeasurements = roundedMeasRDD.collect();

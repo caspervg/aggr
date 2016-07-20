@@ -1,7 +1,9 @@
 package net.caspervg.aggr.core.write;
 
+import com.google.common.collect.Iterables;
 import net.caspervg.aggr.core.bean.Centroid;
 import net.caspervg.aggr.core.bean.Measurement;
+import net.caspervg.aggr.core.bean.TimedMeasurement;
 import net.caspervg.aggr.core.util.AggrContext;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
@@ -22,9 +24,9 @@ import static net.caspervg.aggr.core.util.Constants.*;
 public class CsvAggrWriter extends FileAggrWriter {
 
     private static final String[] MEAS_HEADERS = new String[]{DEFAULT_ID_KEY, DEFAULT_LAT_KEY, DEFAULT_LON_KEY,
-            DEFAULT_TIMESTAMP_KEY, DEFAULT_SOURCE_KEY};
+            DEFAULT_TIMESTAMP_KEY, DEFAULT_SOURCE_KEY, DEFAULT_TYPE_KEY};
     private static final String[] CENT_HEADERS = new String[]{DEFAULT_ID_KEY, DEFAULT_LAT_KEY, DEFAULT_LON_KEY,
-            DEFAULT_TIMESTAMP_KEY, DEFAULT_SOURCE_KEY};
+            DEFAULT_TIMESTAMP_KEY, DEFAULT_SOURCE_KEY, DEFAULT_TYPE_KEY};
     private Appendable out;
 
     public CsvAggrWriter(Appendable out) {
@@ -45,7 +47,12 @@ public class CsvAggrWriter extends FileAggrWriter {
     public void writeMeasurements(Iterable<Measurement> measurements, AggrContext context) {
         try (CSVPrinter printer = CSVFormat.DEFAULT.withHeader(MEAS_HEADERS).print(out)) {
             for (Measurement measurement : measurements) {
-                printMeasurement(printer, measurement);
+                if (measurement instanceof TimedMeasurement) {
+                    TimedMeasurement timedMeasurement = (TimedMeasurement) measurement;
+                    printMeasurement(printer, timedMeasurement);
+                } else {
+                    printMeasurement(printer, measurement);
+                }
             }
             printer.flush();
         } catch (IOException e) {
@@ -78,18 +85,31 @@ public class CsvAggrWriter extends FileAggrWriter {
                 measurement.getUuid(),
                 measurement.getPoint().getVector()[0],
                 measurement.getPoint().getVector()[1],
+                "",
+                Iterables.getFirst(measurement.getParents(), new Measurement("")).getId(),
+                "measurement"
+        );
+    }
+
+    private void printMeasurement(CSVPrinter printer, TimedMeasurement measurement) throws IOException {
+        printer.printRecord(
+                measurement.getUuid(),
+                measurement.getPoint().getVector()[0],
+                measurement.getPoint().getVector()[1],
                 measurement.getTimestamp().atZone(ZoneOffset.UTC).format(DateTimeFormatter.ISO_DATE_TIME),
-                measurement.getParent().orElse("")
+                Iterables.getFirst(measurement.getParents(), new Measurement("")).getId(),
+                "timed_measurement"
         );
     }
 
     private void printCentroid(CSVPrinter printer, Centroid centroid) throws IOException {
         printer.printRecord(
                 centroid.getUuid(),
-                centroid.getVector()[0],
-                centroid.getVector()[1],
+                centroid.getPoint().getVector()[0],
+                centroid.getPoint().getVector()[1],
                 "",
-                Arrays.toString(centroid.getMeasurements().stream().map(Measurement::getUuid).toArray())
+                Arrays.toString(centroid.getMeasurements().stream().map(Measurement::getUuid).toArray()),
+                "centroid"
         );
     }
 }

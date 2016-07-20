@@ -1,12 +1,14 @@
 package net.caspervg.aggr.time;
 
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import net.caspervg.aggr.core.bean.Dataset;
 import net.caspervg.aggr.core.bean.Measurement;
+import net.caspervg.aggr.core.bean.TimedMeasurement;
 import net.caspervg.aggr.core.bean.aggregation.AggregationResult;
 import net.caspervg.aggr.core.bean.aggregation.TimeAggregation;
 import net.caspervg.aggr.core.util.AggrContext;
-import net.caspervg.aggr.core.util.MeasurementTimeComparator;
+import net.caspervg.aggr.core.util.TimedMeasurementComparator;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
 import org.apache.spark.api.java.function.Function;
@@ -14,10 +16,7 @@ import org.apache.spark.api.java.function.Function;
 import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class SparkTimeAggregator extends AbstractTimeAggregator implements Serializable {
@@ -26,13 +25,17 @@ public class SparkTimeAggregator extends AbstractTimeAggregator implements Seria
     public Iterable<AggregationResult<TimeAggregation, Measurement>> aggregate(Dataset dataset,
                                                                                Iterable<Measurement> measurements,
                                                                                AggrContext context) {
+        Measurement[] measurementArray = Iterables.toArray(measurements, Measurement.class);
+        TimedMeasurement[] timedMeasurementArray = Arrays.copyOf(measurementArray, measurementArray.length, TimedMeasurement[].class);
+        List<TimedMeasurement> measurementList = Lists.newArrayList(timedMeasurementArray);
+
         Objects.requireNonNull(context.getSparkContext());
 
         JavaSparkContext sparkCtx = context.getSparkContext();
-        JavaRDD<Measurement> measRDD = sparkCtx.parallelize(Lists.newArrayList(measurements));
+        JavaRDD<TimedMeasurement> measRDD = sparkCtx.parallelize(measurementList);
 
-        LocalDateTime minTimestamp = measRDD.min(new MeasurementTimeComparator()).getTimestamp();
-        LocalDateTime maxTimestamp = measRDD.max(new MeasurementTimeComparator()).getTimestamp();
+        LocalDateTime minTimestamp = measRDD.min(new TimedMeasurementComparator()).getTimestamp();
+        LocalDateTime maxTimestamp = measRDD.max(new TimedMeasurementComparator()).getTimestamp();
         long duration = minTimestamp.until(maxTimestamp, ChronoUnit.MILLIS);
 
         Set<AggregationResult<TimeAggregation, Measurement>> aggregationResults = new HashSet<>();
@@ -44,7 +47,7 @@ public class SparkTimeAggregator extends AbstractTimeAggregator implements Seria
                 LocalDateTime start = minTimestamp.plus(timeStep * i, ChronoUnit.MILLIS);
                 LocalDateTime end = minTimestamp.plus(timeStep * (i + 1), ChronoUnit.MILLIS);
 
-                JavaRDD<Measurement> filteredMeas = measRDD.filter((Function<Measurement, Boolean>) measurement -> {
+                JavaRDD<TimedMeasurement> filteredMeas = measRDD.filter((Function<TimedMeasurement, Boolean>) measurement -> {
                     LocalDateTime timestamp = measurement.getTimestamp();
                     return (timestamp.isEqual(start) || (timestamp.isAfter(start) && timestamp.isBefore(end)));
                 });
@@ -52,7 +55,7 @@ public class SparkTimeAggregator extends AbstractTimeAggregator implements Seria
                 List<Measurement> childMeasurements = filteredMeas.collect()
                         .stream()
                         .map(parent ->
-                                new Measurement(parent.getPoint(), parent.getUuid(), parent.getTimestamp()))
+                                new TimedMeasurement(parent.getPoint(), parent.getUuid(), parent.getTimestamp()))
                         .collect(Collectors.toList());
 
                 aggregationResults.add(new AggregationResult<>(

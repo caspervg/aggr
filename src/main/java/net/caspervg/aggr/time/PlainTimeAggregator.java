@@ -1,12 +1,14 @@
 package net.caspervg.aggr.time;
 
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import net.caspervg.aggr.core.bean.Dataset;
 import net.caspervg.aggr.core.bean.Measurement;
+import net.caspervg.aggr.core.bean.TimedMeasurement;
 import net.caspervg.aggr.core.bean.aggregation.AggregationResult;
 import net.caspervg.aggr.core.bean.aggregation.TimeAggregation;
 import net.caspervg.aggr.core.util.AggrContext;
-import net.caspervg.aggr.core.util.MeasurementTimeComparator;
+import net.caspervg.aggr.core.util.TimedMeasurementComparator;
 
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
@@ -20,12 +22,13 @@ public class PlainTimeAggregator extends AbstractTimeAggregator {
     public Iterable<AggregationResult<TimeAggregation, Measurement>> aggregate(Dataset dataset,
                                                                                Iterable<Measurement> measurements,
                                                                                AggrContext context) {
-        List<Measurement> measurementList = Lists.newArrayList(measurements);
+        TimedMeasurement[] measurementArray = (TimedMeasurement[]) Iterables.toArray(measurements, Measurement.class);
+        List<TimedMeasurement> measurementList = Lists.newArrayList(measurementArray);
 
         // Find the time range
         // Assuming there is at least one measurement in the list!
-        LocalDateTime minTimestamp = measurementList.parallelStream().min(new MeasurementTimeComparator()).get().getTimestamp();
-        LocalDateTime maxTimestamp = measurementList.parallelStream().max(new MeasurementTimeComparator()).get().getTimestamp();
+        LocalDateTime minTimestamp = measurementList.parallelStream().min(new TimedMeasurementComparator()).get().getTimestamp();
+        LocalDateTime maxTimestamp = measurementList.parallelStream().max(new TimedMeasurementComparator()).get().getTimestamp();
         long duration = minTimestamp.until(maxTimestamp, ChronoUnit.MILLIS);
 
         Set<AggregationResult<TimeAggregation, Measurement>> aggregationResults = new HashSet<>();
@@ -48,7 +51,7 @@ public class PlainTimeAggregator extends AbstractTimeAggregator {
                                     return (timestamp.isEqual(start) || (timestamp.isAfter(start) && timestamp.isBefore(end)));
                                 })
                                 .map(parent -> {
-                                    return new Measurement(parent.getPoint(), parent.getUuid(), parent.getTimestamp());
+                                    return new TimedMeasurement(parent.getPoint(), parent.getUuid(), parent.getTimestamp());
                                 })
                                 .collect(Collectors.toList());
 

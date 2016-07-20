@@ -3,6 +3,7 @@ package net.caspervg.aggr.core.read;
 import com.google.common.collect.Iterables;
 import net.caspervg.aggr.core.bean.Measurement;
 import net.caspervg.aggr.core.bean.Point;
+import net.caspervg.aggr.core.bean.TimedMeasurement;
 import net.caspervg.aggr.core.util.AggrContext;
 import org.junit.Assert;
 import org.junit.Before;
@@ -39,18 +40,16 @@ public class CsvAggrReaderTests {
 
         Assert.assertTrue(possibleMeasurement.isPresent());
 
-        Measurement meas = possibleMeasurement.get();
+        TimedMeasurement meas = (TimedMeasurement) possibleMeasurement.get();
         Assert.assertEquals("measurement_4", meas.getUuid());
         Assert.assertEquals(new Point(new Double[]{50.4,4.4}), meas.getPoint());
-        Assert.assertTrue(meas.getParent().isPresent());
-        Assert.assertEquals("parent_4", meas.getParent().get());
         Assert.assertEquals(LocalDateTime.parse("2015-09-10T08:47:39"), meas.getTimestamp());
 
-        possibleMeasurement = reader.read("measurement_2", ctx);
+/*        possibleMeasurement = (Optional<TimedMeasurement>) reader.read("measurement_2", ctx);
 
         Assert.assertTrue(possibleMeasurement.isPresent());
         meas = possibleMeasurement.get();
-        Assert.assertFalse(meas.getParent().isPresent());
+        Assert.assertFalse(meas.getParent().isPresent());*/
     }
 
     @Test

@@ -2,6 +2,7 @@ package net.caspervg.aggr.core.write;
 
 import net.caspervg.aggr.core.bean.Measurement;
 import net.caspervg.aggr.core.bean.Point;
+import net.caspervg.aggr.core.bean.TimedMeasurement;
 import net.caspervg.aggr.core.util.AggrContext;
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Statement;
@@ -57,7 +58,7 @@ public class Rdf4jAggrWriterTests {
 
     @Test
     public void testWriteMeasurement() {
-        Measurement meas = new Measurement("meas1", new Point(new Double[]{1.0, 2.0}), "source1", time1);
+        Measurement meas = new TimedMeasurement("meas1", new Point(new Double[]{1.0, 2.0}), "source1", time1);
         writer.writeMeasurement(meas, ctx);
         IRI measRes = valueFactory.createIRI(MEASUREMENT_URI_PREFIX, "meas1");
 

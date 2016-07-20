@@ -2,6 +2,7 @@ package net.caspervg.aggr.core.read;
 
 import net.caspervg.aggr.core.bean.Measurement;
 import net.caspervg.aggr.core.bean.Point;
+import net.caspervg.aggr.core.bean.TimedMeasurement;
 import net.caspervg.aggr.core.util.AggrContext;
 import org.apache.jena.jdbc.mem.MemDriver;
 import org.apache.jena.jdbc.remote.RemoteEndpointDriver;
@@ -48,7 +49,7 @@ public class JenaAggrReader extends AbstractSparqlAggrReader {
                     String foundId = rs.getString(rs.findColumn(idKey));
                     String source = rs.getString(rs.findColumn(sourceKey));
 
-                    return Optional.of(new Measurement(foundId, new Point(vector), source, time));
+                    return Optional.of(new TimedMeasurement(foundId, new Point(vector), source, time));
                 } else {
                     return Optional.empty();
                 }
@@ -84,16 +85,17 @@ public class JenaAggrReader extends AbstractSparqlAggrReader {
                             Double.parseDouble(rs.getString(rs.findColumn(latitudeKey))),
                             Double.parseDouble(rs.getString(rs.findColumn(longitudeKey)))
                     };
+                    String id = rs.getString(rs.findColumn(idKey));
+                    String source = rs.getString(rs.findColumn(sourceKey));
+
                     LocalDateTime time = LocalDateTime.parse(
                             rs.getString(
                                     rs.findColumn(timeKey)
                             ),
                             DateTimeFormatter.ISO_DATE_TIME
                     );
-                    String id = rs.getString(rs.findColumn(idKey));
-                    String source = rs.getString(rs.findColumn(sourceKey));
 
-                    measurements.add(new Measurement(id, new Point(vector), source, time));
+                    measurements.add(new TimedMeasurement(id, new Point(vector), source, time));
                 }
             } catch (SQLException ex) {
                 System.err.println(query);

@@ -2,6 +2,7 @@ package net.caspervg.aggr.core.read;
 
 import net.caspervg.aggr.core.bean.Measurement;
 import net.caspervg.aggr.core.bean.Point;
+import net.caspervg.aggr.core.bean.TimedMeasurement;
 import net.caspervg.aggr.core.util.AggrContext;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVRecord;
@@ -11,10 +12,7 @@ import java.io.IOException;
 import java.io.Reader;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Implementation of the {@link AggrReader} interface that
@@ -104,15 +102,15 @@ public class CsvAggrReader extends AbstractAggrReader {
         Point point = new Point(new Double[]{lat, lon});
         if (id == null) {
             if (parent == null) {
-                return new Measurement(point, time);
+                return new TimedMeasurement(point, time);
             } else {
-                return new Measurement(point, parent, time);
+                return new TimedMeasurement(point, parent, time);
             }
         } else {
             if (parent == null) {
-                return new Measurement(id, point, time);
+                return new TimedMeasurement(id, point, time);
             } else {
-                return new Measurement(id, point, parent, time);
+                return new TimedMeasurement(id, point, parent, time);
             }
         }
     }
