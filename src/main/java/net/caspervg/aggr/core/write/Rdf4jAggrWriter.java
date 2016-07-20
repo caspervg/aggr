@@ -430,10 +430,10 @@ public class Rdf4jAggrWriter extends AbstractSparqlAggrWriter {
                 );
             }
 
-            for (Identifiable identifiable : aggregation.getComponents()) {
+            for (UniquelyIdentifiable uniquelyIdentifiable : aggregation.getComponents()) {
                 statements.add(
                         valueFactory.createStatement(
-                                centroidWithId(identifiable.getId()),
+                                centroidWithId(uniquelyIdentifiable.getUuid()),
                                 DCTERMS.IS_PART_OF,
                                 aggRes
                         )

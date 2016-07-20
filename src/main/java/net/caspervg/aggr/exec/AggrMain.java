@@ -18,9 +18,7 @@ import net.caspervg.aggr.grid.GridAggregator;
 import net.caspervg.aggr.grid.PlainGridAggregator;
 import net.caspervg.aggr.grid.SparkGridAggregator;
 import net.caspervg.aggr.grid.util.GridAggrCommand;
-import net.caspervg.aggr.kmeans.AbstractKMeansAggregator;
-import net.caspervg.aggr.kmeans.KMeansAggregator;
-import net.caspervg.aggr.kmeans.SparkKMeansAggregator;
+import net.caspervg.aggr.kmeans.*;
 import net.caspervg.aggr.kmeans.util.KMeansAggrCommand;
 import net.caspervg.aggr.time.AbstractTimeAggregator;
 import net.caspervg.aggr.time.PlainTimeAggregator;
@@ -96,11 +94,11 @@ public class AggrMain {
             } else {
                 ctx = new AggrContext(params, sparkCtx);
             }
-            aggregator = new SparkKMeansAggregator();
+            //aggregator = new SparkKMeansAggregator();
+            aggregator = new SparkKMeansClusterAggregator();
         } else {
             ctx = new AggrContext(params);
-            throw new UnsupportedOperationException("Plain KMeans aggregator has not yet been implemented");
-            // aggregator = new PlainKmeansAggregator();
+            aggregator = new PlainKMeansAggregator();
         }
 
         Dataset dataset = new Dataset("kmeans_dataset");

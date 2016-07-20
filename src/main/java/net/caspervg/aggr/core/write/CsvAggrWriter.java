@@ -86,7 +86,7 @@ public class CsvAggrWriter extends FileAggrWriter {
                 measurement.getPoint().getVector()[0],
                 measurement.getPoint().getVector()[1],
                 "",
-                Iterables.getFirst(measurement.getParents(), new Measurement("")).getId(),
+                Iterables.getFirst(measurement.getParents(), new Measurement("")).getUuid(),
                 "measurement"
         );
     }
@@ -97,7 +97,7 @@ public class CsvAggrWriter extends FileAggrWriter {
                 measurement.getPoint().getVector()[0],
                 measurement.getPoint().getVector()[1],
                 measurement.getTimestamp().atZone(ZoneOffset.UTC).format(DateTimeFormatter.ISO_DATE_TIME),
-                Iterables.getFirst(measurement.getParents(), new Measurement("")).getId(),
+                Iterables.getFirst(measurement.getParents(), new Measurement("")).getUuid(),
                 "timed_measurement"
         );
     }

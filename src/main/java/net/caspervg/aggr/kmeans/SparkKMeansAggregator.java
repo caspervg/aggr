@@ -17,7 +17,6 @@ import org.apache.spark.api.java.function.Function;
 import org.apache.spark.api.java.function.Function2;
 import scala.Tuple2;
 
-import java.time.LocalDateTime;
 import java.util.*;
 
 public class SparkKMeansAggregator extends AbstractKMeansAggregator {

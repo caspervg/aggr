@@ -6,10 +6,9 @@ import org.apache.commons.lang3.StringUtils;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.Optional;
 import java.util.UUID;
 
-public class Measurement implements Serializable, Identifiable {
+public class Measurement implements Serializable, UniquelyIdentifiable {
 
     private Point point;
     private String uuid;
@@ -89,10 +88,5 @@ public class Measurement implements Serializable, Identifiable {
                 ", uuid='" + uuid + '\'' +
                 ", parent='" + parents + '\'' +
                 '}';
-    }
-
-    @Override
-    public String getId() {
-        return getUuid();
     }
 }

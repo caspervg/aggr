@@ -11,7 +11,7 @@ import java.util.UUID;
 /**
  * Result of a KMeans aggregation
  */
-public class Centroid extends Measurement implements Serializable, Identifiable {
+public class Centroid extends Measurement implements Serializable, UniquelyIdentifiable {
 
     public Centroid(Point point, Set<Measurement> parents) {
         this(UUID.randomUUID().toString(), point, parents);
@@ -106,10 +106,5 @@ public class Centroid extends Measurement implements Serializable, Identifiable 
     @Override
     public String toString() {
         return super.toString();
-    }
-
-    @Override
-    public String getId() {
-        return getUuid();
     }
 }
