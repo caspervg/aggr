@@ -18,17 +18,15 @@ public abstract class AbstractAggregation implements Serializable {
     private Dataset dataset;
     private Collection<Measurement> sources;
     private Collection<? extends UniquelyIdentifiable> components;
-    private AggregationType aggregationType;
 
-    public AbstractAggregation(AggregationType type, Dataset dataset, Collection<Measurement> sources) {
-        this(UUID.randomUUID().toString(), dataset, sources, type);
+    public AbstractAggregation(Dataset dataset, Collection<Measurement> sources) {
+        this(UUID.randomUUID().toString(), dataset, sources);
     }
 
-    public AbstractAggregation(String uuid, Dataset dataset, Collection<Measurement> sources, AggregationType type) {
+    public AbstractAggregation(String uuid, Dataset dataset, Collection<Measurement> sources) {
         this.uuid = uuid;
         this.dataset = dataset;
         this.sources = sources;
-        this.aggregationType = type;
         this.components = new ArrayList<>();
     }
 
@@ -48,15 +46,6 @@ public abstract class AbstractAggregation implements Serializable {
      */
     public Dataset getDataset() {
         return dataset;
-    }
-
-    /**
-     * Return the type of the aggregation
-     *
-     * @return Type of aggregation
-     */
-    public AggregationType getAggregationType() {
-        return aggregationType;
     }
 
     /**

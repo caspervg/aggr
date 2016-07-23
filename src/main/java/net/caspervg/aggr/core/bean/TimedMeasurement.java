@@ -1,36 +1,21 @@
 package net.caspervg.aggr.core.bean;
 
-import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.UUID;
 
 public class TimedMeasurement extends Measurement implements Serializable {
 
     private LocalDateTime timestamp;
 
-    public TimedMeasurement(Point point, LocalDateTime timestamp) {
-        this(UUID.randomUUID().toString(), point, timestamp);
-    }
-
-    public TimedMeasurement(String uuid, Point point, LocalDateTime timestamp) {
-        this(uuid, point, Lists.newArrayList(), timestamp);
-    }
-
-    public TimedMeasurement(Point point, String parentId, LocalDateTime timestamp) {
-        this(point, Lists.newArrayList(new Measurement(parentId)), timestamp);
-    }
-
-    public TimedMeasurement(Point point, Iterable<Measurement> parents, LocalDateTime timestamp) {
-        this(UUID.randomUUID().toString(), point, parents, timestamp);
-    }
-
-    public TimedMeasurement(String uuid, Point point, String parentId, LocalDateTime timestamp) {
-        this(uuid, point, Lists.newArrayList(new Measurement(parentId)), timestamp);
-    }
-
-    public TimedMeasurement(String uuid, Point point, Iterable<Measurement> parents, LocalDateTime timestamp) {
+    protected TimedMeasurement(String uuid,
+                            Point point,
+                            Iterable<Measurement> parents,
+                            LocalDateTime timestamp) {
         super(uuid, point, parents);
         this.timestamp = timestamp;
     }
@@ -63,5 +48,53 @@ public class TimedMeasurement extends Measurement implements Serializable {
         return "TimedMeasurement{" +
                 "timestamp=" + timestamp +
                 '}';
+    }
+
+
+    public static final class Builder {
+        private String uuid = UUID.randomUUID().toString();
+        private LocalDateTime timestamp;
+        private Point point;
+        private Set<Measurement> parents = new HashSet<>();
+
+        private Builder() {
+        }
+
+        public static Builder setup() {
+            return new Builder();
+        }
+
+        public Builder withUuid(String uuid) {
+            this.uuid = uuid;
+            return this;
+        }
+
+        public Builder withTimestamp(LocalDateTime timestamp) {
+            this.timestamp = timestamp;
+            return this;
+        }
+
+        public Builder withPoint(Point point) {
+            this.point = point;
+            return this;
+        }
+
+        public Builder withParents(Iterable<Measurement> parents) {
+            this.parents = Sets.newHashSet(parents);
+            return this;
+        }
+
+        public Builder withParent(String parentId) {
+            return withParent(Measurement.Builder.setup().withUuid(parentId).build());
+        }
+
+        public Builder withParent(Measurement parent) {
+            this.parents.add(parent);
+            return this;
+        }
+
+        public TimedMeasurement build() {
+            return new TimedMeasurement(uuid, point, parents, timestamp);
+        }
     }
 }

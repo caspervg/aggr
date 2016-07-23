@@ -36,7 +36,7 @@ public class PlainKMeansAggregator extends AbstractKMeansAggregator {
 
         List<Centroid> centroids = StreamSupport.stream(measurements.spliterator(), false)
                 .limit(numCentroids)
-                .map(measurement -> new Centroid(measurement.getPoint(), new HashSet<Measurement>()))
+                .map(measurement -> Centroid.Builder.setup().withPoint(measurement.getPoint()).build())
                 .collect(Collectors.toList());
 
         int iterations = 0;
@@ -60,7 +60,16 @@ public class PlainKMeansAggregator extends AbstractKMeansAggregator {
             centroids = newMapping
                     .entrySet()
                     .stream()
-                    .map(entry -> new Centroid(entry.getKey(), entry.getValue()))
+                    .map(entry -> Centroid.Builder
+                                    .setup()
+                                    .withPoint(
+                                            new Point(
+                                                    entry.getKey()
+                                            )
+                                    )
+                                    .withParents(entry.getValue())
+                                    .build()
+                    )
                     .map(Centroid::recalculatePosition)
                     .collect(Collectors.toList());
 
@@ -86,10 +95,16 @@ public class PlainKMeansAggregator extends AbstractKMeansAggregator {
 
     private Double[] closestCentroidVector(List<Centroid> centroids, Measurement measurement) {
         Centroid currentClosest = centroids.get(0);
-        double minimumDistance = this.distanceMetric.distance(currentClosest.getVector(), measurement.getPoint().getVector());
+        double minimumDistance = this.distanceMetric.distance(
+                currentClosest.getPoint().getVector(),
+                measurement.getPoint().getVector()
+        );
 
         for (Centroid possibleClosest : centroids) {
-            double possibleDistance = this.distanceMetric.distance(possibleClosest.getVector(), measurement.getPoint().getVector());
+            double possibleDistance = this.distanceMetric.distance(
+                    possibleClosest.getPoint().getVector(),
+                    measurement.getPoint().getVector()
+            );
 
             if (possibleDistance < minimumDistance) {
                 minimumDistance = possibleDistance;
@@ -97,6 +112,6 @@ public class PlainKMeansAggregator extends AbstractKMeansAggregator {
             }
         }
 
-        return currentClosest.getVector();
+        return currentClosest.getPoint().getVector();
     }
 }

@@ -31,10 +31,22 @@ public class PlainGridAggregator extends AbstractGridAggregator {
 
             Point roundedPoint = new Point(new Double[]{roundedLatitude, roundedLongitude});
             if (parent instanceof TimedMeasurement) {
-                TimedMeasurement timedParent = (TimedMeasurement) parent;
-                roundedMeasurements.add(new TimedMeasurement(roundedPoint, timedParent.getUuid(), timedParent.getTimestamp()));
+                roundedMeasurements.add(
+                        TimedMeasurement.Builder
+                            .setup()
+                            .withPoint(roundedPoint)
+                            .withParent(parent)
+                            .withTimestamp(((TimedMeasurement) parent).getTimestamp())
+                            .build()
+                );
             } else {
-                roundedMeasurements.add(new Measurement(roundedPoint, parent.getUuid()));
+                roundedMeasurements.add(
+                        Measurement.Builder
+                            .setup()
+                            .withPoint(roundedPoint)
+                            .withParent(parent)
+                            .build()
+                );
             }
         }
 

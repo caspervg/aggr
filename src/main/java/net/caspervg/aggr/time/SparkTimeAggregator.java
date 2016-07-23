@@ -55,7 +55,13 @@ public class SparkTimeAggregator extends AbstractTimeAggregator implements Seria
                 List<Measurement> childMeasurements = filteredMeas.collect()
                         .stream()
                         .map(parent ->
-                                new TimedMeasurement(parent.getPoint(), parent.getUuid(), parent.getTimestamp()))
+                                TimedMeasurement.Builder
+                                    .setup()
+                                    .withPoint(parent.getPoint())
+                                    .withParent(parent)
+                                    .withTimestamp(parent.getTimestamp())
+                                    .build()
+                        )
                         .collect(Collectors.toList());
 
                 aggregationResults.add(new AggregationResult<>(

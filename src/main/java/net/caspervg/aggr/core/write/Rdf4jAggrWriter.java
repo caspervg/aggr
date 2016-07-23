@@ -238,8 +238,7 @@ public class Rdf4jAggrWriter extends AbstractSparqlAggrWriter {
             timestamp = ((TimedMeasurement) measurement).getTimestamp();
         }
         String id = measurement.getUuid();
-        Optional<Measurement> parent = Optional.ofNullable(Iterables.getFirst(measurement.getParents(), null));
-        String parentId = parent.orElse(new Measurement("")).getUuid();
+        Measurement parent = Iterables.getFirst(measurement.getParents(), null);
 
         // Types of the measurement
         statements.add(
@@ -298,12 +297,12 @@ public class Rdf4jAggrWriter extends AbstractSparqlAggrWriter {
 
         if (writeProvenance) {
             // Link to the parent measurement, if present
-            if (parent.isPresent()) {
+            if (parent != null) {
                 statements.add(
                         valueFactory.createStatement(
                                 measRes,
                                 DCTERMS.SOURCE,
-                                measurementWithId(parentId)
+                                measurementWithId(parent.getUuid())
                         )
                 );
             }
@@ -315,8 +314,9 @@ public class Rdf4jAggrWriter extends AbstractSparqlAggrWriter {
     protected Collection<Statement> centroidStatements(Centroid centroid, Resource centRes) {
         Set<Statement> statements = new HashSet<>();
 
-        double latitude = centroid.getVector()[0];
-        double longitude = centroid.getVector()[1];
+        Point point = centroid.getPoint();
+        double latitude = point.getVector()[0];
+        double longitude = point.getVector()[1];
         int weight = centroid.getMeasurements().size();
 
         // Types of the centroid

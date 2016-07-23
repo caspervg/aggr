@@ -58,7 +58,13 @@ public class Rdf4jAggrWriterTests {
 
     @Test
     public void testWriteMeasurement() {
-        Measurement meas = new TimedMeasurement("meas1", new Point(new Double[]{1.0, 2.0}), "source1", time1);
+        Measurement meas = TimedMeasurement.Builder
+            .setup()
+            .withUuid("meas1")
+            .withPoint(new Point(new Double[]{1.0, 2.0}))
+            .withParent("source1")
+            .withTimestamp(time1)
+            .build();
         writer.writeMeasurement(meas, ctx);
         IRI measRes = valueFactory.createIRI(MEASUREMENT_URI_PREFIX, "meas1");
 

@@ -25,7 +25,7 @@ public class KMeansAggregation extends AbstractAggregation implements Serializab
      * @param source Source data
      */
     public KMeansAggregation(String uuid, Dataset dataset, int k, int n, Collection<Measurement> source) {
-        super(uuid, dataset, source, AggregationType.KMEANS);
+        super(uuid, dataset, source);
         this.k = k;
         this.n = n;
     }

@@ -49,7 +49,14 @@ public class JenaAggrReader extends AbstractSparqlAggrReader {
                     String foundId = rs.getString(rs.findColumn(idKey));
                     String source = rs.getString(rs.findColumn(sourceKey));
 
-                    return Optional.of(new TimedMeasurement(foundId, new Point(vector), source, time));
+                    return Optional.of(
+                            TimedMeasurement.Builder
+                                .setup()
+                                .withUuid(foundId)
+                                .withPoint(new Point(vector))
+                                .withTimestamp(time)
+                                .build()
+                    );
                 } else {
                     return Optional.empty();
                 }
@@ -95,7 +102,14 @@ public class JenaAggrReader extends AbstractSparqlAggrReader {
                             DateTimeFormatter.ISO_DATE_TIME
                     );
 
-                    measurements.add(new TimedMeasurement(id, new Point(vector), source, time));
+                    measurements.add(
+                            TimedMeasurement.Builder
+                                .setup()
+                                .withUuid(id)
+                                .withPoint(new Point(vector))
+                                .withTimestamp(time)
+                                .build()
+                    );
                 }
             } catch (SQLException ex) {
                 System.err.println(query);

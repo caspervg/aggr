@@ -7,11 +7,7 @@ public class Dataset {
     private String uuid;
     private String title;
 
-    public Dataset(String title) {
-        this(UUID.randomUUID().toString(), title);
-    }
-
-    public Dataset(String uuid, String title) {
+    protected Dataset(String uuid, String title) {
         this.uuid = uuid;
         this.title = title;
     }
@@ -49,5 +45,32 @@ public class Dataset {
                 "uuid='" + uuid + '\'' +
                 ", title='" + title + '\'' +
                 '}';
+    }
+
+
+    public static final class Builder {
+        private String uuid = UUID.randomUUID().toString();
+        private String title = uuid;
+
+        private Builder() {
+        }
+
+        public static Builder setup() {
+            return new Builder();
+        }
+
+        public Builder withUuid(String uuid) {
+            this.uuid = uuid;
+            return this;
+        }
+
+        public Builder withTitle(String title) {
+            this.title = title;
+            return this;
+        }
+
+        public Dataset build() {
+            return new Dataset(uuid, title);
+        }
     }
 }

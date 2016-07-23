@@ -100,19 +100,19 @@ public class CsvAggrReader extends AbstractAggrReader {
         }
 
         Point point = new Point(new Double[]{lat, lon});
-        if (id == null) {
-            if (parent == null) {
-                return new TimedMeasurement(point, time);
-            } else {
-                return new TimedMeasurement(point, parent, time);
-            }
-        } else {
-            if (parent == null) {
-                return new TimedMeasurement(id, point, time);
-            } else {
-                return new TimedMeasurement(id, point, parent, time);
-            }
+        TimedMeasurement.Builder builder = TimedMeasurement.Builder
+                .setup()
+                .withPoint(point)
+                .withTimestamp(time);
+
+        if (parent != null) {
+            builder = builder.withParent(parent);
         }
+        if (id != null) {
+            builder = builder.withUuid(id);
+        }
+
+        return builder.build();
     }
 
     private Iterable<CSVRecord> parseRecords(Reader in) throws IOException {

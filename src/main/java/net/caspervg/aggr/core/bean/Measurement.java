@@ -1,11 +1,11 @@
 package net.caspervg.aggr.core.bean;
 
-import com.beust.jcommander.internal.Lists;
+import com.google.common.collect.Sets;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.Set;
 import java.util.UUID;
 
 public class Measurement implements Serializable, UniquelyIdentifiable {
@@ -14,29 +14,7 @@ public class Measurement implements Serializable, UniquelyIdentifiable {
     private String uuid;
     private Iterable<Measurement> parents;
 
-    public Measurement(String uuid) {
-        this.uuid = uuid;
-        this.point = new Point(new Double[]{-1.0, -1.0});
-        this.parents = new ArrayList<>();
-    }
-
-    public Measurement(Point point) {
-        this(UUID.randomUUID().toString(), point);
-    }
-
-    public Measurement(String uuid, Point point) {
-        this(uuid, point, null);
-    }
-
-    public Measurement(Point point, String parentId) {
-        this(point, Lists.newArrayList(new Measurement(parentId)));
-    }
-
-    public Measurement(Point point, Iterable<Measurement> parents) {
-        this(UUID.randomUUID().toString(), point, parents);
-    }
-
-    public Measurement(String uuid, Point point, Iterable<Measurement> parents) {
+    protected Measurement(String uuid, Point point, Iterable<Measurement> parents) {
         this.point = point;
         if (StringUtils.isBlank(uuid)) {
             this.uuid = UUID.randomUUID().toString();
@@ -54,6 +32,7 @@ public class Measurement implements Serializable, UniquelyIdentifiable {
         return point;
     }
 
+    @Override
     public String getUuid() {
         return uuid;
     }
@@ -88,5 +67,46 @@ public class Measurement implements Serializable, UniquelyIdentifiable {
                 ", uuid='" + uuid + '\'' +
                 ", parent='" + parents + '\'' +
                 '}';
+    }
+
+    public static final class Builder {
+        private Point point;
+        private String uuid = UUID.randomUUID().toString();
+        private Set<Measurement> parents = new HashSet<>();
+
+        private Builder() {
+        }
+
+        public static Builder setup() {
+            return new Builder();
+        }
+
+        public Builder withPoint(Point point) {
+            this.point = point;
+            return this;
+        }
+
+        public Builder withUuid(String uuid) {
+            this.uuid = uuid;
+            return this;
+        }
+
+        public Builder withParents(Iterable<Measurement> parents) {
+            this.parents = Sets.newHashSet(parents);
+            return this;
+        }
+
+        public Builder withParent(String parentId) {
+            return withParent(Measurement.Builder.setup().withUuid(parentId).build());
+        }
+
+        public Builder withParent(Measurement parent) {
+            this.parents.add(parent);
+            return this;
+        }
+
+        public Measurement build() {
+            return new Measurement(uuid, point,parents);
+        }
     }
 }

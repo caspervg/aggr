@@ -45,14 +45,19 @@ public class SparkKMeansAggregator extends AbstractKMeansAggregator {
 
         // Convert these measurements into Centroid objects
         JavaRDD<Centroid> centroids = context.getSparkContext().parallelize(centroidSeeds).map(
-                (Function<Measurement, Centroid>) measurement ->
-                        new Centroid(
-                                new Double[]{
-                                        measurement.getPoint().getVector()[0],
-                                        measurement.getPoint().getVector()[1]
-                                },
-                                new HashSet<>()
-                        )
+                (Function<Measurement, Centroid>) measurement -> {
+                    return Centroid.Builder
+                            .setup()
+                            .withPoint(
+                                    new Point(
+                                            new Double[]{
+                                                    measurement.getPoint().getVector()[0],
+                                                    measurement.getPoint().getVector()[1]
+                                            }
+                                    )
+                            )
+                            .build();
+                }
         );
 
         int iterations = 0;
@@ -72,17 +77,28 @@ public class SparkKMeansAggregator extends AbstractKMeansAggregator {
                                 pair1._1.getPoint().getVector()[1] + pair2._1.getPoint().getVector()[1]
                         });
 
-                        Measurement sumMeas = new Measurement(sum);
+                        Measurement sumMeas = Measurement.Builder
+                                .setup()
+                                .withPoint(sum)
+                                .build();
+
                         return new Tuple2<>(sumMeas, pair1._2 + pair2._2);
                     }).map((Function<Tuple2<Centroid, Tuple2<Measurement, Integer>>, Centroid>) centroidTuple2Tuple2 -> {
                         // Calculate the new position of the centroid (average of the citizen measurements)
                         Tuple2<Measurement, Integer> pair = centroidTuple2Tuple2._2;
                         Measurement sum = pair._1;
                         Integer amount = pair._2;
-                        return new Centroid(new Double[]{
-                                sum.getPoint().getVector()[0] / amount,
-                                sum.getPoint().getVector()[1] / amount
-                        }, new HashSet<>());
+
+                        return Centroid.Builder.setup()
+                                                .withPoint(
+                                                        new Point(
+                                                                new Double[]{
+                                                                        sum.getPoint().getVector()[0] / amount,
+                                                                        sum.getPoint().getVector()[1] / amount
+                                                                }
+                                                        )
+                                                )
+                                                .build();
                     });
         }
 
@@ -95,9 +111,12 @@ public class SparkKMeansAggregator extends AbstractKMeansAggregator {
         Map<Centroid, Iterable<Measurement>> resultMapping = results.collectAsMap();
         List<Centroid> finalCentroids = new ArrayList<>();
         for (Centroid centroid : resultMapping.keySet()) {
-            finalCentroids.add(new Centroid(centroid.getVector(), Sets.newHashSet(
-                    resultMapping.get(centroid)
-            )));
+            finalCentroids.add(
+                    Centroid.Builder.setup()
+                                    .withPoint(centroid.getPoint())
+                                    .withParents(Sets.newHashSet(resultMapping.get(centroid)))
+                                    .build()
+            );
         }
 
         // Return the result of the aggregation

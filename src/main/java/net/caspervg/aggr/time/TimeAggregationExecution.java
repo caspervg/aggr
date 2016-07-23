@@ -56,7 +56,7 @@ public class TimeAggregationExecution extends AbstractAggregationExecution {
             aggregator = new PlainTimeAggregator();
         }
 
-        Dataset dataset = new Dataset("time_dataset");
+        Dataset dataset = Dataset.Builder.setup().withTitle("time_dataset").build();
         Iterable<Measurement> meas = getReader(ac, ctx).read(ctx);
         Iterable<AggregationResult<TimeAggregation, Measurement>> results = aggregator.aggregate(dataset, meas, ctx);
 

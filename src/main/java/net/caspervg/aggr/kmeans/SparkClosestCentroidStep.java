@@ -28,7 +28,7 @@ public class SparkClosestCentroidStep implements PairFunction<Measurement,Centro
         double minimumDistance = Double.MAX_VALUE;
 
         for (Centroid centroid : this.centroids) {
-            Double [] centroidVector = centroid.getVector();
+            Double [] centroidVector = centroid.getPoint().getVector();
 
             double dist = distanceMetric.distance(centroidVector, measurementVector);
             if (dist < minimumDistance) {

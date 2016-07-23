@@ -28,10 +28,6 @@ public class SparkKMeansClusterAggregator extends AbstractKMeansAggregator imple
                                                                               AggrContext context) {
         Objects.requireNonNull(context.getSparkContext());
 
-        DistanceMetric<Double> distanceMetric = DistanceMetricChoice.valueOf(
-                context.getParameters().getOrDefault(METRIC_PARAM, DEFAULT_DISTANCE_METRIC)
-        ).getMetric();
-
         int maxIterations = Integer.parseInt(
                 context.getParameters().getOrDefault(ITERATIONS_PARAM, DEFAULT_MAX_ITERATIONS)
         );
@@ -52,19 +48,13 @@ public class SparkKMeansClusterAggregator extends AbstractKMeansAggregator imple
 
         KMeansModel clusters = KMeans.train(vecRDD.rdd(), numClusters, maxIterations);
 
-        System.out.println("Trained clusters");
-
         Vector[] centers = clusters.clusterCenters();
         List<Integer> predictedIndices = clusters.predict(vecRDD).collect();
-
-        System.out.println("Predicted indices");
 
         List<Set<Measurement>> centroidParentsList = new ArrayList<>();
         for (Vector ignored : centers) {
             centroidParentsList.add(new HashSet<>());
         }
-
-        System.out.println("Created parents list");
 
         for (int i = 0; i < predictedIndices.size(); i++) {
             int predictedIndex = predictedIndices.get(i);
@@ -72,15 +62,16 @@ public class SparkKMeansClusterAggregator extends AbstractKMeansAggregator imple
             parents.add(measurementList.get(i));
         }
 
-        System.out.println("Added parents");
-
         List<Centroid> centroidList = new ArrayList<>();
         for (int i = 0; i < centroidParentsList.size(); i++) {
             Point center = new Point(ArrayUtils.toObject(centers[i].toArray()));
-            centroidList.add(new Centroid(center, centroidParentsList.get(i)));
+            centroidList.add(
+                    Centroid.Builder.setup()
+                                    .withPoint(center)
+                                    .withParents(centroidParentsList.get(i))
+                                    .build()
+            );
         }
-
-        System.out.println("Added centroids");
 
         // Return the result of the aggregation
         KMeansAggregation aggr = new KMeansAggregation(

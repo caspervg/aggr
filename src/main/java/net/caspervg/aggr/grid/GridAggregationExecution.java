@@ -56,7 +56,7 @@ public class GridAggregationExecution extends AbstractAggregationExecution {
             aggregator = new PlainGridAggregator();
         }
 
-        Dataset dataset = new Dataset("grid_dataset");
+        Dataset dataset = Dataset.Builder.setup().withTitle("grid_dataset").build();
         Iterable<Measurement> meas = getReader(ac, ctx).read(ctx);
         Iterable<AggregationResult<GridAggregation, Measurement>> results = aggregator.aggregate(dataset, meas, ctx);
 

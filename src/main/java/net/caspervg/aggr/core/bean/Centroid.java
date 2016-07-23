@@ -4,6 +4,7 @@ import com.google.common.collect.Sets;
 import org.apache.commons.lang3.ArrayUtils;
 
 import java.io.Serializable;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
@@ -13,32 +14,7 @@ import java.util.UUID;
  */
 public class Centroid extends Measurement implements Serializable, UniquelyIdentifiable {
 
-    public Centroid(Point point, Set<Measurement> parents) {
-        this(UUID.randomUUID().toString(), point, parents);
-    }
-
-    /**
-     * Creates a Centroid with given vector coordinates and collected parents
-     *
-     * @param vector Coordinates
-     * @param parents Measurements that were coalesced into this centroid
-     */
-    public Centroid(Double[] vector, Set<Measurement> parents) {
-        this(UUID.randomUUID().toString(), vector, parents);
-    }
-
-    /**
-     * Creates a Centroid with given UUID, vector coordinates and collected parents
-     *
-     * @param uuid Identifier of the centroid
-     * @param vector Coordinates
-     * @param parents Measurements that were coalesced into this centroid
-     */
-    public Centroid(String uuid, Double[] vector, Set<Measurement> parents) {
-        this(uuid, new Point(vector), parents);
-    }
-
-    public Centroid(String uuid, Point point, Set<Measurement> parents) {
+    protected Centroid(String uuid, Point point, Set<Measurement> parents) {
         super(uuid, point, parents);
     }
 
@@ -51,7 +27,7 @@ public class Centroid extends Measurement implements Serializable, UniquelyIdent
     public Centroid recalculatePosition() {
         Set<Measurement> measurements = getMeasurements();
 
-        if (measurements.size() == 0) return new Centroid(this.getPoint(), new HashSet<>());
+        if (measurements.size() == 0) return Builder.setup().withPoint(this.getPoint()).build();
         double[] sum = null;
 
         for (Measurement measurement : measurements) {
@@ -71,17 +47,11 @@ public class Centroid extends Measurement implements Serializable, UniquelyIdent
             avg[i] = sum[i] / measurements.size();
         }
 
-        return new Centroid(ArrayUtils.toObject(avg), new HashSet<>(measurements));
-    }
-
-    /**
-     * Coordinates of the centroid
-     *
-     * @deprecated use {@link #getPoint()} instead.
-     * @return coordinates of the centroid
-     */
-    public Double[] getVector() {
-        return getPoint().getVector();
+        return Builder
+                .setup()
+                .withPoint(new Point(ArrayUtils.toObject(avg)))
+                .withParents(measurements)
+                .build();
     }
 
     /**
@@ -106,5 +76,37 @@ public class Centroid extends Measurement implements Serializable, UniquelyIdent
     @Override
     public String toString() {
         return super.toString();
+    }
+
+    public static final class Builder {
+        private String uuid = UUID.randomUUID().toString();
+        private Point point;
+        private Set<Measurement> parents = new HashSet<>();
+
+        private Builder() {
+        }
+
+        public static Builder setup() {
+            return new Builder();
+        }
+
+        public Builder withPoint(Point point) {
+            this.point = point;
+            return this;
+        }
+
+        public Builder withUuid(String uuid) {
+            this.uuid = uuid;
+            return this;
+        }
+
+        public Builder withParents(Collection<Measurement> parents) {
+            this.parents = new HashSet<>(parents);
+            return this;
+        }
+
+        public Centroid build() {
+            return new Centroid(uuid, point, parents);
+        }
     }
 }

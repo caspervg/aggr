@@ -50,9 +50,13 @@ public class PlainTimeAggregator extends AbstractTimeAggregator {
                                     LocalDateTime timestamp = measurement.getTimestamp();
                                     return (timestamp.isEqual(start) || (timestamp.isAfter(start) && timestamp.isBefore(end)));
                                 })
-                                .map(parent -> {
-                                    return new TimedMeasurement(parent.getPoint(), parent.getUuid(), parent.getTimestamp());
-                                })
+                                .map(parent -> TimedMeasurement.Builder
+                                        .setup()
+                                        .withPoint(parent.getPoint())
+                                        .withParent(parent)
+                                        .withTimestamp(parent.getTimestamp())
+                                        .build()
+                                )
                                 .collect(Collectors.toList());
 
                 // Add this aggregation to the result

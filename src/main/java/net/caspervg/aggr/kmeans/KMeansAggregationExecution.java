@@ -60,7 +60,7 @@ public class KMeansAggregationExecution extends AbstractAggregationExecution {
             aggregator = new PlainKMeansAggregator();
         }
 
-        Dataset dataset = new Dataset("kmeans_dataset");
+        Dataset dataset = Dataset.Builder.setup().withTitle("kmeans_dataset").build();
         Iterable<Measurement> meas = getReader(ac, ctx).read(ctx);
         Iterable<AggregationResult<KMeansAggregation, Centroid>> results = aggregator.aggregate(dataset, meas, ctx);
 

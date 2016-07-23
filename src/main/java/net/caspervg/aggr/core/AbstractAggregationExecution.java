@@ -1,6 +1,5 @@
 package net.caspervg.aggr.core;
 
-import net.caspervg.aggr.core.AggregationExecution;
 import net.caspervg.aggr.core.bean.aggregation.AbstractAggregation;
 import net.caspervg.aggr.core.bean.aggregation.AggregationResult;
 import net.caspervg.aggr.core.read.AggrReader;

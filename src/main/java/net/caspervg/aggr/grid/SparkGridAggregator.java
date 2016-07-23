@@ -40,9 +40,18 @@ public class SparkGridAggregator extends AbstractGridAggregator implements Seria
             Point roundedPoint = new Point(new Double[]{roundedLatitude, roundedLongitude});
 
             if (parent instanceof TimedMeasurement) {
-                return new TimedMeasurement(roundedPoint, parent.getUuid(), ((TimedMeasurement) parent).getTimestamp());
+                return TimedMeasurement.Builder
+                        .setup()
+                        .withPoint(roundedPoint)
+                        .withParent(parent)
+                        .withTimestamp(((TimedMeasurement) parent).getTimestamp())
+                        .build();
             } else {
-                return new Measurement(roundedPoint, parent.getUuid());
+                return Measurement.Builder
+                        .setup()
+                        .withPoint(roundedPoint)
+                        .withParent(parent)
+                        .build();
             }
         });
 

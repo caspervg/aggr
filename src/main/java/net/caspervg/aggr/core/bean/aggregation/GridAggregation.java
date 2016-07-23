@@ -44,7 +44,7 @@ public class GridAggregation extends AbstractAggregation implements Serializable
      * @param source Source data
      */
     public GridAggregation(String uuid, Dataset dataset, double gridSize, Collection<Measurement> source) {
-        super(uuid, dataset, source, AggregationType.GRID);
+        super(uuid, dataset, source);
         this.gridSize = gridSize;
     }
 
