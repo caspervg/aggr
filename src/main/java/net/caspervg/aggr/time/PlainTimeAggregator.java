@@ -9,7 +9,6 @@ import net.caspervg.aggr.core.bean.aggregation.AggregationResult;
 import net.caspervg.aggr.core.bean.aggregation.TimeAggregation;
 import net.caspervg.aggr.core.util.AggrContext;
 import net.caspervg.aggr.core.util.TimedMeasurementComparator;
-import spark.utils.Assert;
 
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;

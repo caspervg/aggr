@@ -32,7 +32,7 @@ public class AggrCommand {
     private boolean writeDataCsv = true;
 
     @Parameter(names = {"--write-provenance"}, description = "Write data on the provenance of centroids, measurements and aggregations." +
-            "Enabling this will greatly increase the time taken to write to the triple store")
+            "Enabling this will greatly increase the time taken to write to the triple store", arity = 1)
     private boolean writeProvenance = false;
 
     @Parameter(names = {"-d", "--dataset-id"}, description = "Identifier of the dataset that the aggregations are based " +
