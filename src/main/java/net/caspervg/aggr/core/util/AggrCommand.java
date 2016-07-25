@@ -35,7 +35,7 @@ public class AggrCommand {
             "Enabling this will greatly increase the time taken to write to the triple store")
     private boolean writeProvenance = false;
 
-    @Parameter(names = {"-d", "--dataset-id"}, description = "Identifier of the dataset that the aggregations are based" +
+    @Parameter(names = {"-d", "--dataset-id"}, description = "Identifier of the dataset that the aggregations are based " +
             "on", required = true)
     private String datasetId;
 

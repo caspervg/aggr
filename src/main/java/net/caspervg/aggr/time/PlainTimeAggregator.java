@@ -9,6 +9,7 @@ import net.caspervg.aggr.core.bean.aggregation.AggregationResult;
 import net.caspervg.aggr.core.bean.aggregation.TimeAggregation;
 import net.caspervg.aggr.core.util.AggrContext;
 import net.caspervg.aggr.core.util.TimedMeasurementComparator;
+import spark.utils.Assert;
 
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
@@ -24,6 +25,10 @@ public class PlainTimeAggregator extends AbstractTimeAggregator {
                                                                                AggrContext context) {
         TimedMeasurement[] measurementArray = (TimedMeasurement[]) Iterables.toArray(measurements, Measurement.class);
         List<TimedMeasurement> measurementList = Lists.newArrayList(measurementArray);
+
+        if (measurementList.size() < 1) {
+            return new HashSet<>();
+        }
 
         // Find the time range
         // Assuming there is at least one measurement in the list!

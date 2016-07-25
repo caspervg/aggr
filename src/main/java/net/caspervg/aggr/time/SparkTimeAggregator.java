@@ -34,6 +34,10 @@ public class SparkTimeAggregator extends AbstractTimeAggregator implements Seria
         JavaSparkContext sparkCtx = context.getSparkContext();
         JavaRDD<TimedMeasurement> measRDD = sparkCtx.parallelize(measurementList);
 
+        if (measurementList.size() < 1) {
+            return new HashSet<>();
+        }
+
         LocalDateTime minTimestamp = measRDD.min(new TimedMeasurementComparator()).getTimestamp();
         LocalDateTime maxTimestamp = measRDD.max(new TimedMeasurementComparator()).getTimestamp();
         long duration = minTimestamp.until(maxTimestamp, ChronoUnit.MILLIS);

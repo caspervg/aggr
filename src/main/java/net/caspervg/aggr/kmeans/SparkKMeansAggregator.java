@@ -89,16 +89,17 @@ public class SparkKMeansAggregator extends AbstractKMeansAggregator {
                         Measurement sum = pair._1;
                         Integer amount = pair._2;
 
-                        return Centroid.Builder.setup()
-                                                .withPoint(
-                                                        new Point(
-                                                                new Double[]{
-                                                                        sum.getPoint().getVector()[0] / amount,
-                                                                        sum.getPoint().getVector()[1] / amount
-                                                                }
-                                                        )
-                                                )
-                                                .build();
+                        return Centroid.Builder
+                                .setup()
+                                .withPoint(
+                                        new Point(
+                                                new Double[]{
+                                                        sum.getPoint().getVector()[0] / amount,
+                                                        sum.getPoint().getVector()[1] / amount
+                                                }
+                                        )
+                                )
+                                .build();
                     });
         }
 
@@ -112,10 +113,11 @@ public class SparkKMeansAggregator extends AbstractKMeansAggregator {
         List<Centroid> finalCentroids = new ArrayList<>();
         for (Centroid centroid : resultMapping.keySet()) {
             finalCentroids.add(
-                    Centroid.Builder.setup()
-                                    .withPoint(centroid.getPoint())
-                                    .withParents(Sets.newHashSet(resultMapping.get(centroid)))
-                                    .build()
+                    Centroid.Builder
+                            .setup()
+                            .withPoint(centroid.getPoint())
+                            .withParents(Sets.newHashSet(resultMapping.get(centroid)))
+                            .build()
             );
         }
 
