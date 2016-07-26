@@ -72,8 +72,8 @@ services:
     environment:
       VIRTUAL_HOST: spark-worker.demo.big-data-europe.local
       VIRTUAL_PORT: 8081
-  kmeans:
-    image: caspervg/aggregations
+  aggr:
+    image: caspervg/aggr
     environment:
       INIT_DAEMON_STEP: compute_aggregations
       HDFS_URL: hdfs://namenode:8020
@@ -124,6 +124,12 @@ services:
     image: semtech/mu-dispatcher:1.0.1
     volumes:
       - ./config:/config
+  aggr_web:
+    image: caspervg/aggr_web
+    volumes:
+      - ./data/logs:/logs
+    ports:
+      - 8080:80
   database:
     image: tenforce/virtuoso:1.0.0-virtuoso7.2.2
     environment:

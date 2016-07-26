@@ -70,3 +70,4 @@ data/hadoop/historyserver/*
 data/hadoop/namenode/*
 
 target/
+/data/logs/*.log

@@ -1,7 +1,5 @@
 #!/usr/bin/env bash
 
-printenv
-
 export SPARK_APPLICATION_ARGS="
     -i ${APP_ARGS_INPUT}
     -o ${APP_ARGS_OUTPUT}

@@ -6,7 +6,7 @@
 
     <groupId>net.caspervg</groupId>
     <artifactId>aggr</artifactId>
-    <version>0.1.2</version>
+    <version>0.2.0</version>
 
     <properties>
         <spark.version>2.0.0-preview</spark.version>
@@ -116,7 +116,7 @@
                 <configuration>
                     <archive>
                         <manifest>
-                            <mainClass>net.caspervg.aggr.exec.AggrMain</mainClass>
+                            <mainClass>net.caspervg.aggr.exec.AggrMasterMain</mainClass>
                         </manifest>
                     </archive>
                 </configuration>
