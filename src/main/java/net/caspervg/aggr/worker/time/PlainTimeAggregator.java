@@ -1,10 +1,8 @@
 package net.caspervg.aggr.worker.time;
 
-import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import net.caspervg.aggr.worker.core.bean.Dataset;
 import net.caspervg.aggr.worker.core.bean.Measurement;
-import net.caspervg.aggr.worker.core.bean.TimedMeasurement;
 import net.caspervg.aggr.worker.core.bean.aggregation.AggregationResult;
 import net.caspervg.aggr.worker.core.bean.aggregation.TimeAggregation;
 import net.caspervg.aggr.worker.core.util.AggrContext;
@@ -12,7 +10,6 @@ import net.caspervg.aggr.worker.core.util.TimedMeasurementComparator;
 
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -21,11 +18,9 @@ import java.util.stream.Collectors;
 public class PlainTimeAggregator extends AbstractTimeAggregator {
     @Override
     public Iterable<AggregationResult<TimeAggregation, Measurement>> aggregate(Dataset dataset,
-                                                                               Iterable<Measurement> measurements,
-                                                                               AggrContext context) {
-        Measurement[] measurementArray = Iterables.toArray(measurements, Measurement.class);
-        TimedMeasurement[] timedMeasurementArray = Arrays.copyOf(measurementArray, measurementArray.length, TimedMeasurement[].class);
-        List<TimedMeasurement> measurementList = Lists.newArrayList(timedMeasurementArray);
+                                                                                    Iterable<Measurement> measurements,
+                                                                                    AggrContext context) {
+        List<Measurement> measurementList = Lists.newArrayList(measurements);
 
         if (measurementList.size() < 1) {
             return new HashSet<>();
@@ -56,12 +51,14 @@ public class PlainTimeAggregator extends AbstractTimeAggregator {
                                     LocalDateTime timestamp = measurement.getTimestamp();
                                     return (timestamp.isEqual(start) || (timestamp.isAfter(start) && timestamp.isBefore(end)));
                                 })
-                                .map(parent -> TimedMeasurement.Builder
-                                        .setup()
-                                        .withPoint(parent.getPoint())
-                                        .withParent(parent)
-                                        .withTimestamp(parent.getTimestamp())
-                                        .build()
+                                .map(parent -> {
+                                            Measurement child = context.newMeasurement();
+                                            child.setVector(parent.getVector());
+                                            child.setData(parent.getData());
+                                            child.setTimestamp(parent.getTimestamp());
+
+                                            return child;
+                                        }
                                 )
                                 .collect(Collectors.toList());
 

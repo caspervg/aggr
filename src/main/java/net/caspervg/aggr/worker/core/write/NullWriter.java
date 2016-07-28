@@ -1,6 +1,5 @@
 package net.caspervg.aggr.worker.core.write;
 
-import net.caspervg.aggr.worker.core.bean.Centroid;
 import net.caspervg.aggr.worker.core.bean.Dataset;
 import net.caspervg.aggr.worker.core.bean.Measurement;
 import net.caspervg.aggr.worker.core.bean.aggregation.GridAggregation;
@@ -20,16 +19,6 @@ public class NullWriter implements AggrWriter {
 
     @Override
     public void writeMeasurements(Iterable<Measurement> measurements, AggrContext context) {
-        // Empty on purpose, don't write anything
-    }
-
-    @Override
-    public void writeCentroid(Centroid centroid, AggrContext context) {
-        // Empty on purpose, don't write anything
-    }
-
-    @Override
-    public void writeCentroids(Iterable<Centroid> centroids, AggrContext context) {
         // Empty on purpose, don't write anything
     }
 

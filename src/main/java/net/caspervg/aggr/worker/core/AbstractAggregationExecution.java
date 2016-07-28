@@ -9,14 +9,19 @@ import net.caspervg.aggr.core.AggrCommand;
 import net.caspervg.aggr.worker.core.util.AggrContext;
 import net.caspervg.aggr.worker.core.util.untyped.UntypedSPARQLRepository;
 import net.caspervg.aggr.worker.core.write.*;
+import net.caspervg.aggr.worker.time.PlainTimeAggregator;
+import net.caspervg.aggr.worker.time.SparkTimeAggregator;
+import net.caspervg.aggr.worker.time.TimeAggregator;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.hadoop.fs.FSDataOutputStream;
-import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.fs.*;
 import org.apache.spark.SparkConf;
 import org.apache.spark.SparkContext;
 import org.apache.spark.api.java.JavaSparkContext;
 
 import java.io.*;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.Map;
 
 public abstract class AbstractAggregationExecution implements AggregationExecution {
 
@@ -114,6 +119,24 @@ public abstract class AbstractAggregationExecution implements AggregationExecuti
         if (context.getSparkContext() != null) {
             context.getSparkContext().stop();
         }
+    }
+
+    protected AggrContext createContext(Map<String, String> parameters, AggrCommand ac) throws URISyntaxException, IOException {
+        AggrContext.Builder acb = AggrContext.builder()
+                .parameters(parameters)
+                .clazz(ac.getMeasurementClass());
+        if (ac.isSpark()) {
+            String hdfsUrl = ac.getHdfsUrl();
+            JavaSparkContext sparkCtx = getSparkContext(ac);
+
+            acb.sparkContext(sparkCtx);
+            if (StringUtils.isNotBlank(hdfsUrl)) {
+                FileSystem hdfs = FileSystem.get(new URI(hdfsUrl), sparkCtx.hadoopConfiguration());
+                acb.fileSystem(hdfs);
+            }
+        }
+
+        return acb.build();
     }
 
 }

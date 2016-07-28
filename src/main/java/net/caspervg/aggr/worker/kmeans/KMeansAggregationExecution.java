@@ -1,22 +1,17 @@
 package net.caspervg.aggr.worker.kmeans;
 
-import net.caspervg.aggr.worker.core.bean.Centroid;
+import net.caspervg.aggr.core.AggrCommand;
+import net.caspervg.aggr.core.KMeansAggrCommand;
+import net.caspervg.aggr.worker.core.AbstractAggregationExecution;
 import net.caspervg.aggr.worker.core.bean.Dataset;
 import net.caspervg.aggr.worker.core.bean.Measurement;
 import net.caspervg.aggr.worker.core.bean.aggregation.AggregationResult;
 import net.caspervg.aggr.worker.core.bean.aggregation.KMeansAggregation;
 import net.caspervg.aggr.worker.core.read.AbstractAggrReader;
-import net.caspervg.aggr.worker.core.AbstractAggregationExecution;
-import net.caspervg.aggr.core.AggrCommand;
 import net.caspervg.aggr.worker.core.util.AggrContext;
 import net.caspervg.aggr.worker.core.write.AggrResultWriter;
-import net.caspervg.aggr.core.KMeansAggrCommand;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.hadoop.fs.FileSystem;
-import org.apache.spark.api.java.JavaSparkContext;
 
 import java.io.IOException;
-import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Map;
 
@@ -41,31 +36,21 @@ public class KMeansAggregationExecution extends AbstractAggregationExecution {
         params.put(AbstractKMeansAggregator.ITERATIONS_PARAM, String.valueOf(kac.getIterations()));
         params.put(AbstractKMeansAggregator.METRIC_PARAM, kac.getDistanceMetricChoice().name());
 
-        AggrContext ctx;
+        AggrContext ctx = createContext(params, ac);
         KMeansAggregator aggregator;
         if (ac.isSpark()) {
-            String hdfsUrl = ac.getHdfsUrl();
-            JavaSparkContext sparkCtx = getSparkContext(ac);
-
-            if (StringUtils.isNotBlank(hdfsUrl)) {
-                FileSystem hdfs = FileSystem.get(new URI(hdfsUrl), sparkCtx.hadoopConfiguration());
-                ctx = new AggrContext(params, sparkCtx, hdfs);
-            } else {
-                ctx = new AggrContext(params, sparkCtx);
-            }
             //aggregator = new SparkKMeansAggregator();
             aggregator = new SparkKMeansClusterAggregator();
         } else {
-            ctx = new AggrContext(params);
             aggregator = new PlainKMeansAggregator();
         }
 
         Dataset dataset = Dataset.Builder.setup().withTitle(ac.getDatasetId()).build();
         Iterable<Measurement> meas = getReader(ac, ctx).read(ctx);
-        Iterable<AggregationResult<KMeansAggregation, Centroid>> results = aggregator.aggregate(dataset, meas, ctx);
+        Iterable<AggregationResult<KMeansAggregation, Measurement>> results = aggregator.aggregate(dataset, meas, ctx);
 
         AggrResultWriter writer = null;
-        for (AggregationResult<KMeansAggregation, Centroid> res : results) {
+        for (AggregationResult<KMeansAggregation, Measurement> res : results) {
             writer = getWriter(res, ac, ctx);
 
             writer.writeKMeansAggregation(res, ctx);

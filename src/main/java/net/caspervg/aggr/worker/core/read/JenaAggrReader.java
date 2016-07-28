@@ -1,19 +1,15 @@
 package net.caspervg.aggr.worker.core.read;
 
 import net.caspervg.aggr.worker.core.bean.Measurement;
-import net.caspervg.aggr.worker.core.bean.Point;
-import net.caspervg.aggr.worker.core.bean.TimedMeasurement;
+import net.caspervg.aggr.worker.core.bean.UniquelyIdentifiable;
+import net.caspervg.aggr.worker.core.bean.impl.BasicParent;
 import net.caspervg.aggr.worker.core.util.AggrContext;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.jena.jdbc.mem.MemDriver;
 import org.apache.jena.jdbc.remote.RemoteEndpointDriver;
 
 import java.sql.*;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Implementation of the {@link AggrReader} interface that reads measurements through Jena, through either
@@ -25,37 +21,14 @@ public class JenaAggrReader extends AbstractSparqlAggrReader {
     public Optional<Measurement> read(String id, AggrContext context) {
         Map<String, String> parameters = context.getParameters();
         String query = this.query(id, parameters);
-        String latitudeKey = this.latitudeKey(parameters);
-        String longitudeKey = this.longitudeKey(parameters);
-        String timeKey = this.timestampKey(parameters);
-        String idKey = this.idKey(parameters);
-        String sourceKey = this.sourceKey(parameters);
 
         try (Connection conn = getConnection(parameters)) {
 
             Statement stmt = conn.createStatement();
             try (ResultSet rs = stmt.executeQuery(query)) {
                 if (rs.next()) {
-                    Double[] vector = new Double[]{
-                            Double.parseDouble(rs.getString(rs.findColumn(latitudeKey))),
-                            Double.parseDouble(rs.getString(rs.findColumn(longitudeKey)))
-                    };
-                    LocalDateTime time = LocalDateTime.parse(
-                            rs.getString(
-                                    rs.findColumn(timeKey)
-                            ),
-                            DateTimeFormatter.ISO_DATE_TIME
-                    );
-                    String foundId = rs.getString(rs.findColumn(idKey));
-                    String source = rs.getString(rs.findColumn(sourceKey));
-
                     return Optional.of(
-                            TimedMeasurement.Builder
-                                .setup()
-                                .withUuid(foundId)
-                                .withPoint(new Point(vector))
-                                .withTimestamp(time)
-                                .build()
+                            measurementFromRecord(context, rs)
                     );
                 } else {
                     return Optional.empty();
@@ -77,39 +50,13 @@ public class JenaAggrReader extends AbstractSparqlAggrReader {
 
         Map<String, String> parameters = context.getParameters();
         String query = this.query(parameters);
-        String latitudeKey = this.latitudeKey(parameters);
-        String longitudeKey = this.longitudeKey(parameters);
-        String timeKey = this.timestampKey(parameters);
-        String idKey = this.idKey(parameters);
-        String sourceKey = this.sourceKey(parameters);
 
         try (Connection conn = getConnection(parameters)) {
 
             Statement stmt = conn.createStatement();
             try (ResultSet rs = stmt.executeQuery(query)) {
                 while (rs.next()) {
-                    Double[] vector = new Double[]{
-                            Double.parseDouble(rs.getString(rs.findColumn(latitudeKey))),
-                            Double.parseDouble(rs.getString(rs.findColumn(longitudeKey)))
-                    };
-                    String id = rs.getString(rs.findColumn(idKey));
-                    String source = rs.getString(rs.findColumn(sourceKey));
-
-                    LocalDateTime time = LocalDateTime.parse(
-                            rs.getString(
-                                    rs.findColumn(timeKey)
-                            ),
-                            DateTimeFormatter.ISO_DATE_TIME
-                    );
-
-                    measurements.add(
-                            TimedMeasurement.Builder
-                                .setup()
-                                .withUuid(id)
-                                .withPoint(new Point(vector))
-                                .withTimestamp(time)
-                                .build()
-                    );
+                    measurements.add(measurementFromRecord(context, rs));
                 }
             } catch (SQLException ex) {
                 System.err.println(query);
@@ -120,6 +67,35 @@ public class JenaAggrReader extends AbstractSparqlAggrReader {
         }
 
         return measurements;
+    }
+
+    private Measurement measurementFromRecord(AggrContext context, ResultSet record) throws SQLException {
+        Map<String, String> params = context.getParameters();
+        Measurement measurement = context.newMeasurement();
+
+        String idKey = idKey(params);
+        String srcKey = sourceKey(params);
+
+        String measId = record.getString(idKey);
+        if (StringUtils.isNotBlank(measId)) {
+            measurement.setUuid(measId);
+        }
+
+        String parentId = record.getString(srcKey);
+        if (StringUtils.isNotBlank(parentId)) {
+            Set<UniquelyIdentifiable> parents = new HashSet<>();
+            parents.add(new BasicParent(parentId));
+            measurement.setParents(parents);
+        }
+
+        Map<String, Object> data = new HashMap<>();
+        for (String key : measurement.getReadKeys()) {
+            data.put(key, record.getObject(key));
+        }
+        measurement.setData(data);
+
+        return measurement;
+
     }
 
     private Connection getConnection(Map<String, String> parameters) throws SQLException {

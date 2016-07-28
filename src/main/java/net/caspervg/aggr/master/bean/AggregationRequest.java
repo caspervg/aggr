@@ -10,6 +10,7 @@ public class AggregationRequest {
     private AggregationRequestParameters parameters;
     private AggregationRequestEnvironment environment;
     private String service;
+    private String measurementClassName;
 
     private AggregationRequest(String id,
                                String input,
@@ -17,6 +18,7 @@ public class AggregationRequest {
                                String aggregationType,
                                boolean writeProvenance,
                                boolean bigData,
+                               String measurementClassName,
                                AggregationRequestParameters parameters,
                                AggregationRequestEnvironment environment) {
         this.id = id;
@@ -25,6 +27,7 @@ public class AggregationRequest {
         this.aggregationType = aggregationType;
         this.writeProvenance = writeProvenance;
         this.bigData = bigData;
+        this.measurementClassName = measurementClassName;
         this.parameters = parameters;
         this.environment = environment;
     }
@@ -83,6 +86,10 @@ public class AggregationRequest {
                 '}';
     }
 
+    public String getMeasurementClassName() {
+        return measurementClassName;
+    }
+
     public static final class Builder {
         private String id;
         private String input;
@@ -90,6 +97,7 @@ public class AggregationRequest {
         private String aggregationType;
         private boolean writeProvenance;
         private boolean bigData;
+        private String measurementClassName;
         private AggregationRequestParameters parameters;
         private AggregationRequestEnvironment environment;
 
@@ -130,6 +138,11 @@ public class AggregationRequest {
             return this;
         }
 
+        public Builder measurementClassName(String measurementClassName) {
+            this.measurementClassName = measurementClassName;
+            return this;
+        }
+
         public Builder parameters(AggregationRequestParameters parameters) {
             this.parameters = parameters;
             return this;
@@ -141,7 +154,17 @@ public class AggregationRequest {
         }
 
         public AggregationRequest build() {
-            return new AggregationRequest(id, input, output, aggregationType, writeProvenance, bigData, parameters, environment);
+            return new AggregationRequest(
+                    id,
+                    input,
+                    output,
+                    aggregationType,
+                    writeProvenance,
+                    bigData,
+                    measurementClassName,
+                    parameters,
+                    environment
+            );
         }
     }
 }

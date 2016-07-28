@@ -38,23 +38,13 @@ public class TimeAggregationExecution extends AbstractAggregationExecution {
         params.put(OUTPUT_PARAM_KEY, ac.getOutput());
         params.put(AbstractTimeAggregator.DETAIL_PARAM, String.valueOf(tac.getMaxDetail()));
 
-        AggrContext ctx;
         TimeAggregator aggregator;
         if (ac.isSpark()) {
-            String hdfsUrl = ac.getHdfsUrl();
-            JavaSparkContext sparkCtx = getSparkContext(ac);
-
-            if (StringUtils.isNotBlank(hdfsUrl)) {
-                FileSystem hdfs = FileSystem.get(new URI(hdfsUrl), sparkCtx.hadoopConfiguration());
-                ctx = new AggrContext(params, sparkCtx, hdfs);
-            } else {
-                ctx = new AggrContext(params, sparkCtx);
-            }
             aggregator = new SparkTimeAggregator();
         } else {
-            ctx = new AggrContext(params);
             aggregator = new PlainTimeAggregator();
         }
+        AggrContext ctx = createContext(params, ac);
 
         Dataset dataset = Dataset.Builder.setup().withTitle(ac.getDatasetId()).build();
         Iterable<Measurement> meas = getReader(ac, ctx).read(ctx);

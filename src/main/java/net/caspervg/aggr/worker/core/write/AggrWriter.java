@@ -1,6 +1,5 @@
 package net.caspervg.aggr.worker.core.write;
 
-import net.caspervg.aggr.worker.core.bean.Centroid;
 import net.caspervg.aggr.worker.core.bean.Dataset;
 import net.caspervg.aggr.worker.core.bean.Measurement;
 import net.caspervg.aggr.worker.core.bean.aggregation.GridAggregation;
@@ -24,22 +23,6 @@ public interface AggrWriter {
      * @param context Context of the operation
      */
     void writeMeasurements(Iterable<Measurement> measurements, AggrContext context);
-
-    /**
-     * Writes a centroid to the channel
-     *
-     * @param centroid Centroid to write
-     * @param context Context of the operation
-     */
-    void writeCentroid(Centroid centroid, AggrContext context);
-
-    /**
-     * Writes many centroids to the channel
-     *
-     * @param centroids Centroids to write
-     * @param context Context of the operation
-     */
-    void writeCentroids(Iterable<Centroid> centroids, AggrContext context);
 
     /**
      * Writes a time aggregation to the channel

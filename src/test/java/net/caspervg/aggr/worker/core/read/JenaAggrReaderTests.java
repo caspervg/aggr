@@ -1,3 +1,4 @@
+/*
 package net.caspervg.aggr.worker.core.read;
 
 import com.google.common.collect.Iterables;
@@ -36,6 +37,7 @@ public class JenaAggrReaderTests {
         Measurement meas = possibleMeasurement.get();
         Assert.assertEquals("measurement_4", meas.getUuid());
         Assert.assertEquals(new Point(new Double[]{50.4,4.4}), meas.getPoint());
+*/
 /*        Assert.assertTrue(meas.getParent().isPresent());
         Assert.assertEquals("parent_4", meas.getParent().get());
         Assert.assertEquals(LocalDateTime.parse("2015-09-10T08:47:39"), meas.getTimestamp());
@@ -44,7 +46,8 @@ public class JenaAggrReaderTests {
 
         Assert.assertTrue(possibleMeasurement.isPresent());
         meas = possibleMeasurement.get();
-        Assert.assertFalse(meas.getParent().isPresent());*/
+        Assert.assertFalse(meas.getParent().isPresent());*//*
+
     }
 
     @Test
@@ -62,3 +65,4 @@ public class JenaAggrReaderTests {
         Assert.assertEquals(4, measArr.length);
     }
 }
+*/

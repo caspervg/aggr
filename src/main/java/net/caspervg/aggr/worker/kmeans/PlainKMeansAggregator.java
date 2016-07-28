@@ -1,15 +1,15 @@
 package net.caspervg.aggr.worker.kmeans;
 
 import com.google.common.collect.Lists;
-import net.caspervg.aggr.worker.core.bean.Centroid;
+import com.google.common.collect.Sets;
 import net.caspervg.aggr.worker.core.bean.Dataset;
 import net.caspervg.aggr.worker.core.bean.Measurement;
-import net.caspervg.aggr.worker.core.bean.Point;
 import net.caspervg.aggr.worker.core.bean.aggregation.AggregationResult;
 import net.caspervg.aggr.worker.core.bean.aggregation.KMeansAggregation;
 import net.caspervg.aggr.worker.core.distance.DistanceMetric;
 import net.caspervg.aggr.worker.core.distance.DistanceMetricChoice;
 import net.caspervg.aggr.worker.core.util.AggrContext;
+import org.apache.commons.lang3.ArrayUtils;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -20,7 +20,7 @@ public class PlainKMeansAggregator extends AbstractKMeansAggregator {
     private DistanceMetric<Double> distanceMetric;
 
     @Override
-    public Iterable<AggregationResult<KMeansAggregation, Centroid>> aggregate(Dataset dataset,
+    public Iterable<AggregationResult<KMeansAggregation, Measurement>> aggregate(Dataset dataset,
                                                                               Iterable<Measurement> measurements,
                                                                               AggrContext context) {
         this.distanceMetric = DistanceMetricChoice.valueOf(
@@ -34,17 +34,16 @@ public class PlainKMeansAggregator extends AbstractKMeansAggregator {
                 context.getParameters().getOrDefault(CENTROIDS_PARAM, DEFAULT_NUM_CENTROIDS)
         );
 
-        List<Centroid> centroids = StreamSupport.stream(measurements.spliterator(), false)
+        List<Measurement> centroids = StreamSupport.stream(measurements.spliterator(), false)
                 .limit(numCentroids)
-                .map(measurement -> Centroid.Builder.setup().withPoint(measurement.getPoint()).build())
                 .collect(Collectors.toList());
 
         int iterations = 0;
         while(iterations < maxIterations) {
             Map<Double[], Set<Measurement>> newMapping = new HashMap<>();
 
-            for (Centroid centroid : centroids) {
-                newMapping.put(centroid.getPoint().getVector(), new HashSet<>());
+            for (Measurement centroid : centroids) {
+                newMapping.put(centroid.getVector(), new HashSet<>());
             }
 
             for (Measurement measurement : measurements) {
@@ -57,21 +56,17 @@ public class PlainKMeansAggregator extends AbstractKMeansAggregator {
                 }
             }
 
-            centroids = newMapping
-                    .entrySet()
-                    .stream()
-                    .map(entry -> Centroid.Builder
-                                    .setup()
-                                    .withPoint(
-                                            new Point(
-                                                    entry.getKey()
-                                            )
-                                    )
-                                    .withParents(entry.getValue())
-                                    .build()
-                    )
-                    .map(Centroid::recalculatePosition)
-                    .collect(Collectors.toList());
+            centroids = new ArrayList<>(centroids.size());
+            for (Map.Entry<Double[], Set<Measurement>> entry : newMapping.entrySet()) {
+                Measurement nextCentroid = context.newMeasurement();
+                Double[] current = entry.getKey();
+                Set<Measurement> parents = entry.getValue();
+
+                nextCentroid.setVector(optimalPosition(current, parents));
+                nextCentroid.setParents(Sets.newHashSet(parents));
+
+                centroids.add(nextCentroid);
+            }
 
             iterations++;
         }
@@ -93,17 +88,17 @@ public class PlainKMeansAggregator extends AbstractKMeansAggregator {
         );
     }
 
-    private Double[] closestCentroidVector(List<Centroid> centroids, Measurement measurement) {
-        Centroid currentClosest = centroids.get(0);
+    private Double[] closestCentroidVector(List<Measurement> centroids, Measurement measurement) {
+        Measurement currentClosest = centroids.get(0);
         double minimumDistance = this.distanceMetric.distance(
-                currentClosest.getPoint().getVector(),
-                measurement.getPoint().getVector()
+                currentClosest.getVector(),
+                measurement.getVector()
         );
 
-        for (Centroid possibleClosest : centroids) {
+        for (Measurement possibleClosest : centroids) {
             double possibleDistance = this.distanceMetric.distance(
-                    possibleClosest.getPoint().getVector(),
-                    measurement.getPoint().getVector()
+                    possibleClosest.getVector(),
+                    measurement.getVector()
             );
 
             if (possibleDistance < minimumDistance) {
@@ -112,6 +107,29 @@ public class PlainKMeansAggregator extends AbstractKMeansAggregator {
             }
         }
 
-        return currentClosest.getPoint().getVector();
+        return currentClosest.getVector();
+    }
+
+    private Double[] optimalPosition(Double[] current, Set<Measurement> parents) {
+        if (parents.size() == 0) return current;
+        double[] sum = null;
+
+        for (Measurement parent : parents) {
+            if (sum == null) {
+                sum = new double[parent.getVector().length];
+            }
+
+            for (int i = 0; i < sum.length; i++) {
+                sum[i] += parent.getVector()[i];
+            }
+        }
+
+        assert sum != null;
+        double[] avg = new double[sum.length];
+        for (int i = 0; i < avg.length; i++) {
+            avg[i] = sum[i] / parents.size();
+        }
+
+        return ArrayUtils.toObject(avg);
     }
 }

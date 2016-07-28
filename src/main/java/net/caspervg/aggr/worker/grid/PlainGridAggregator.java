@@ -14,8 +14,8 @@ public class PlainGridAggregator extends AbstractGridAggregator {
 
     @Override
     public Iterable<AggregationResult<GridAggregation, Measurement>> aggregate(Dataset dataset,
-                                                                               Iterable<Measurement> measurements,
-                                                                               AggrContext context) {
+                                                                                       Iterable<Measurement> measurements,
+                                                                                       AggrContext context) {
         double gridSize = Double.parseDouble(
                 context.getParameters().getOrDefault(GRID_SIZE_PARAM, DEFAULT_GRID_SIZE)
         );
@@ -23,31 +23,22 @@ public class PlainGridAggregator extends AbstractGridAggregator {
         Set<Measurement> roundedMeasurements = new HashSet<>();
 
         for (Measurement parent : measurements) {
-            double latitude = parent.getPoint().getVector()[0];
-            double longitude = parent.getPoint().getVector()[1];
+            Double[] parentVec = parent.getVector();
+            Double[] roundedVec = new Double[parentVec.length];
 
-            double roundedLatitude = (double) Math.round(latitude / gridSize) * gridSize;
-            double roundedLongitude = (double) Math.round(longitude / gridSize) * gridSize;
-
-            Point roundedPoint = new Point(new Double[]{roundedLatitude, roundedLongitude});
-            if (parent instanceof TimedMeasurement) {
-                roundedMeasurements.add(
-                        TimedMeasurement.Builder
-                            .setup()
-                            .withPoint(roundedPoint)
-                            .withParent(parent)
-                            .withTimestamp(((TimedMeasurement) parent).getTimestamp())
-                            .build()
-                );
-            } else {
-                roundedMeasurements.add(
-                        Measurement.Builder
-                            .setup()
-                            .withPoint(roundedPoint)
-                            .withParent(parent)
-                            .build()
-                );
+            for (int i = 0; i < parentVec.length; i++) {
+                roundedVec[i] = (double) Math.round(parentVec[i] / gridSize) * gridSize;
             }
+
+            Measurement child = context.newMeasurement();
+            Set<UniquelyIdentifiable> parents = new HashSet<>();
+            parents.add(parent);
+
+            child.setParents(parents);
+            child.setData(parent.getData());
+            child.setVector(roundedVec);
+
+            roundedMeasurements.add(child);
         }
 
         return Lists.newArrayList(

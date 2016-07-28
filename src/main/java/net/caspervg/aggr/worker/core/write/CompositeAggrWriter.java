@@ -1,6 +1,5 @@
 package net.caspervg.aggr.worker.core.write;
 
-import net.caspervg.aggr.worker.core.bean.Centroid;
 import net.caspervg.aggr.worker.core.bean.Dataset;
 import net.caspervg.aggr.worker.core.bean.Measurement;
 import net.caspervg.aggr.worker.core.bean.aggregation.AggregationResult;
@@ -54,16 +53,10 @@ public class CompositeAggrWriter implements AggrResultWriter {
     }
 
     @Override
-    public void writeKMeansAggregation(AggregationResult<KMeansAggregation, Centroid> result, AggrContext context) {
-        Iterable<Centroid> centroids = result.getResults();
-        dataWriter.writeCentroids(centroids, context);
+    public void writeKMeansAggregation(AggregationResult<KMeansAggregation, Measurement> result, AggrContext context) {
+        Iterable<Measurement> centroids = result.getResults();
+        dataWriter.writeMeasurements(centroids, context);
         metaWriter.writeAggregation(result.getAggregation(), context);
-
-        if (writeProvenance) {
-            for (Centroid centroid : centroids) {
-                metaWriter.writeMeasurements(centroid.getMeasurements(), context);
-            }
-        }
     }
 
     @Override

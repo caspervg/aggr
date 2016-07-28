@@ -90,6 +90,13 @@
             <version>${rdf4j.version}</version>
         </dependency>
 
+        <!-- Deep clones -->
+        <dependency>
+            <groupId>uk.com.robust-it</groupId>
+            <artifactId>cloning</artifactId>
+            <version>1.9.2</version>
+        </dependency>
+
         <!-- JUnit -->
         <dependency>
             <groupId>junit</groupId>

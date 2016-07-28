@@ -3,6 +3,7 @@ package net.caspervg.aggr.core;
 import com.beust.jcommander.DynamicParameter;
 import com.beust.jcommander.Parameter;
 import net.caspervg.aggr.master.bean.AggregationRequest;
+import net.caspervg.aggr.worker.core.bean.Measurement;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.HashMap;
@@ -39,6 +40,9 @@ public class AggrCommand {
     @Parameter(names = {"-d", "--dataset-id"}, description = "Identifier of the dataset that the aggregations are based " +
             "on", required = true)
     private String datasetId;
+
+    @Parameter(names = {"--class"}, description = "Package and class name of the class to use to read/store measurements")
+    private String measurementClassName = "net.caspervg.aggr.worker.bean.impl.GeoMeasurement";
 
     @DynamicParameter(names ={"-D"}, description = "Additional dynamic parameters that could be useful for some " +
             "aggregation command, data reader and/or writer. e.g. 'query', 'latitude_key', ...")
@@ -84,6 +88,19 @@ public class AggrCommand {
         return datasetId;
     }
 
+    public String getMeasurementClassName() {
+        return measurementClassName;
+    }
+
+    @SuppressWarnings("unchecked")
+    public Class<? extends Measurement> getMeasurementClass() {
+        try {
+            return (Class<? extends Measurement>) Class.forName(getMeasurementClassName());
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     public Map<String, String> getDynamicParameters() {
         return dynamicParameters;
     }
@@ -96,6 +113,7 @@ public class AggrCommand {
         command.writeDataCsv = req.isBigData();
         command.writeProvenance = req.isWriteProvenance();
         command.datasetId = req.getId();
+        command.measurementClassName = req.getMeasurementClassName();
         command.dynamicParameters = new HashMap<>(req.getParameters().getDynamic());
 
         command.HDFS_URL = req.getEnvironment().getHdfs();

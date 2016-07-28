@@ -2,7 +2,9 @@ package net.caspervg.aggr.worker.core.write;
 
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
-import net.caspervg.aggr.worker.core.bean.*;
+import net.caspervg.aggr.worker.core.bean.Dataset;
+import net.caspervg.aggr.worker.core.bean.Measurement;
+import net.caspervg.aggr.worker.core.bean.UniquelyIdentifiable;
 import net.caspervg.aggr.worker.core.bean.aggregation.AbstractAggregation;
 import net.caspervg.aggr.worker.core.bean.aggregation.GridAggregation;
 import net.caspervg.aggr.worker.core.bean.aggregation.KMeansAggregation;
@@ -13,12 +15,15 @@ import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
 import org.eclipse.rdf4j.model.vocabulary.DCTERMS;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
+import org.eclipse.rdf4j.model.vocabulary.XMLSchema;
 import org.eclipse.rdf4j.repository.Repository;
 import org.eclipse.rdf4j.repository.RepositoryConnection;
 import org.eclipse.rdf4j.repository.sail.SailRepository;
 import org.eclipse.rdf4j.sail.memory.MemoryStore;
+import scala.xml.XML;
 
 import java.math.BigInteger;
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.*;
@@ -37,15 +42,11 @@ public class Rdf4jAggrWriter extends AbstractSparqlAggrWriter {
     private ValueFactory valueFactory;
     private IRI geoPoint;
     private IRI ownMeas;
-    private IRI ownCentroid;
     private IRI ownDs;
     private IRI ownAggr;
     private IRI ownGridAggr;
     private IRI ownKMeansAggr;
     private IRI ownTimeAggr;
-    private IRI geoLat;
-    private IRI geoLon;
-    private IRI ownWeight;
     private IRI muUUID;
 
     public Rdf4jAggrWriter(Repository repository, boolean writeProvenance) {
@@ -53,18 +54,15 @@ public class Rdf4jAggrWriter extends AbstractSparqlAggrWriter {
         this.writeProvenance = writeProvenance;
 
         this.valueFactory = SimpleValueFactory.getInstance();
+        UntypedLiteral.setDatatype(XMLSchema.STRING);
 
         this.geoPoint = valueFactory.createIRI(GEO_PREFIX, "Point");
         this.ownMeas = valueFactory.createIRI(OWN_CLASS, "Measurement");
-        this.ownCentroid = valueFactory.createIRI(OWN_CLASS, "Centroid");
         this.ownDs = valueFactory.createIRI(OWN_CLASS, "Dataset");
         this.ownAggr = valueFactory.createIRI(OWN_CLASS, "Aggregation");
         this.ownGridAggr = valueFactory.createIRI(OWN_CLASS, "GridAggregation");
         this.ownKMeansAggr = valueFactory.createIRI(OWN_CLASS, "KMeansAggregation");
         this.ownTimeAggr = valueFactory.createIRI(OWN_CLASS, "TimeAggregation");
-        this.geoLat = valueFactory.createIRI(GEO_PREFIX, "lat");
-        this.geoLon = valueFactory.createIRI(GEO_PREFIX, "long");
-        this.ownWeight = valueFactory.createIRI(WEIGHT_PROPERTY);
         this.muUUID = valueFactory.createIRI(MU_PREFIX, "uuid");
     }
 
@@ -92,27 +90,6 @@ public class Rdf4jAggrWriter extends AbstractSparqlAggrWriter {
         for (Measurement measurement : measurements) {
             Resource measRes = measurementWithId(measurement.getUuid());
             statements.addAll(measurementStatements(measurement, measRes));
-        }
-
-        add(statements);
-    }
-
-    @Override
-    public void writeCentroid(Centroid centroid, AggrContext context) {
-        Resource centRes = centroidWithId(centroid.getUuid());
-
-        add(centroidStatements(centroid, centRes));
-    }
-
-    @Override
-    public void writeCentroids(Iterable<Centroid> centroids, AggrContext context) {
-        Set<Statement> statements = new HashSet<>();
-
-        if (Iterables.isEmpty(centroids)) return;
-
-        for (Centroid centroid : centroids) {
-            Resource centRes = centroidWithId(centroid.getUuid());
-            statements.addAll(centroidStatements(centroid, centRes));
         }
 
         add(statements);
@@ -231,14 +208,12 @@ public class Rdf4jAggrWriter extends AbstractSparqlAggrWriter {
     protected Collection<Statement> measurementStatements(Measurement measurement, Resource measRes) {
         Set<Statement> statements = new HashSet<>();
 
-        double latitude = measurement.getPoint().getVector()[0];
-        double longitude = measurement.getPoint().getVector()[1];
-        LocalDateTime timestamp = null;
-        if (measurement instanceof TimedMeasurement) {
-            timestamp = ((TimedMeasurement) measurement).getTimestamp();
-        }
+/*        LocalDateTime timestamp = null;
+        if (measurement.getData().containsKey(DEFAULT_TIMESTAMP_KEY)) {
+            timestamp = (LocalDateTime) measurement.getData().get(DEFAULT_TIMESTAMP_KEY);
+        }*/
         String id = measurement.getUuid();
-        Measurement parent = Iterables.getFirst(measurement.getParents(), null);
+        Set<UniquelyIdentifiable> parents = measurement.getParents();
 
         // Types of the measurement
         statements.add(
@@ -266,121 +241,43 @@ public class Rdf4jAggrWriter extends AbstractSparqlAggrWriter {
                 )
         );
 
-        // Latitude of the measurement
-        statements.add(
-                valueFactory.createStatement(
-                        measRes,
-                        this.geoLat,
-                        stringLiteral(String.valueOf(latitude))    // Spec requires string for latitude
-                )
-        );
+        for (String key : measurement.getWriteKeys()) {
+            Object measValue = measurement.getData().get(key);
+            IRI type = null;
+            Value value;
 
-        // Longitude of the measurement
-        statements.add(
-                valueFactory.createStatement(
-                        measRes,
-                        this.geoLon,
-                        stringLiteral(String.valueOf(longitude))    // Spec requires string for longitude
-                )
-        );
+            if (measValue instanceof Integer) {
+                value = valueFactory.createLiteral(BigInteger.valueOf((Integer) measValue));
+            } else if (measValue instanceof Double) {
+                value = valueFactory.createLiteral((Double) measValue);
+            } else if (measValue instanceof Instant) {
+                type = DCTERMS.DATE;
+                value =  literalTimestamp((Instant) measValue);
+            } else {
+                value = stringLiteral(measValue.toString());
+            }
 
-        if (timestamp != null) {
-            // Timestamp of the measurement
+            if (type == null) {
+                type =  valueFactory.createIRI(OWN_PREFIX, key);
+            }
+
             statements.add(
                     valueFactory.createStatement(
                             measRes,
-                            DCTERMS.DATE,
-                            literalTimestamp(timestamp)
+                            type,
+                            value
                     )
             );
         }
 
         if (writeProvenance) {
-            // Link to the parent measurement, if present
-            if (parent != null) {
+            for (UniquelyIdentifiable parent : parents) {
                 statements.add(
-                        valueFactory.createStatement(
-                                measRes,
-                                DCTERMS.SOURCE,
-                                measurementWithId(parent.getUuid())
-                        )
-                );
-            }
-        }
-
-        return statements;
-    }
-
-    protected Collection<Statement> centroidStatements(Centroid centroid, Resource centRes) {
-        Set<Statement> statements = new HashSet<>();
-
-        Point point = centroid.getPoint();
-        double latitude = point.getVector()[0];
-        double longitude = point.getVector()[1];
-        int weight = centroid.getMeasurements().size();
-
-        // Types of the centroid
-        statements.add(
-                valueFactory.createStatement(
-                        centRes,
-                        RDF.TYPE,
-                        this.geoPoint
-                )
-        );
-
-        statements.add(
-                valueFactory.createStatement(
-                        centRes,
-                        RDF.TYPE,
-                        this.ownCentroid
-                )
-        );
-
-        // Latitude of the centroid
-        statements.add(
-                valueFactory.createStatement(
-                        centRes,
-                        this.geoLat,
-                        stringLiteral(String.valueOf(latitude))     // Spec requires string for latitude
-                )
-        );
-
-        // Longitude of the centroid
-        statements.add(
-                valueFactory.createStatement(
-                        centRes,
-                        this.geoLon,
-                        stringLiteral(String.valueOf(longitude))    // Spec requires string for longitude
-                )
-        );
-
-        // Weight of the centroid
-        statements.add(
-                valueFactory.createStatement(
-                        centRes,
-                        this.ownWeight,
-                        valueFactory.createLiteral(BigInteger.valueOf(weight))
-                )
-        );
-
-        // mu-UUID of the centroid
-        statements.add(
-                valueFactory.createStatement(
-                        centRes,
-                        this.muUUID,
-                        stringLiteral(centroid.getUuid())
-                )
-        );
-
-        if (writeProvenance) {
-            // Source measurements of the centroids
-            for (Measurement measurement : centroid.getMeasurements()) {
-                statements.add(
-                        valueFactory.createStatement(
-                                centRes,
-                                DCTERMS.SOURCE,
-                                measurementWithId(measurement.getUuid())
-                        )
+                    valueFactory.createStatement(
+                        measRes,
+                        DCTERMS.SOURCE,
+                        measurementWithId(parent.getUuid())
+                    )
                 );
             }
         }
@@ -468,7 +365,7 @@ public class Rdf4jAggrWriter extends AbstractSparqlAggrWriter {
                 )
         );
 
-        // Type of the daatset
+        // Type of the dataset
         statements.add(
                 valueFactory.createStatement(
                         dsRes,
@@ -537,14 +434,16 @@ public class Rdf4jAggrWriter extends AbstractSparqlAggrWriter {
      * @param dateTime Date time to convert
      * @return Converted literal
      */
-    private Literal literalTimestamp(LocalDateTime dateTime) {
+    private Literal literalTimestamp(Instant dateTime) {
         return valueFactory.createLiteral(
                 Date.from(
-                        dateTime.toInstant(
-                                ZoneOffset.UTC
-                        )
+                        dateTime
                 )
         );
+    }
+
+    private Literal literalTimestamp(LocalDateTime dateTime) {
+        return literalTimestamp(dateTime.toInstant(ZoneOffset.UTC));
     }
 
     /**
