@@ -1,5 +1,7 @@
 package net.caspervg.aggr.master.bean;
 
+import org.apache.commons.lang3.StringUtils;
+
 public class AggregationRequest {
     private String id;
     private String input;
@@ -10,7 +12,7 @@ public class AggregationRequest {
     private AggregationRequestParameters parameters;
     private AggregationRequestEnvironment environment;
     private String service;
-    private String measurementClassName;
+    private String measurementClassName = "net.caspervg.aggr.worker.bean.TimedGeoMeasurement";
 
     private AggregationRequest(String id,
                                String input,
@@ -97,7 +99,7 @@ public class AggregationRequest {
         private String aggregationType;
         private boolean writeProvenance;
         private boolean bigData;
-        private String measurementClassName;
+        private String measurementClassName = "net.caspervg.aggr.worker.bean.TimedGeoMeasurement";
         private AggregationRequestParameters parameters;
         private AggregationRequestEnvironment environment;
 
@@ -139,7 +141,9 @@ public class AggregationRequest {
         }
 
         public Builder measurementClassName(String measurementClassName) {
-            this.measurementClassName = measurementClassName;
+            if (StringUtils.isNotBlank(measurementClassName)) {
+                this.measurementClassName = measurementClassName;
+            }
             return this;
         }
 
