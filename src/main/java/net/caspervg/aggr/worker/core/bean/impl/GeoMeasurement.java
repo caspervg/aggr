@@ -86,12 +86,23 @@ public class GeoMeasurement implements Measurement {
     }
 
     @Override
+    public void setDatum(String key, Object datum) {
+        // Empty on purpose, GeoMeasurement has no extra data
+    }
+
+    @Override
     public Map<String, Object> getData() {
         Map<String, Object> data = new HashMap<>();
         data.put(LAT_KEY, vector[0]);
         data.put(LON_KEY, vector[1]);
 
         return data;
+    }
+
+    @Override
+    public Object getDatum(String key) {
+        // Empty on purpose, GeoMeasurement has no extra data
+        return null;
     }
 
     @Override

@@ -12,8 +12,10 @@ public interface Measurement extends UniquelyIdentifiable, Parental, Serializabl
     LocalDateTime getTimestamp();
     void setTimestamp(LocalDateTime timestamp);
 
-    void setData(Map<String, Object> data);
     Map<String, Object> getData();
+    Object getDatum(String key);
+    void setData(Map<String, Object> data);
+    void setDatum(String key, Object datum);
 
     List<String> getReadKeys();
     List<String> getWriteKeys();

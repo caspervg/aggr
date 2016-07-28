@@ -4,6 +4,7 @@ import com.google.common.collect.Lists;
 import net.caspervg.aggr.worker.core.bean.*;
 import net.caspervg.aggr.worker.core.bean.aggregation.AggregationResult;
 import net.caspervg.aggr.worker.core.bean.aggregation.KMeansAggregation;
+import net.caspervg.aggr.worker.core.bean.impl.WeightedGeoMeasurement;
 import net.caspervg.aggr.worker.core.util.AggrContext;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.spark.api.java.JavaRDD;
@@ -63,6 +64,7 @@ public class SparkKMeansClusterAggregator extends AbstractKMeansAggregator imple
             Measurement centroid = context.newMeasurement();
             centroid.setVector(centerVec);
             centroid.setParents(centroidParentsList.get(i));
+            centroid.setDatum(WeightedGeoMeasurement.WEIGHT_KEY, centroidParentsList.get(i).size());
 
             centroidList.add(
                     centroid
