@@ -12,7 +12,7 @@ public class AggregationRequest {
     private AggregationRequestParameters parameters;
     private AggregationRequestEnvironment environment;
     private String service;
-    private String measurementClassName = "net.caspervg.aggr.worker.bean.TimedGeoMeasurement";
+    private String measurementClassName = "net.caspervg.aggr.worker.core.bean.impl.TimedGeoMeasurement";
 
     private AggregationRequest(String id,
                                String input,
@@ -99,7 +99,7 @@ public class AggregationRequest {
         private String aggregationType;
         private boolean writeProvenance;
         private boolean bigData;
-        private String measurementClassName = "net.caspervg.aggr.worker.bean.TimedGeoMeasurement";
+        private String measurementClassName = "net.caspervg.aggr.worker.core.bean.impl.TimedGeoMeasurement";
         private AggregationRequestParameters parameters;
         private AggregationRequestEnvironment environment;
 
