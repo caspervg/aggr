@@ -28,6 +28,8 @@ public class SparkKMeansAggregator extends AbstractKMeansAggregator {
                                                                               AggrContext context) {
         Objects.requireNonNull(context.getSparkContext());
 
+        Class<? extends Measurement> clazz = context.getClazz();
+
         DistanceMetric<Double> distanceMetric = DistanceMetricChoice.valueOf(
                 context.getParameters().getOrDefault(METRIC_PARAM, DEFAULT_DISTANCE_METRIC)
         ).getMetric();
@@ -70,7 +72,7 @@ public class SparkKMeansAggregator extends AbstractKMeansAggregator {
                             sum[i] = vec1[i] + vec2[i];
                         }
 
-                        Measurement sumMeas = context.newMeasurement();
+                        Measurement sumMeas = newInstance(clazz);
                         sumMeas.setVector(sum);
 
                         return new Tuple2<>(sumMeas, pair1._2 + pair2._2);
@@ -80,7 +82,7 @@ public class SparkKMeansAggregator extends AbstractKMeansAggregator {
                         Measurement sum = pair._1;
                         Integer amount = pair._2;
 
-                        Measurement avgMeas = context.newMeasurement();
+                        Measurement avgMeas = newInstance(clazz);
 
                         Double[] vecSum = sum.getVector();
                         Double[] vecAvg = new Double[vecSum.length];

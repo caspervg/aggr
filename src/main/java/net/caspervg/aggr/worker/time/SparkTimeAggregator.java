@@ -23,11 +23,12 @@ public class SparkTimeAggregator extends AbstractTimeAggregator implements Seria
     public Iterable<AggregationResult<TimeAggregation, Measurement>> aggregate(Dataset dataset,
                                                                                Iterable<Measurement> measurements,
                                                                                AggrContext context) {
-        List<Measurement> measurementList = Lists.newArrayList(measurements);
-
         Objects.requireNonNull(context.getSparkContext());
 
+        List<Measurement> measurementList = Lists.newArrayList(measurements);
+
         JavaSparkContext sparkCtx = context.getSparkContext();
+        Class<? extends Measurement> clazz = context.getClazz();
         JavaRDD<Measurement> measRDD = sparkCtx.parallelize(measurementList);
 
         if (measurementList.size() < 1) {
@@ -55,7 +56,7 @@ public class SparkTimeAggregator extends AbstractTimeAggregator implements Seria
                 List<Measurement> childMeasurements = filteredMeas.collect()
                         .stream()
                         .map(parent -> {
-                                    Measurement child = context.newMeasurement();
+                                    Measurement child = newInstance(clazz);
                                     child.setVector(parent.getVector());
                                     child.setData(parent.getData());
                                     child.setTimestamp(parent.getTimestamp());

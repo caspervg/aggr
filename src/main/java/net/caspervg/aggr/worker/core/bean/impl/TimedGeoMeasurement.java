@@ -1,5 +1,7 @@
 package net.caspervg.aggr.worker.core.bean.impl;
 
+import org.apache.commons.lang3.StringUtils;
+
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
@@ -35,7 +37,9 @@ public class TimedGeoMeasurement extends GeoMeasurement {
         Object timeObj = data.get(TIME_KEY);
         if (timeObj != null) {
             String timeStr = String.valueOf(timeObj);
-            this.timestamp = LocalDateTime.parse(timeStr, DateTimeFormatter.ISO_DATE_TIME);
+            if (StringUtils.isNotBlank(timeStr)) {
+                this.timestamp = LocalDateTime.parse(timeStr, DateTimeFormatter.ISO_DATE_TIME);
+            }
         }
 
     }

@@ -22,7 +22,7 @@ public class Rdf4jAggrRequestUpdater {
     protected static final String OWN_PROPERTY = OWN_PREFIX + "property#";
     protected static final String STATUS_PROPERTY = OWN_PROPERTY + "status";
     protected static final String REQUEST_URI_PREFIX = OWN_PREFIX + "aggregation-request/";
-    protected static final String[] POSSIBLE_STATUSES = new String[] {"in_flight", "not_started", "success", "failure"};
+    protected static final String[] POSSIBLE_STATUSES = new String[] {"not_started"};
 
     private Repository repository;
     private ValueFactory valueFactory;
@@ -45,6 +45,13 @@ public class Rdf4jAggrRequestUpdater {
                     valueFactory.createStatement(
                             reqRes,
                             this.ownStatus,
+                            valueFactory.createLiteral(possibleStatus)
+                    )
+            );
+            rmStatements.add(
+                    valueFactory.createStatement(
+                            reqRes,
+                            this.ownStatus,
                             new UntypedLiteral(possibleStatus)
                     )
             );
@@ -58,26 +65,19 @@ public class Rdf4jAggrRequestUpdater {
                 )
         );
 
-        rm(rmStatements);
-        add(addStatements);
+        try (RepositoryConnection conn = getConnection()) {
+            IRI graphIri = valueFactory.createIRI(DEFAULT_GRAPH);
+
+            conn.begin();
+            conn.remove(rmStatements, graphIri);
+            conn.remove(reqRes, this.ownStatus, null, graphIri);
+            conn.add(addStatements, graphIri);
+            conn.commit();
+        }
     }
 
     private Resource requestWithId(String id) {
         return valueFactory.createIRI(REQUEST_URI_PREFIX, id);
-    }
-
-    private void rm(Collection<Statement> statements) {
-        try (RepositoryConnection conn = getConnection()) {
-            IRI graphIri = valueFactory.createIRI(DEFAULT_GRAPH);
-            conn.remove(statements, graphIri);
-        }
-    }
-
-    private void add(Collection<Statement> statements) {
-        try (RepositoryConnection conn = getConnection()) {
-            IRI graphIri = valueFactory.createIRI(DEFAULT_GRAPH);
-            conn.add(statements, graphIri);
-        }
     }
 
     private RepositoryConnection getConnection() {

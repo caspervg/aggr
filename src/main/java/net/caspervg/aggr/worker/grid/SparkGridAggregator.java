@@ -16,11 +16,14 @@ import java.util.Set;
 
 public class SparkGridAggregator extends AbstractGridAggregator implements Serializable {
 
+
+
     @Override
     public Iterable<AggregationResult<GridAggregation, Measurement>> aggregate(Dataset dataset,
                                                                                        Iterable<Measurement> measurements,
                                                                                        AggrContext context) {
         Objects.requireNonNull(context.getSparkContext());
+        Class<? extends Measurement> clazz = context.getClazz();
 
         double gridSize = Double.parseDouble(
                 context.getParameters().getOrDefault(GRID_SIZE_PARAM, DEFAULT_GRID_SIZE)
@@ -37,7 +40,7 @@ public class SparkGridAggregator extends AbstractGridAggregator implements Seria
                 roundedVec[i] = (double) Math.round(parentVec[i] / gridSize) * gridSize;
             }
 
-            Measurement child = context.newMeasurement();
+            Measurement child = newInstance(clazz);
             Set<UniquelyIdentifiable> parents = new HashSet<>();
             parents.add(parent);
 

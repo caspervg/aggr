@@ -6,7 +6,7 @@
 
     <groupId>net.caspervg</groupId>
     <artifactId>aggr</artifactId>
-    <version>0.3.0</version>
+    <version>0.3.1</version>
 
     <properties>
         <!-- need 1.6.2 for compatibility with the Spark-Master and Spark-Worker dockers -->
@@ -88,13 +88,6 @@
             <groupId>org.eclipse.rdf4j</groupId>
             <artifactId>rdf4j-runtime</artifactId>
             <version>${rdf4j.version}</version>
-        </dependency>
-
-        <!-- Deep clones -->
-        <dependency>
-            <groupId>uk.com.robust-it</groupId>
-            <artifactId>cloning</artifactId>
-            <version>1.9.2</version>
         </dependency>
 
         <!-- JUnit -->

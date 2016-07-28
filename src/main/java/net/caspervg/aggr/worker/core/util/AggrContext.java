@@ -4,9 +4,10 @@ import net.caspervg.aggr.worker.core.bean.Measurement;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.spark.api.java.JavaSparkContext;
 
+import java.io.Serializable;
 import java.util.Map;
 
-public class AggrContext {
+public class AggrContext implements Serializable {
 
     private Map<String, String> parameters;
     private JavaSparkContext sparkContext;

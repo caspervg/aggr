@@ -47,7 +47,7 @@ public class AggrMasterMain {
                                 e.printStackTrace();
                                 updater.updateStatus(request.getId(), "failure");
                             }
-                        }).run();
+                        }).start();
                         break;
                     case "grid":
                         GridAggrCommand gridCommand = GridAggrCommand.of(request);
@@ -59,7 +59,7 @@ public class AggrMasterMain {
                                 e.printStackTrace();
                                 updater.updateStatus(request.getId(), "failure");
                             }
-                        }).run();
+                        }).start();
                         break;
                     case "time":
                         TimeAggrCommand timeCommand = TimeAggrCommand.of(request);
@@ -71,7 +71,7 @@ public class AggrMasterMain {
                                 e.printStackTrace();
                                 updater.updateStatus(request.getId(), "failure");
                             }
-                        }).run();
+                        }).start();
                         break;
                     default:
                         throw new IllegalStateException("Found a unknown aggregation type");
