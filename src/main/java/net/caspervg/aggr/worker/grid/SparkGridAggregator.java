@@ -23,7 +23,7 @@ public class SparkGridAggregator extends AbstractGridAggregator implements Seria
                                                                                        Iterable<Measurement> measurements,
                                                                                        AggrContext context) {
         Objects.requireNonNull(context.getSparkContext());
-        Class<? extends Measurement> clazz = context.getClazz();
+        Class<? extends Measurement> clazz = context.getOutputClass();
 
         double gridSize = Double.parseDouble(
                 context.getParameters().getOrDefault(GRID_SIZE_PARAM, DEFAULT_GRID_SIZE)

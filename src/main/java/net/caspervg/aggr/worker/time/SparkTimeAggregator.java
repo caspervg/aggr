@@ -28,7 +28,7 @@ public class SparkTimeAggregator extends AbstractTimeAggregator implements Seria
         List<Measurement> measurementList = Lists.newArrayList(measurements);
 
         JavaSparkContext sparkCtx = context.getSparkContext();
-        Class<? extends Measurement> clazz = context.getClazz();
+        Class<? extends Measurement> clazz = context.getOutputClass();
         JavaRDD<Measurement> measRDD = sparkCtx.parallelize(measurementList);
 
         if (measurementList.size() < 1) {

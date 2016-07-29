@@ -12,7 +12,8 @@ public class AggregationRequest {
     private AggregationRequestParameters parameters;
     private AggregationRequestEnvironment environment;
     private String service;
-    private String measurementClassName = "net.caspervg.aggr.worker.core.bean.impl.TimedGeoMeasurement";
+    private String inputClassName;
+    private String outputClassName;
 
     private AggregationRequest(String id,
                                String input,
@@ -20,7 +21,8 @@ public class AggregationRequest {
                                String aggregationType,
                                boolean writeProvenance,
                                boolean bigData,
-                               String measurementClassName,
+                               String inputClassName,
+                               String outputClassName,
                                AggregationRequestParameters parameters,
                                AggregationRequestEnvironment environment) {
         this.id = id;
@@ -29,7 +31,8 @@ public class AggregationRequest {
         this.aggregationType = aggregationType;
         this.writeProvenance = writeProvenance;
         this.bigData = bigData;
-        this.measurementClassName = measurementClassName;
+        this.inputClassName = inputClassName;
+        this.outputClassName = outputClassName;
         this.parameters = parameters;
         this.environment = environment;
     }
@@ -88,8 +91,12 @@ public class AggregationRequest {
                 '}';
     }
 
-    public String getMeasurementClassName() {
-        return measurementClassName;
+    public String getInputClassName() {
+        return inputClassName;
+    }
+
+    public String getOutputClassName() {
+        return outputClassName;
     }
 
     public static final class Builder {
@@ -99,7 +106,8 @@ public class AggregationRequest {
         private String aggregationType;
         private boolean writeProvenance;
         private boolean bigData;
-        private String measurementClassName = "net.caspervg.aggr.worker.core.bean.impl.TimedGeoMeasurement";
+        private String inputClassName;
+        private String outputClassName;
         private AggregationRequestParameters parameters;
         private AggregationRequestEnvironment environment;
 
@@ -140,9 +148,16 @@ public class AggregationRequest {
             return this;
         }
 
-        public Builder measurementClassName(String measurementClassName) {
+        public Builder inputClassName(String measurementClassName) {
             if (StringUtils.isNotBlank(measurementClassName)) {
-                this.measurementClassName = measurementClassName;
+                this.inputClassName = measurementClassName;
+            }
+            return this;
+        }
+
+        public Builder outputClassName(String measurementClassName) {
+            if (StringUtils.isNotBlank(measurementClassName)) {
+                this.outputClassName = measurementClassName;
             }
             return this;
         }
@@ -165,7 +180,8 @@ public class AggregationRequest {
                     aggregationType,
                     writeProvenance,
                     bigData,
-                    measurementClassName,
+                    inputClassName,
+                    outputClassName,
                     parameters,
                     environment
             );

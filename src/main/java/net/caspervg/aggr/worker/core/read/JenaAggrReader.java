@@ -71,7 +71,7 @@ public class JenaAggrReader extends AbstractSparqlAggrReader {
 
     private Measurement measurementFromRecord(AggrContext context, ResultSet record) throws SQLException {
         Map<String, String> params = context.getParameters();
-        Measurement measurement = context.newMeasurement();
+        Measurement measurement = context.newInputMeasurement();
 
         String idKey = idKey(params);
         String srcKey = sourceKey(params);

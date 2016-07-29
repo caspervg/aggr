@@ -6,6 +6,7 @@ import net.caspervg.aggr.worker.core.bean.Dataset;
 import net.caspervg.aggr.worker.core.bean.Measurement;
 import net.caspervg.aggr.worker.core.bean.aggregation.AggregationResult;
 import net.caspervg.aggr.worker.core.bean.aggregation.KMeansAggregation;
+import net.caspervg.aggr.worker.core.bean.impl.WeightedGeoMeasurement;
 import net.caspervg.aggr.worker.core.distance.DistanceMetric;
 import net.caspervg.aggr.worker.core.distance.DistanceMetricChoice;
 import net.caspervg.aggr.worker.core.util.AggrContext;
@@ -58,12 +59,13 @@ public class PlainKMeansAggregator extends AbstractKMeansAggregator {
 
             centroids = new ArrayList<>(centroids.size());
             for (Map.Entry<Double[], Set<Measurement>> entry : newMapping.entrySet()) {
-                Measurement nextCentroid = context.newMeasurement();
+                Measurement nextCentroid = context.newOutputMeasurement();
                 Double[] current = entry.getKey();
                 Set<Measurement> parents = entry.getValue();
 
                 nextCentroid.setVector(optimalPosition(current, parents));
                 nextCentroid.setParents(Sets.newHashSet(parents));
+                nextCentroid.setDatum(WeightedGeoMeasurement.WEIGHT_KEY, parents.size());
 
                 centroids.add(nextCentroid);
             }

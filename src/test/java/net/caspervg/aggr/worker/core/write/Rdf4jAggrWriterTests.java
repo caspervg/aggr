@@ -47,7 +47,7 @@ public class Rdf4jAggrWriterTests {
         Map<String, String> params = new HashMap<>();
 
         //noinspection unchecked
-        this.ctx = AggrContext.builder().parameters(Collections.EMPTY_MAP).clazz(TimedGeoMeasurement.class).build();
+        this.ctx = AggrContext.builder().parameters(Collections.EMPTY_MAP).inputClass(TimedGeoMeasurement.class).build();
         this.repository = new SailRepository(new MemoryStore());
         this.writer = new Rdf4jAggrWriter(repository, true);
         this.valueFactory = SimpleValueFactory.getInstance();

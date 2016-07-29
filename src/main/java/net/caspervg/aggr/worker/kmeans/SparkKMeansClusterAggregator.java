@@ -61,7 +61,7 @@ public class SparkKMeansClusterAggregator extends AbstractKMeansAggregator imple
         List<Measurement> centroidList = new ArrayList<>();
         for (int i = 0; i < centroidParentsList.size(); i++) {
             Double[] centerVec = ArrayUtils.toObject(centers[i].toArray());
-            Measurement centroid = context.newMeasurement();
+            Measurement centroid = context.newOutputMeasurement();
             centroid.setVector(centerVec);
             centroid.setParents(centroidParentsList.get(i));
             centroid.setDatum(WeightedGeoMeasurement.WEIGHT_KEY, centroidParentsList.get(i).size());

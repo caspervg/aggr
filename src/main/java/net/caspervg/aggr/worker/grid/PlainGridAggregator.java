@@ -30,7 +30,7 @@ public class PlainGridAggregator extends AbstractGridAggregator {
                 roundedVec[i] = (double) Math.round(parentVec[i] / gridSize) * gridSize;
             }
 
-            Measurement child = context.newMeasurement();
+            Measurement child = context.newOutputMeasurement();
             Set<UniquelyIdentifiable> parents = new HashSet<>();
             parents.add(parent);
 

@@ -28,7 +28,7 @@ public class CsvAggrReaderTests {
         params.put("source_key", "parent_column");
         params.put("input_path", CsvAggrReaderTests.class.getResource("/measurements.csv").getPath());
 
-        ctx = AggrContext.builder().parameters(params).clazz(TimedGeoMeasurement.class).build();
+        ctx = AggrContext.builder().parameters(params).inputClass(TimedGeoMeasurement.class).build();
         reader = new CsvAggrReader(new BufferedReader(new InputStreamReader(CsvAggrReader.class.getResourceAsStream("/measurements.csv"))));
     }
 

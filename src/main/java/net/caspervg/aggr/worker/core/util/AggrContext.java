@@ -12,7 +12,8 @@ public class AggrContext implements Serializable {
     private Map<String, String> parameters;
     private JavaSparkContext sparkContext;
     private FileSystem fileSystem;
-    private Class<? extends Measurement> clazz;
+    private Class<? extends Measurement> inputClass;
+    private Class<? extends Measurement> outputClass;
 
     public static Builder builder() {
         return new Builder();
@@ -21,11 +22,13 @@ public class AggrContext implements Serializable {
     public AggrContext(Map<String, String> parameters,
                        JavaSparkContext sparkContext,
                        FileSystem fileSystem,
-                       Class<? extends Measurement> clazz) {
+                       Class<? extends Measurement> inputClass,
+                       Class<? extends Measurement> outputClass) {
         this.parameters = parameters;
         this.sparkContext = sparkContext;
         this.fileSystem = fileSystem;
-        this.clazz = clazz;
+        this.inputClass = inputClass;
+        this.outputClass = outputClass;
     }
 
     public Map<String, String> getParameters() {
@@ -40,13 +43,25 @@ public class AggrContext implements Serializable {
         return fileSystem;
     }
 
-    public Class<? extends Measurement> getClazz() {
-        return clazz;
+    public Class<? extends Measurement> getInputClass() {
+        return inputClass;
     }
 
-    public Measurement newMeasurement() {
+    public Class<? extends Measurement> getOutputClass() {
+        return outputClass;
+    }
+
+    public Measurement newInputMeasurement() {
         try {
-            return this.clazz.newInstance();
+            return this.inputClass.newInstance();
+        } catch (InstantiationException | IllegalAccessException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public Measurement newOutputMeasurement() {
+        try {
+            return this.outputClass.newInstance();
         } catch (InstantiationException | IllegalAccessException e) {
             throw new RuntimeException(e);
         }
@@ -56,7 +71,8 @@ public class AggrContext implements Serializable {
         private Map<String, String> parameters;
         private JavaSparkContext sparkContext;
         private FileSystem fileSystem;
-        private Class<? extends Measurement> clazz;
+        private Class<? extends Measurement> inputClass;
+        private Class<? extends Measurement> outputClass;
 
         private Builder() {
         }
@@ -76,13 +92,18 @@ public class AggrContext implements Serializable {
             return this;
         }
 
-        public Builder clazz(Class<? extends Measurement> clazz) {
-            this.clazz = clazz;
+        public Builder inputClass(Class<? extends Measurement> clazz) {
+            this.inputClass = clazz;
+            return this;
+        }
+
+        public Builder outputClass(Class<? extends Measurement> clazz) {
+            this.outputClass = clazz;
             return this;
         }
 
         public AggrContext build() {
-            return new AggrContext(parameters, sparkContext, fileSystem, clazz);
+            return new AggrContext(parameters, sparkContext, fileSystem, inputClass, outputClass);
         }
     }
 }

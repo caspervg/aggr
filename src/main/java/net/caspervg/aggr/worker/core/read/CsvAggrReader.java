@@ -67,7 +67,7 @@ public class CsvAggrReader extends AbstractAggrReader {
 
     private Measurement measurementFromRecord(AggrContext context, CSVRecord record) {
         Map<String, String> params = context.getParameters();
-        Measurement measurement = context.newMeasurement();
+        Measurement measurement = context.newInputMeasurement();
 
         String idKey = idKey(params);
         String srcKey = sourceKey(params);

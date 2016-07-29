@@ -52,7 +52,7 @@ public class PlainTimeAggregator extends AbstractTimeAggregator {
                                     return (timestamp.isEqual(start) || (timestamp.isAfter(start) && timestamp.isBefore(end)));
                                 })
                                 .map(parent -> {
-                                            Measurement child = context.newMeasurement();
+                                            Measurement child = context.newOutputMeasurement();
                                             child.setVector(parent.getVector());
                                             child.setData(parent.getData());
                                             child.setTimestamp(parent.getTimestamp());

@@ -9,9 +9,6 @@ import net.caspervg.aggr.core.AggrCommand;
 import net.caspervg.aggr.worker.core.util.AggrContext;
 import net.caspervg.aggr.worker.core.util.untyped.UntypedSPARQLRepository;
 import net.caspervg.aggr.worker.core.write.*;
-import net.caspervg.aggr.worker.time.PlainTimeAggregator;
-import net.caspervg.aggr.worker.time.SparkTimeAggregator;
-import net.caspervg.aggr.worker.time.TimeAggregator;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.fs.*;
 import org.apache.spark.SparkConf;
@@ -124,7 +121,8 @@ public abstract class AbstractAggregationExecution implements AggregationExecuti
     protected AggrContext createContext(Map<String, String> parameters, AggrCommand ac) throws URISyntaxException, IOException {
         AggrContext.Builder acb = AggrContext.builder()
                 .parameters(parameters)
-                .clazz(ac.getMeasurementClass());
+                .inputClass(ac.getInputClass())
+                .outputClass(ac.getOutputClass());
         if (ac.isSpark()) {
             String hdfsUrl = ac.getHdfsUrl();
             JavaSparkContext sparkCtx = getSparkContext(ac);

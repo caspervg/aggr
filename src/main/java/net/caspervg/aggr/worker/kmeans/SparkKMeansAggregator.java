@@ -4,8 +4,10 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import net.caspervg.aggr.worker.core.bean.Dataset;
 import net.caspervg.aggr.worker.core.bean.Measurement;
+import net.caspervg.aggr.worker.core.bean.UniquelyIdentifiable;
 import net.caspervg.aggr.worker.core.bean.aggregation.AggregationResult;
 import net.caspervg.aggr.worker.core.bean.aggregation.KMeansAggregation;
+import net.caspervg.aggr.worker.core.bean.impl.WeightedGeoMeasurement;
 import net.caspervg.aggr.worker.core.distance.DistanceMetric;
 import net.caspervg.aggr.worker.core.distance.DistanceMetricChoice;
 import net.caspervg.aggr.worker.core.util.AggrContext;
@@ -15,10 +17,7 @@ import org.apache.spark.api.java.function.Function;
 import org.apache.spark.api.java.function.Function2;
 import scala.Tuple2;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 
 public class SparkKMeansAggregator extends AbstractKMeansAggregator {
 
@@ -28,7 +27,7 @@ public class SparkKMeansAggregator extends AbstractKMeansAggregator {
                                                                               AggrContext context) {
         Objects.requireNonNull(context.getSparkContext());
 
-        Class<? extends Measurement> clazz = context.getClazz();
+        Class<? extends Measurement> clazz = context.getOutputClass();
 
         DistanceMetric<Double> distanceMetric = DistanceMetricChoice.valueOf(
                 context.getParameters().getOrDefault(METRIC_PARAM, DEFAULT_DISTANCE_METRIC)
@@ -105,9 +104,11 @@ public class SparkKMeansAggregator extends AbstractKMeansAggregator {
         Map<Measurement, Iterable<Measurement>> resultMapping = results.collectAsMap();
         List<Measurement> finalCentroids = new ArrayList<>();
         for (Measurement centroid : resultMapping.keySet()) {
-            Measurement finalCentroid = context.newMeasurement();
+            Measurement finalCentroid = context.newInputMeasurement();
             finalCentroid.setVector(centroid.getVector());
-            finalCentroid.setParents(Sets.newHashSet(resultMapping.get(centroid)));
+            Set<Measurement> parents = Sets.newHashSet(resultMapping.get(centroid));
+            finalCentroid.setParents(Sets.newHashSet(parents));
+            finalCentroid.setDatum(WeightedGeoMeasurement.WEIGHT_KEY, parents.size());
 
             finalCentroids.add(
                 finalCentroid

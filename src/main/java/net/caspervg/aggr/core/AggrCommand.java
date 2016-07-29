@@ -12,8 +12,16 @@ import java.util.Optional;
 
 public class AggrCommand {
 
+    private static final String DEFAULT_CLASS = "net.caspervg.aggr.worker.core.bean.impl.TimedGeoMeasurement";
+    private static final String DEFAULT_INPUT_CLASS;
+    private static final String DEFAULT_OUTPUT_CLASS;
     private String SPARK_URL;
     private String HDFS_URL;
+
+    static {
+        DEFAULT_INPUT_CLASS = Optional.ofNullable(System.getenv("INPUT_CLASS")).orElse(DEFAULT_CLASS);
+        DEFAULT_OUTPUT_CLASS = Optional.ofNullable(System.getenv("OUTPUT_CLASS")).orElse(DEFAULT_CLASS);
+    }
 
     public AggrCommand() {
         SPARK_URL = Optional.ofNullable(System.getenv("SPARK_MASTER_URL")).orElse("");
@@ -41,8 +49,11 @@ public class AggrCommand {
             "on", required = true)
     private String datasetId;
 
-    @Parameter(names = {"--class"}, description = "Package and class name of the class to use to read/store measurements")
-    private String measurementClassName = "net.caspervg.aggr.worker.bean.impl.GeoMeasurement";
+    @Parameter(names = {"--input-class"}, description = "Package and class name of the class for reading measurements")
+    private String inputClassName = DEFAULT_INPUT_CLASS;
+
+    @Parameter(names = {"--output-class"}, description = "Package and class name of the class for storing measurements")
+    private String outputClassName = DEFAULT_OUTPUT_CLASS;
 
     @DynamicParameter(names ={"-D"}, description = "Additional dynamic parameters that could be useful for some " +
             "aggregation command, data reader and/or writer. e.g. 'query', 'latitude_key', ...")
@@ -88,18 +99,32 @@ public class AggrCommand {
         return datasetId;
     }
 
-    public String getMeasurementClassName() {
-        return measurementClassName;
+    public String getInputClassName() {
+        return inputClassName;
     }
 
     @SuppressWarnings("unchecked")
-    public Class<? extends Measurement> getMeasurementClass() {
+    public Class<? extends Measurement> getInputClass() {
         try {
-            return (Class<? extends Measurement>) Class.forName(getMeasurementClassName());
+            return (Class<? extends Measurement>) Class.forName(getInputClassName());
         } catch (ClassNotFoundException e) {
             throw new RuntimeException(e);
         }
     }
+
+    public String getOutputClassName() {
+        return outputClassName;
+    }
+
+    @SuppressWarnings("unchecked")
+    public Class<? extends Measurement> getOutputClass() {
+        try {
+            return (Class<? extends Measurement>) Class.forName(getOutputClassName());
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
 
     public Map<String, String> getDynamicParameters() {
         return dynamicParameters;
@@ -113,7 +138,7 @@ public class AggrCommand {
         command.writeDataCsv = req.isBigData();
         command.writeProvenance = req.isWriteProvenance();
         command.datasetId = req.getId();
-        command.measurementClassName = req.getMeasurementClassName();
+        command.inputClassName = req.getInputClassName();
         command.dynamicParameters = new HashMap<>(req.getParameters().getDynamic());
 
         command.HDFS_URL = req.getEnvironment().getHdfs();
@@ -121,4 +146,5 @@ public class AggrCommand {
 
         return command;
     }
+
 }
