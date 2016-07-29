@@ -64,17 +64,16 @@ public class GeoMeasurement implements Measurement {
     }
 
     @Override
-    public LocalDateTime getTimestamp() {
+    public Optional<LocalDateTime> getTimestamp() {
         System.err.println("GeoMeasurement does not support setting the timestamp. " +
                 "Use TimedGeoMeasurement instead");
-        return null;
+        return Optional.empty();
     }
 
     @Override
     public void setTimestamp(LocalDateTime timestamp) {
         System.err.println("GeoMeasurement does not support setting the timestamp. " +
                 "Use TimedGeoMeasurement instead");
-        return;
     }
 
     @Override
@@ -86,8 +85,17 @@ public class GeoMeasurement implements Measurement {
     }
 
     @Override
-    public void setDatum(String key, Object datum) {
-        // Empty on purpose, GeoMeasurement has no extra data
+    public void setDatum(String key, Object value) {
+        switch (key) {
+            case LAT_KEY:
+                this.vector[0] = Double.valueOf(String.valueOf(value));
+                break;
+            case LON_KEY:
+                this.vector[1] = Double.valueOf(String.valueOf(value));
+                break;
+            default:
+                throw new IllegalArgumentException("Unsupported key in #setDatum(String, Object)");
+        }
     }
 
     @Override
@@ -100,9 +108,15 @@ public class GeoMeasurement implements Measurement {
     }
 
     @Override
-    public Object getDatum(String key) {
-        // Empty on purpose, GeoMeasurement has no extra data
-        return null;
+    public Optional<Object> getDatum(String key) {
+        switch (key) {
+            case LAT_KEY:
+                return Optional.of(vector[0]);
+            case LON_KEY:
+                return Optional.of(vector[1]);
+            default:
+                return Optional.empty();
+        }
     }
 
     @Override
@@ -113,5 +127,69 @@ public class GeoMeasurement implements Measurement {
     @Override
     public List<String> getWriteKeys() {
         return Lists.newArrayList(LAT_KEY, LON_KEY);
+    }
+
+    @Override
+    public boolean canCombine(Measurement other) {
+        return Arrays.deepEquals(this.getVector(), other.getVector());
+    }
+
+    @Override
+    public Measurement combine(Measurement other) {
+        if (! canCombine(other)) {
+            throw new IllegalArgumentException("Other measurement must have the same vector");
+        }
+
+        Measurement combined = new GeoMeasurement();
+
+        combined.setData(this.getData());
+        combined.setVector(this.getVector());
+
+        Set<UniquelyIdentifiable> parents = new HashSet<>();
+        parents.add(this);
+        parents.add(other);
+        combined.setParents(parents);
+
+        return combined;
+    }
+
+    @Override
+    public Measurement combine(Iterable<Measurement> others) {
+        Measurement combined = new GeoMeasurement();
+        combined.setData(this.getData());
+        combined.setVector(this.getVector());
+
+        Set<UniquelyIdentifiable> parents = new HashSet<>();
+        parents.add(this);
+        for (Measurement other : others) {
+            if (! canCombine(other)) {
+                throw new IllegalArgumentException("Other measurement must have the same vector");
+            }
+            parents.add(other);
+        }
+        combined.setParents(parents);
+
+        return combined;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof GeoMeasurement)) return false;
+
+        GeoMeasurement that = (GeoMeasurement) o;
+
+        if (uuid != null ? !uuid.equals(that.uuid) : that.uuid != null) return false;
+        if (!Arrays.deepEquals(vector, that.vector)) return false;
+        return parents != null ? parents.equals(that.parents) : that.parents == null;
+
+    }
+
+    @Override
+    public int hashCode() {
+        int result = uuid != null ? uuid.hashCode() : 0;
+        result = 31 * result + Arrays.hashCode(vector);
+        result = 31 * result + (parents != null ? parents.hashCode() : 0);
+        return result;
     }
 }

@@ -1,6 +1,7 @@
 package net.caspervg.aggr.worker.core.write;
 
 import net.caspervg.aggr.worker.core.bean.Dataset;
+import net.caspervg.aggr.worker.core.bean.aggregation.BasicAggregation;
 import net.caspervg.aggr.worker.core.bean.aggregation.GridAggregation;
 import net.caspervg.aggr.worker.core.bean.aggregation.KMeansAggregation;
 import net.caspervg.aggr.worker.core.bean.aggregation.TimeAggregation;
@@ -23,6 +24,11 @@ public abstract class FileAggrWriter extends AbstractAggrWriter {
 
     @Override
     public void writeAggregation(GridAggregation aggregation, AggrContext context) {
+        notSupported();
+    }
+
+    @Override
+    public void writeAggregation(BasicAggregation aggregation, AggrContext context) {
         notSupported();
     }
 

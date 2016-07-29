@@ -19,6 +19,7 @@ import java.util.stream.Collectors;
 
 public class SparkTimeAggregator extends AbstractTimeAggregator implements Serializable {
 
+    @SuppressWarnings("OptionalGetWithoutIsPresent")
     @Override
     public Iterable<AggregationResult<TimeAggregation, Measurement>> aggregate(Dataset dataset,
                                                                                Iterable<Measurement> measurements,
@@ -35,8 +36,8 @@ public class SparkTimeAggregator extends AbstractTimeAggregator implements Seria
             return new HashSet<>();
         }
 
-        LocalDateTime minTimestamp = measRDD.min(new TimedMeasurementComparator()).getTimestamp();
-        LocalDateTime maxTimestamp = measRDD.max(new TimedMeasurementComparator()).getTimestamp();
+        LocalDateTime minTimestamp = measRDD.min(new TimedMeasurementComparator()).getTimestamp().get();
+        LocalDateTime maxTimestamp = measRDD.max(new TimedMeasurementComparator()).getTimestamp().get();
         long duration = minTimestamp.until(maxTimestamp, ChronoUnit.MILLIS);
 
         Set<AggregationResult<TimeAggregation, Measurement>> aggregationResults = new HashSet<>();
@@ -49,7 +50,7 @@ public class SparkTimeAggregator extends AbstractTimeAggregator implements Seria
                 LocalDateTime end = minTimestamp.plus(timeStep * (i + 1), ChronoUnit.MILLIS);
 
                 JavaRDD<Measurement> filteredMeas = measRDD.filter((Function<Measurement, Boolean>) measurement -> {
-                    LocalDateTime timestamp = measurement.getTimestamp();
+                    LocalDateTime timestamp = measurement.getTimestamp().get();
                     return (timestamp.isEqual(start) || (timestamp.isAfter(start) && timestamp.isBefore(end)));
                 });
 
@@ -59,7 +60,7 @@ public class SparkTimeAggregator extends AbstractTimeAggregator implements Seria
                                     Measurement child = newInstance(clazz);
                                     child.setVector(parent.getVector());
                                     child.setData(parent.getData());
-                                    child.setTimestamp(parent.getTimestamp());
+                                    child.setTimestamp(parent.getTimestamp().get());
 
                                     return child;
                                 }

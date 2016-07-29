@@ -25,6 +25,7 @@ import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 import static net.caspervg.aggr.worker.core.write.AbstractSparqlAggrWriter.*;
 

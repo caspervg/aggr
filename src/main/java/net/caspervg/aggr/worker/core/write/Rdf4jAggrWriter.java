@@ -5,10 +5,7 @@ import com.google.common.collect.Lists;
 import net.caspervg.aggr.worker.core.bean.Dataset;
 import net.caspervg.aggr.worker.core.bean.Measurement;
 import net.caspervg.aggr.worker.core.bean.UniquelyIdentifiable;
-import net.caspervg.aggr.worker.core.bean.aggregation.AbstractAggregation;
-import net.caspervg.aggr.worker.core.bean.aggregation.GridAggregation;
-import net.caspervg.aggr.worker.core.bean.aggregation.KMeansAggregation;
-import net.caspervg.aggr.worker.core.bean.aggregation.TimeAggregation;
+import net.caspervg.aggr.worker.core.bean.aggregation.*;
 import net.caspervg.aggr.worker.core.util.AggrContext;
 import net.caspervg.aggr.worker.core.util.untyped.UntypedLiteral;
 import org.eclipse.rdf4j.model.*;
@@ -47,6 +44,7 @@ public class Rdf4jAggrWriter extends AbstractSparqlAggrWriter {
     private IRI ownGridAggr;
     private IRI ownKMeansAggr;
     private IRI ownTimeAggr;
+    private IRI ownBasicAggr;
     private IRI muUUID;
 
     public Rdf4jAggrWriter(Repository repository, boolean writeProvenance) {
@@ -63,6 +61,7 @@ public class Rdf4jAggrWriter extends AbstractSparqlAggrWriter {
         this.ownGridAggr = valueFactory.createIRI(OWN_CLASS, "GridAggregation");
         this.ownKMeansAggr = valueFactory.createIRI(OWN_CLASS, "KMeansAggregation");
         this.ownTimeAggr = valueFactory.createIRI(OWN_CLASS, "TimeAggregation");
+        this.ownBasicAggr = valueFactory.createIRI(OWN_CLASS, "BasicAggregation");
         this.muUUID = valueFactory.createIRI(MU_PREFIX, "uuid");
     }
 
@@ -199,6 +198,25 @@ public class Rdf4jAggrWriter extends AbstractSparqlAggrWriter {
                         aggRes,
                         RDF.TYPE,
                         this.ownGridAggr
+                )
+        );
+
+        add(statements);
+    }
+
+    @Override
+    public void writeAggregation(BasicAggregation aggregation, AggrContext context) {
+        Set<Statement> statements = new HashSet<>();
+
+        Resource aggRes = aggregationWithId(aggregation.getUuid());
+        statements.addAll(aggregationStatements(aggregation, aggRes));
+
+        // Type of the aggregation
+        statements.add(
+                valueFactory.createStatement(
+                        aggRes,
+                        RDF.TYPE,
+                        this.ownBasicAggr
                 )
         );
 

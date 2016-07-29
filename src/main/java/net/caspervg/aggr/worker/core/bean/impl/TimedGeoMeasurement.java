@@ -1,11 +1,12 @@
 package net.caspervg.aggr.worker.core.bean.impl;
 
+import net.caspervg.aggr.worker.core.bean.Measurement;
+import net.caspervg.aggr.worker.core.bean.UniquelyIdentifiable;
 import org.apache.commons.lang3.StringUtils;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class TimedGeoMeasurement extends GeoMeasurement {
 
@@ -22,8 +23,8 @@ public class TimedGeoMeasurement extends GeoMeasurement {
     }
 
     @Override
-    public LocalDateTime getTimestamp() {
-        return this.timestamp;
+    public Optional<LocalDateTime> getTimestamp() {
+        return Optional.ofNullable(this.timestamp);
     }
 
     @Override
@@ -34,14 +35,32 @@ public class TimedGeoMeasurement extends GeoMeasurement {
     @Override
     public void setData(Map<String, Object> data) {
         super.setData(data);
-        Object timeObj = data.get(TIME_KEY);
-        if (timeObj != null) {
-            String timeStr = String.valueOf(timeObj);
-            if (StringUtils.isNotBlank(timeStr)) {
-                this.timestamp = LocalDateTime.parse(timeStr, DateTimeFormatter.ISO_DATE_TIME);
-            }
-        }
 
+        LocalDateTime possibTs = timestampFromObj(data.get(TIME_KEY));
+        if (possibTs != null) {
+            this.timestamp = possibTs;
+        }
+    }
+
+    @Override
+    public void setDatum(String key, Object value) {
+        switch (key) {
+            case TIME_KEY:
+                this.timestamp = timestampFromObj(value);
+                break;
+            default:
+                super.setDatum(key, value);
+        }
+    }
+
+    @Override
+    public Optional<Object> getDatum(String key) {
+        switch (key) {
+            case TIME_KEY:
+                return Optional.of(this.timestamp);
+            default:
+                return super.getDatum(key);
+        }
     }
 
     @Override
@@ -66,4 +85,78 @@ public class TimedGeoMeasurement extends GeoMeasurement {
         return keys;
     }
 
+    @Override
+    public boolean canCombine(Measurement other) {
+        return Optional.ofNullable(this.timestamp).equals(other.getTimestamp()) && super.canCombine(other);
+    }
+
+    @Override
+    public Measurement combine(Measurement other) {
+        if (! canCombine(other)) {
+            throw new IllegalArgumentException("Other measurement must have the same vector and timestamp");
+        }
+
+        Measurement combined = new TimedGeoMeasurement();
+
+        combined.setData(this.getData());
+
+        combined.setVector(this.getVector());
+
+        Set<UniquelyIdentifiable> parents = new HashSet<>();
+        parents.add(this);
+        parents.add(other);
+        combined.setParents(parents);
+
+        return combined;
+    }
+
+    @Override
+    public Measurement combine(Iterable<Measurement> others) {
+        Measurement combined = new TimedGeoMeasurement();
+
+        combined.setData(this.getData());
+        combined.setVector(this.getVector());
+
+        Set<UniquelyIdentifiable> parents = new HashSet<>();
+        parents.add(this);
+        for (Measurement other : others) {
+            if (! canCombine(other)) {
+                throw new IllegalArgumentException("Other measurement must have the same vector and timestamp");
+            }
+            parents.add(other);
+        }
+        combined.setParents(parents);
+
+        return combined;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof TimedGeoMeasurement)) return false;
+        if (!super.equals(o)) return false;
+
+        TimedGeoMeasurement that = (TimedGeoMeasurement) o;
+
+        return timestamp != null ? timestamp.equals(that.timestamp) : that.timestamp == null;
+
+    }
+
+    @Override
+    public int hashCode() {
+        int result = super.hashCode();
+        result = 31 * result + (timestamp != null ? timestamp.hashCode() : 0);
+        return result;
+    }
+
+    private LocalDateTime timestampFromObj(Object timeObj) {
+        if (timeObj != null) {
+            String timeStr = String.valueOf(timeObj);
+            if (StringUtils.isNotBlank(timeStr)) {
+                return LocalDateTime.parse(timeStr, DateTimeFormatter.ISO_DATE_TIME);
+            }
+        }
+
+        return null;
+    }
 }

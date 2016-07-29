@@ -2,10 +2,7 @@ package net.caspervg.aggr.worker.core.write;
 
 import net.caspervg.aggr.worker.core.bean.Dataset;
 import net.caspervg.aggr.worker.core.bean.Measurement;
-import net.caspervg.aggr.worker.core.bean.aggregation.AggregationResult;
-import net.caspervg.aggr.worker.core.bean.aggregation.GridAggregation;
-import net.caspervg.aggr.worker.core.bean.aggregation.KMeansAggregation;
-import net.caspervg.aggr.worker.core.bean.aggregation.TimeAggregation;
+import net.caspervg.aggr.worker.core.bean.aggregation.*;
 import net.caspervg.aggr.worker.core.util.AggrContext;
 
 /**
@@ -61,6 +58,12 @@ public class CompositeAggrWriter implements AggrResultWriter {
 
     @Override
     public void writeTimeAggregation(AggregationResult<TimeAggregation, Measurement> result, AggrContext context) {
+        dataWriter.writeMeasurements(result.getResults(), context);
+        metaWriter.writeAggregation(result.getAggregation(), context);
+    }
+
+    @Override
+    public void writeBasicAggregation(AggregationResult<BasicAggregation, Measurement> result, AggrContext context) {
         dataWriter.writeMeasurements(result.getResults(), context);
         metaWriter.writeAggregation(result.getAggregation(), context);
     }

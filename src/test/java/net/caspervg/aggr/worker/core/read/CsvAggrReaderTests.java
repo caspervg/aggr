@@ -41,7 +41,7 @@ public class CsvAggrReaderTests {
         Measurement meas = possibleMeasurement.get();
         Assert.assertEquals("measurement_4", meas.getUuid());
         Assert.assertArrayEquals(new Double[]{50.4,4.4}, meas.getVector());
-        Assert.assertEquals(LocalDateTime.parse("2015-09-10T08:47:39"), meas.getTimestamp());
+        Assert.assertEquals(Optional.of(LocalDateTime.parse("2015-09-10T08:47:39")), meas.getTimestamp());
     }
 
     @Test
