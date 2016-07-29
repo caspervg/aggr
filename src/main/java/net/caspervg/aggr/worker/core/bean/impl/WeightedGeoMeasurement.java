@@ -113,7 +113,7 @@ public class WeightedGeoMeasurement extends GeoMeasurement {
             if (!(otherWeightObj.isPresent())) {
                 throw new IllegalArgumentException("Other measurement must be weighted");
             } else {
-                weightSum += Long.parseLong(String.valueOf(otherWeightObj));
+                weightSum += Long.parseLong(String.valueOf(otherWeightObj.get()));
                 parents.add(other);
             }
         }

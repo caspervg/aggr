@@ -24,6 +24,10 @@ defmodule Dispatcher do
   match "/init-daemon/*path" do
     Proxy.forward conn, path, "http://initDaemon/"
   end
+
+  match "/request/*path" do
+    Proxy.forward conn, path, "http://aggr_web/aggregations/"
+  end
 	
   match _ do
     send_resp( conn, 404, "Route not found" )

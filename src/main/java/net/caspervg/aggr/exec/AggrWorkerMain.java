@@ -26,7 +26,7 @@ public class AggrWorkerMain {
         KMeansAggrCommand kac = new KMeansAggrCommand();
         jc.addCommand("kmeans", kac);
         BasicCommand bac = new BasicCommand();
-        jc.addCommand("combine", bac);
+        jc.addCommand("combination", bac);
 
         jc.parse(args);
 
