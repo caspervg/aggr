@@ -19,15 +19,15 @@ public abstract class AbstractAggregation implements Serializable {
     private Collection<Measurement> sources;
     private Collection<? extends UniquelyIdentifiable> components;
 
-    public AbstractAggregation(Dataset dataset, Collection<Measurement> sources) {
-        this(UUID.randomUUID().toString(), dataset, sources);
+    public AbstractAggregation(Dataset dataset, Collection<Measurement> sources, Collection<Measurement> results) {
+        this(UUID.randomUUID().toString(), dataset, sources, results);
     }
 
-    public AbstractAggregation(String uuid, Dataset dataset, Collection<Measurement> sources) {
+    public AbstractAggregation(String uuid, Dataset dataset, Collection<Measurement> sources, Collection<Measurement> results) {
         this.uuid = uuid;
         this.dataset = dataset;
         this.sources = sources;
-        this.components = new ArrayList<>();
+        this.components = new ArrayList<>(results);
     }
 
     /**

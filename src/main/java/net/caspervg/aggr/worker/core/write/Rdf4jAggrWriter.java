@@ -5,10 +5,7 @@ import com.google.common.collect.Lists;
 import net.caspervg.aggr.worker.core.bean.Dataset;
 import net.caspervg.aggr.worker.core.bean.Measurement;
 import net.caspervg.aggr.worker.core.bean.UniquelyIdentifiable;
-import net.caspervg.aggr.worker.core.bean.aggregation.AbstractAggregation;
-import net.caspervg.aggr.worker.core.bean.aggregation.GridAggregation;
-import net.caspervg.aggr.worker.core.bean.aggregation.KMeansAggregation;
-import net.caspervg.aggr.worker.core.bean.aggregation.TimeAggregation;
+import net.caspervg.aggr.worker.core.bean.aggregation.*;
 import net.caspervg.aggr.worker.core.util.AggrContext;
 import net.caspervg.aggr.worker.core.util.untyped.UntypedLiteral;
 import org.eclipse.rdf4j.model.*;
@@ -47,6 +44,7 @@ public class Rdf4jAggrWriter extends AbstractSparqlAggrWriter {
     private IRI ownGridAggr;
     private IRI ownKMeansAggr;
     private IRI ownTimeAggr;
+    private IRI ownBasicAggr;
     private IRI muUUID;
 
     public Rdf4jAggrWriter(Repository repository, boolean writeProvenance) {
@@ -63,6 +61,7 @@ public class Rdf4jAggrWriter extends AbstractSparqlAggrWriter {
         this.ownGridAggr = valueFactory.createIRI(OWN_CLASS, "GridAggregation");
         this.ownKMeansAggr = valueFactory.createIRI(OWN_CLASS, "KMeansAggregation");
         this.ownTimeAggr = valueFactory.createIRI(OWN_CLASS, "TimeAggregation");
+        this.ownBasicAggr = valueFactory.createIRI(OWN_CLASS, "BasicAggregation");
         this.muUUID = valueFactory.createIRI(MU_PREFIX, "uuid");
     }
 
@@ -205,6 +204,25 @@ public class Rdf4jAggrWriter extends AbstractSparqlAggrWriter {
         add(statements);
     }
 
+    @Override
+    public void writeAggregation(BasicAggregation aggregation, AggrContext context) {
+        Set<Statement> statements = new HashSet<>();
+
+        Resource aggRes = aggregationWithId(aggregation.getUuid());
+        statements.addAll(aggregationStatements(aggregation, aggRes));
+
+        // Type of the aggregation
+        statements.add(
+                valueFactory.createStatement(
+                        aggRes,
+                        RDF.TYPE,
+                        this.ownBasicAggr
+                )
+        );
+
+        add(statements);
+    }
+
     protected Collection<Statement> measurementStatements(Measurement measurement, Resource measRes) {
         Set<Statement> statements = new HashSet<>();
 
@@ -216,13 +234,13 @@ public class Rdf4jAggrWriter extends AbstractSparqlAggrWriter {
         Set<UniquelyIdentifiable> parents = measurement.getParents();
 
         // Types of the measurement
-        statements.add(
+/*        statements.add(
                 valueFactory.createStatement(
                         measRes,
                         RDF.TYPE,
                         this.geoPoint
                 )
-        );
+        );*/
 
         statements.add(
                 valueFactory.createStatement(
@@ -248,6 +266,8 @@ public class Rdf4jAggrWriter extends AbstractSparqlAggrWriter {
 
             if (measValue instanceof Integer) {
                 value = valueFactory.createLiteral(BigInteger.valueOf((Integer) measValue));
+            } else if (measValue instanceof Long) {
+                value = valueFactory.createLiteral(BigInteger.valueOf((Long) measValue));
             } else if (measValue instanceof Double) {
                 value = valueFactory.createLiteral((Double) measValue);
             } else if (measValue instanceof Instant) {
@@ -258,7 +278,7 @@ public class Rdf4jAggrWriter extends AbstractSparqlAggrWriter {
             }
 
             if (type == null) {
-                type =  valueFactory.createIRI(OWN_PREFIX, key);
+                type =  valueFactory.createIRI(OWN_PROPERTY, key);
             }
 
             statements.add(
@@ -330,7 +350,7 @@ public class Rdf4jAggrWriter extends AbstractSparqlAggrWriter {
             for (UniquelyIdentifiable uniquelyIdentifiable : aggregation.getComponents()) {
                 statements.add(
                         valueFactory.createStatement(
-                                centroidWithId(uniquelyIdentifiable.getUuid()),
+                                measurementWithId(uniquelyIdentifiable.getUuid()),
                                 DCTERMS.IS_PART_OF,
                                 aggRes
                         )

@@ -7,6 +7,7 @@ import net.caspervg.aggr.core.TimeAggrCommand;
 import net.caspervg.aggr.master.JenaAggrRequestReader;
 import net.caspervg.aggr.master.bean.AggregationRequest;
 import net.caspervg.aggr.master.bean.Rdf4jAggrRequestUpdater;
+import net.caspervg.aggr.worker.basic.BasicAggregationExecution;
 import net.caspervg.aggr.worker.core.util.untyped.UntypedSPARQLRepository;
 import net.caspervg.aggr.worker.grid.GridAggregationExecution;
 import net.caspervg.aggr.worker.kmeans.KMeansAggregationExecution;
@@ -74,7 +75,15 @@ public class AggrMasterMain {
                         }).start();
                         break;
                     default:
-                        throw new IllegalStateException("Found a unknown aggregation type");
+                        new Thread(() -> {
+                            try {
+                                new BasicAggregationExecution(mainCommand, request.getAggregationType().toLowerCase()).execute();
+                                updater.updateStatus(request.getId(), "success");
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                                updater.updateStatus(request.getId(), "failure");
+                            }
+                        }).start();
                 }
             }
             System.out.println("Finished processing new requests");

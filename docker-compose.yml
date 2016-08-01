@@ -124,6 +124,10 @@ services:
     image: semtech/mu-dispatcher:1.0.1
     volumes:
       - ./config:/config
+    links:
+      - resource:resource
+    ports:
+      - 8881:80
   aggr_web:
     image: caspervg/aggr_web
     volumes:
@@ -141,6 +145,12 @@ services:
       - ./data/db:/data
     ports:
       - 8890:8890
+  resource:
+      image: semtech/mu-cl-resources:latest
+      links:
+        - database:database
+      volumes:
+        - ./config/resources:/config
   pipeline:
     image: bde2020/mu-pipeline-service:0.1.0
   initdaemon:

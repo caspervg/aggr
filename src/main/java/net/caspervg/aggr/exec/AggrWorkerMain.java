@@ -1,14 +1,13 @@
 package net.caspervg.aggr.exec;
 
 import com.beust.jcommander.JCommander;
+import com.google.common.collect.ImmutableMap;
+import net.caspervg.aggr.core.*;
+import net.caspervg.aggr.worker.basic.BasicAggregationExecution;
 import net.caspervg.aggr.worker.core.AggregationExecution;
-import net.caspervg.aggr.core.AggrCommand;
 import net.caspervg.aggr.worker.grid.GridAggregationExecution;
-import net.caspervg.aggr.core.GridAggrCommand;
 import net.caspervg.aggr.worker.kmeans.KMeansAggregationExecution;
-import net.caspervg.aggr.core.KMeansAggrCommand;
 import net.caspervg.aggr.worker.time.TimeAggregationExecution;
-import net.caspervg.aggr.core.TimeAggrCommand;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -26,6 +25,8 @@ public class AggrWorkerMain {
         jc.addCommand("time", tac);
         KMeansAggrCommand kac = new KMeansAggrCommand();
         jc.addCommand("kmeans", kac);
+        BasicCommand bac = new BasicCommand();
+        jc.addCommand("combination", bac);
 
         jc.parse(args);
 
@@ -34,11 +35,15 @@ public class AggrWorkerMain {
             return;
         }
 
-        Map<String, AggregationExecution> executionMap = new HashMap<>();
-        executionMap.put("grid", new GridAggregationExecution(ac, gac));
-        executionMap.put("time", new TimeAggregationExecution(ac, tac));
-        executionMap.put("kmeans", new KMeansAggregationExecution(ac, kac));
+        Map<String, AggregationExecution> executionMap = ImmutableMap.of(
+                "grid",   new GridAggregationExecution(ac, gac),
+                "time",   new TimeAggregationExecution(ac, tac),
+                "kmeans", new KMeansAggregationExecution(ac, kac)
+        );
 
-        executionMap.getOrDefault(jc.getParsedCommand(), jc::usage).execute();
+        executionMap.getOrDefault(
+                jc.getParsedCommand(),
+                new BasicAggregationExecution(ac, jc.getParsedCommand())
+        ).execute();
     }
 }

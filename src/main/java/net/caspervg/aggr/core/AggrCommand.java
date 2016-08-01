@@ -139,6 +139,7 @@ public class AggrCommand {
         command.writeProvenance = req.isWriteProvenance();
         command.datasetId = req.getId();
         command.inputClassName = req.getInputClassName();
+        command.outputClassName = req.getOutputClassName();
         command.dynamicParameters = new HashMap<>(req.getParameters().getDynamic());
 
         command.HDFS_URL = req.getEnvironment().getHdfs();
