@@ -14,15 +14,15 @@ public class MagnitudeSeeding implements SeedingStrategy {
      *
      * Calculates the initial seeds using method proposed by Fouad Khan in 2012, as part of
      * the article "An initial seed selection algorithm for k-means clustering of georeferenced data
-     * to improve replicability of cluster assignments for mapping applications"
+     * to improve repeatability of cluster assignments for mapping applications"
      *
      * @see <a href='http://www.sciencedirect.com/science/article/pii/S1568494612003377'>doi:10.1016/j.asoc.2012.07.021</a>
      * @param measurements {@inheritDoc}
-     * @param numClusters {@inheritDoc}
+     * @param n {@inheritDoc}
      * @return {@inheritDoc}
      */
     @Override
-    public Set<Measurement> seeds(Collection<Measurement> measurements, int numClusters) {
+    public Set<Measurement> seeds(Collection<Measurement> measurements, int n) {
         List<Measurement> measurementList = new ArrayList<>(measurements);
 
         /*
@@ -59,14 +59,14 @@ public class MagnitudeSeeding implements SeedingStrategy {
         /*
          * Sort i_1, …, i_{k−1} in ascending order.
          */
-        int[] highestDistanceIndices = Arrays.copyOfRange(indices, 1, numClusters - 1);
+        int[] highestDistanceIndices = Arrays.copyOfRange(indices, 1, n - 1);
         Arrays.sort(highestDistanceIndices);                                        // Ascending order
 
         /*
          * The set (i_1, …, i_{k−1}, i_{k}) now forms the set of indices
          * of data values d_i, which serve as the upper bounds of clusters 1, …, k; where i_k = n.
          */
-        int[] upperBounds = ArrayUtils.add(highestDistanceIndices, indices[numClusters]);
+        int[] upperBounds = ArrayUtils.add(highestDistanceIndices, indices[n]);
 
         /*
          * The corresponding set of indices of data values d_i which serve as the lower bounds of clusters 1, …, k

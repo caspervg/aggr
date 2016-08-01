@@ -16,7 +16,7 @@ public class SinglePassSeeding implements SeedingStrategy {
      * {@inheritDoc}
      *
      * Calculates the initial seeds using method proposed by Pavan et al. in 2010, as part of
-     * the article "Single Pass Seed Selection Algorithm for k-Means"
+     * the article "Single Pass Seed Selection Algorithm for k-Means".
      *
      * @see <a href='http://thescipub.com/PDF/jcssp.2010.60.66.pdf'>jcssp.2010.60.66</a>
      * @param measurements {@inheritDoc}

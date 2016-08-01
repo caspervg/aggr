@@ -68,7 +68,7 @@ public class SparkTimeAggregator extends AbstractTimeAggregator implements Seria
                         .collect(Collectors.toList());
 
                 aggregationResults.add(new AggregationResult<>(
-                        new TimeAggregation(dataset, start, end, childMeasurements),
+                        new TimeAggregation(dataset, start, end, filteredMeas.collect(), childMeasurements),
                         childMeasurements
                 ));
             }

@@ -6,7 +6,9 @@ import net.caspervg.aggr.worker.core.bean.aggregation.AggregationResult;
 import net.caspervg.aggr.worker.core.bean.aggregation.GridAggregation;
 import net.caspervg.aggr.worker.core.util.AggrContext;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 public class PlainGridAggregator extends AbstractGridAggregator {
@@ -20,6 +22,7 @@ public class PlainGridAggregator extends AbstractGridAggregator {
                 context.getParameters().getOrDefault(GRID_SIZE_PARAM, DEFAULT_GRID_SIZE)
         );
 
+        List<Measurement> measurementList = Lists.newArrayList(measurements);
         Set<Measurement> roundedMeasurements = new HashSet<>();
 
         for (Measurement parent : measurements) {
@@ -45,6 +48,7 @@ public class PlainGridAggregator extends AbstractGridAggregator {
                 new AggregationResult<>(
                         new GridAggregation(dataset,
                                 gridSize,
+                                measurementList,
                                 roundedMeasurements
                         ),
                         roundedMeasurements

@@ -49,7 +49,7 @@ public class SparkKMeansAggregator extends AbstractKMeansAggregator {
         JavaRDD<Measurement> centroids = context.getSparkContext().parallelize(centroidSeeds);
 
         int iterations = 0;
-        while(iterations++ < maxIterations) {
+        while (iterations++ < maxIterations) {
             // Find the closest centroid for each measurement
             JavaPairRDD<Measurement, Measurement> closest = measRDD.mapToPair(
                     new SparkClosestCentroidStep(centroids.collect(), distanceMetric)
@@ -120,7 +120,8 @@ public class SparkKMeansAggregator extends AbstractKMeansAggregator {
                 dataset,
                 numCentroids,
                 maxIterations,
-                Lists.newArrayList(measurements)
+                Lists.newArrayList(measurements),
+                finalCentroids
         );
         aggr.setComponents(finalCentroids);
 

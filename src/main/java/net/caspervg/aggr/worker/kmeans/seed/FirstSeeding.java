@@ -9,7 +9,7 @@ import java.util.Set;
 
 public class FirstSeeding implements SeedingStrategy {
     @Override
-    public Set<Measurement> seeds(Collection<Measurement> measurements, int numClusters) {
-        return new HashSet<>(new ArrayList<>(measurements).subList(0, numClusters - 1));
+    public Set<Measurement> seeds(Collection<Measurement> measurements, int n) {
+        return new HashSet<>(new ArrayList<>(measurements).subList(0, n - 1));
     }
 }

@@ -46,13 +46,18 @@ public class PlainTimeAggregator extends AbstractTimeAggregator {
                 LocalDateTime end = minTimestamp.plus(timeStep * (i + 1), ChronoUnit.MILLIS);
 
                 // Filter only the measurements that fall within the desired time bounds
-                List<Measurement> childMeasurements =
+                List<Measurement> filteredMeasurements =
                         measurementList
+                        .stream()
+                        .filter(measurement -> {
+                            LocalDateTime timestamp = measurement.getTimestamp().get();
+                            return (timestamp.isEqual(start) || (timestamp.isAfter(start) && timestamp.isBefore(end)));
+                        })
+                        .collect(Collectors.toList());
+
+                List<Measurement> childMeasurements =
+                        filteredMeasurements
                                 .stream()
-                                .filter(measurement -> {
-                                    LocalDateTime timestamp = measurement.getTimestamp().get();
-                                    return (timestamp.isEqual(start) || (timestamp.isAfter(start) && timestamp.isBefore(end)));
-                                })
                                 .map(parent -> {
                                             Measurement child = context.newOutputMeasurement();
                                             child.setVector(parent.getVector());
@@ -66,7 +71,7 @@ public class PlainTimeAggregator extends AbstractTimeAggregator {
 
                 // Add this aggregation to the result
                 aggregationResults.add(new AggregationResult<>(
-                        new TimeAggregation(dataset, start, end, childMeasurements),
+                        new TimeAggregation(dataset, start, end, filteredMeasurements, childMeasurements),
                         childMeasurements
                 ));
             }

@@ -29,7 +29,9 @@ public class SparkGridAggregator extends AbstractGridAggregator implements Seria
                 context.getParameters().getOrDefault(GRID_SIZE_PARAM, DEFAULT_GRID_SIZE)
         );
 
-        JavaRDD<Measurement> measRDD = context.getSparkContext().parallelize(Lists.newArrayList(measurements));
+        List<Measurement> measurementList  = Lists.newArrayList(measurements);
+
+        JavaRDD<Measurement> measRDD = context.getSparkContext().parallelize(measurementList);
 
         // Map each measurement so that it sits on top of the grid (rounding)
         JavaRDD<Measurement> roundedMeasRDD = measRDD.map((Function<Measurement, Measurement>) parent -> {
@@ -58,6 +60,7 @@ public class SparkGridAggregator extends AbstractGridAggregator implements Seria
                 new AggregationResult<>(
                         new GridAggregation(dataset,
                                 gridSize,
+                                measurementList,
                                 Lists.newArrayList(childMeasurements)
                         ),
                         childMeasurements
