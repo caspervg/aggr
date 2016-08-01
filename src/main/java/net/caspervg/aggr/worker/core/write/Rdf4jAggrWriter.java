@@ -234,13 +234,13 @@ public class Rdf4jAggrWriter extends AbstractSparqlAggrWriter {
         Set<UniquelyIdentifiable> parents = measurement.getParents();
 
         // Types of the measurement
-        statements.add(
+/*        statements.add(
                 valueFactory.createStatement(
                         measRes,
                         RDF.TYPE,
                         this.geoPoint
                 )
-        );
+        );*/
 
         statements.add(
                 valueFactory.createStatement(
@@ -266,6 +266,8 @@ public class Rdf4jAggrWriter extends AbstractSparqlAggrWriter {
 
             if (measValue instanceof Integer) {
                 value = valueFactory.createLiteral(BigInteger.valueOf((Integer) measValue));
+            } else if (measValue instanceof Long) {
+                value = valueFactory.createLiteral(BigInteger.valueOf((Long) measValue));
             } else if (measValue instanceof Double) {
                 value = valueFactory.createLiteral((Double) measValue);
             } else if (measValue instanceof Instant) {
@@ -276,7 +278,7 @@ public class Rdf4jAggrWriter extends AbstractSparqlAggrWriter {
             }
 
             if (type == null) {
-                type =  valueFactory.createIRI(OWN_PREFIX, key);
+                type =  valueFactory.createIRI(OWN_PROPERTY, key);
             }
 
             statements.add(
@@ -348,7 +350,7 @@ public class Rdf4jAggrWriter extends AbstractSparqlAggrWriter {
             for (UniquelyIdentifiable uniquelyIdentifiable : aggregation.getComponents()) {
                 statements.add(
                         valueFactory.createStatement(
-                                centroidWithId(uniquelyIdentifiable.getUuid()),
+                                measurementWithId(uniquelyIdentifiable.getUuid()),
                                 DCTERMS.IS_PART_OF,
                                 aggRes
                         )

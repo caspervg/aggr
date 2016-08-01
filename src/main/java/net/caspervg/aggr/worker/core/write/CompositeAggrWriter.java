@@ -1,5 +1,6 @@
 package net.caspervg.aggr.worker.core.write;
 
+import com.beust.jcommander.internal.Lists;
 import net.caspervg.aggr.worker.core.bean.Dataset;
 import net.caspervg.aggr.worker.core.bean.Measurement;
 import net.caspervg.aggr.worker.core.bean.aggregation.*;

@@ -25,8 +25,8 @@ public class TimeAggregation extends AbstractAggregation implements Serializable
      * @param end End time
      * @param source Source data
      */
-    public TimeAggregation(String uuid, Dataset dataset, LocalDateTime start, LocalDateTime end, Collection<Measurement> source) {
-        super(uuid, dataset, source);
+    public TimeAggregation(String uuid, Dataset dataset, LocalDateTime start, LocalDateTime end, Collection<Measurement> source, Collection<Measurement> results) {
+        super(uuid, dataset, source, results);
         this.start = start;
         this.end = end;
     }
@@ -39,8 +39,8 @@ public class TimeAggregation extends AbstractAggregation implements Serializable
      * @param end End time
      * @param source Source data
      */
-    public TimeAggregation(Dataset dataset, LocalDateTime start, LocalDateTime end, Collection<Measurement> source) {
-        this(UUID.randomUUID().toString(), dataset, start, end, source);
+    public TimeAggregation(Dataset dataset, LocalDateTime start, LocalDateTime end, Collection<Measurement> source, Collection<Measurement> results) {
+        this(UUID.randomUUID().toString(), dataset, start, end, source, results);
     }
 
     /**

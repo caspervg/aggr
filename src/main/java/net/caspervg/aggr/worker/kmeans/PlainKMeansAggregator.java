@@ -78,7 +78,8 @@ public class PlainKMeansAggregator extends AbstractKMeansAggregator {
                 dataset,
                 numCentroids,
                 maxIterations,
-                Lists.newArrayList(measurements)
+                Lists.newArrayList(measurements),
+                centroids
         );
         aggr.setComponents(centroids);
 

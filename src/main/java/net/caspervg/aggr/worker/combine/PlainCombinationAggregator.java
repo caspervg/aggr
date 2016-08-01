@@ -45,7 +45,8 @@ public class PlainCombinationAggregator implements BasicAggregator {
                 new AggregationResult<>(
                         new BasicAggregation(
                                 dataset,
-                                Lists.newArrayList(measurements)
+                                Lists.newArrayList(measurements),
+                                result
                         ),
                         result
                 )

@@ -76,7 +76,8 @@ public class SparkKMeansClusterAggregator extends AbstractKMeansAggregator imple
                 dataset,
                 numClusters,
                 maxIterations,
-                measurementList
+                measurementList,
+                centroidList
         );
         aggr.setComponents(centroidList);
 

@@ -28,7 +28,23 @@ defmodule Dispatcher do
   match "/request/*path" do
     Proxy.forward conn, path, "http://aggr_web/aggregations/"
   end
-	
+
+  match "/centroids/*path" do
+    Proxy.forward conn, path, "http://resource/centroids/"
+  end
+
+  match "/datasets/*path" do
+    Proxy.forward conn, path, "http://resource/datasets/"
+  end
+
+  match "/aggregations/*path" do
+    Proxy.forward conn, path, "http://resource/aggregations/"
+  end
+
+  match "/measurements/*path" do
+    Proxy.forward conn, path, "http://resource/measurements/"
+  end
+
   match _ do
     send_resp( conn, 404, "Route not found" )
   end
