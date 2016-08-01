@@ -16,6 +16,7 @@ import java.util.Optional;
  */
 public class UntypedLiteral implements Literal, Serializable {
 
+    private static IRI datatype = null;
     private String value;
 
     public UntypedLiteral(String value) {
@@ -40,6 +41,10 @@ public class UntypedLiteral implements Literal, Serializable {
     @Override
     public IRI getDatatype() {
         return null;
+    }
+
+    public static void setDatatype(IRI datatype) {
+        UntypedLiteral.datatype = datatype;
     }
 
     @Override

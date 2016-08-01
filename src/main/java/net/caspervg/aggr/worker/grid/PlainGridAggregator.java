@@ -6,7 +6,9 @@ import net.caspervg.aggr.worker.core.bean.aggregation.AggregationResult;
 import net.caspervg.aggr.worker.core.bean.aggregation.GridAggregation;
 import net.caspervg.aggr.worker.core.util.AggrContext;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 public class PlainGridAggregator extends AbstractGridAggregator {
@@ -14,46 +16,39 @@ public class PlainGridAggregator extends AbstractGridAggregator {
 
     @Override
     public Iterable<AggregationResult<GridAggregation, Measurement>> aggregate(Dataset dataset,
-                                                                               Iterable<Measurement> measurements,
-                                                                               AggrContext context) {
+                                                                                       Iterable<Measurement> measurements,
+                                                                                       AggrContext context) {
         double gridSize = Double.parseDouble(
                 context.getParameters().getOrDefault(GRID_SIZE_PARAM, DEFAULT_GRID_SIZE)
         );
 
+        List<Measurement> measurementList = Lists.newArrayList(measurements);
         Set<Measurement> roundedMeasurements = new HashSet<>();
 
         for (Measurement parent : measurements) {
-            double latitude = parent.getPoint().getVector()[0];
-            double longitude = parent.getPoint().getVector()[1];
+            Double[] parentVec = parent.getVector();
+            Double[] roundedVec = new Double[parentVec.length];
 
-            double roundedLatitude = (double) Math.round(latitude / gridSize) * gridSize;
-            double roundedLongitude = (double) Math.round(longitude / gridSize) * gridSize;
-
-            Point roundedPoint = new Point(new Double[]{roundedLatitude, roundedLongitude});
-            if (parent instanceof TimedMeasurement) {
-                roundedMeasurements.add(
-                        TimedMeasurement.Builder
-                            .setup()
-                            .withPoint(roundedPoint)
-                            .withParent(parent)
-                            .withTimestamp(((TimedMeasurement) parent).getTimestamp())
-                            .build()
-                );
-            } else {
-                roundedMeasurements.add(
-                        Measurement.Builder
-                            .setup()
-                            .withPoint(roundedPoint)
-                            .withParent(parent)
-                            .build()
-                );
+            for (int i = 0; i < parentVec.length; i++) {
+                roundedVec[i] = (double) Math.round(parentVec[i] / gridSize) * gridSize;
             }
+
+            Measurement child = context.newOutputMeasurement();
+            Set<UniquelyIdentifiable> parents = new HashSet<>();
+            parents.add(parent);
+
+            child.setParents(parents);
+            child.setData(parent.getData());
+            child.setVector(roundedVec);
+
+            roundedMeasurements.add(child);
         }
 
         return Lists.newArrayList(
                 new AggregationResult<>(
                         new GridAggregation(dataset,
                                 gridSize,
+                                measurementList,
                                 roundedMeasurements
                         ),
                         roundedMeasurements

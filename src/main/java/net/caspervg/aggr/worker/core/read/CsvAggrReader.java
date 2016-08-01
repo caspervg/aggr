@@ -1,23 +1,19 @@
 package net.caspervg.aggr.worker.core.read;
 
 import net.caspervg.aggr.worker.core.bean.Measurement;
-import net.caspervg.aggr.worker.core.bean.Point;
-import net.caspervg.aggr.worker.core.bean.TimedMeasurement;
+import net.caspervg.aggr.worker.core.bean.UniquelyIdentifiable;
+import net.caspervg.aggr.worker.core.bean.impl.BasicParent;
 import net.caspervg.aggr.worker.core.util.AggrContext;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVRecord;
 
 import java.io.IOException;
 import java.io.Reader;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 /**
  * Implementation of the {@link AggrReader} interface that
  * reads from a CSV-formatted file.
- *
- * @implNote Expects timestamps to be in {@value DateTimeFormatter#ISO_DATE_TIME} format
  */
 public class CsvAggrReader extends AbstractAggrReader {
 
@@ -71,47 +67,31 @@ public class CsvAggrReader extends AbstractAggrReader {
 
     private Measurement measurementFromRecord(AggrContext context, CSVRecord record) {
         Map<String, String> params = context.getParameters();
+        Measurement measurement = context.newInputMeasurement();
 
         String idKey = idKey(params);
-        String latKey = latitudeKey(params);
-        String lonKey = longitudeKey(params);
         String srcKey = sourceKey(params);
-        String timeKey = timestampKey(params);
 
-        String id = null;
         if (record.isSet(idKey)) {
-            id = record.get(idKey);
-        }
-        String latStr = record.get(latKey);
-        String lonStr = record.get(lonKey);
-        String timeStr = record.get(timeKey);
-
-        if (latStr == null || lonStr == null || timeStr == null) {
-            throw new IllegalStateException("Latitude, longitude and time columns may not be empty: " + record.toString());
+            String measId = record.get(idKey);
+            measurement.setUuid(measId);
         }
 
-        double lat = Double.parseDouble(latStr);
-        double lon = Double.parseDouble(lonStr);
-        LocalDateTime time = LocalDateTime.parse(timeStr, DateTimeFormatter.ISO_DATE_TIME);
-        String parent = null;
         if (record.isSet(srcKey)) {
-            parent = record.get(srcKey);
+            Set<UniquelyIdentifiable> parents = new HashSet<>();
+            String parentId = record.get(srcKey);
+
+            parents.add(new BasicParent(parentId));
+            measurement.setParents(parents);
         }
 
-        Point point = new Point(new Double[]{lat, lon});
-        TimedMeasurement.Builder builder = TimedMeasurement.Builder
-                .setup()
-                .withPoint(point)
-                .withTimestamp(time);
-
-        if (parent != null) {
-            builder = builder.withParent(parent);
+        Map<String, Object> data = new HashMap<>();
+        for (String key : measurement.getReadKeys()) {
+            data.put(key, record.get(key));
         }
-        if (id != null) {
-            builder = builder.withUuid(id);
-        }
+        measurement.setData(data);
 
-        return builder.build();
+        return measurement;
     }
 
     private Iterable<CSVRecord> parseRecords(Reader in) throws IOException {

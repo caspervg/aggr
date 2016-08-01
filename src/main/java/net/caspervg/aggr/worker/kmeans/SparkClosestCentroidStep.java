@@ -1,6 +1,5 @@
 package net.caspervg.aggr.worker.kmeans;
 
-import net.caspervg.aggr.worker.core.bean.Centroid;
 import net.caspervg.aggr.worker.core.bean.Measurement;
 import net.caspervg.aggr.worker.core.distance.DistanceMetric;
 import org.apache.spark.api.java.function.PairFunction;
@@ -9,26 +8,26 @@ import scala.Tuple2;
 import java.util.List;
 
 
-public class SparkClosestCentroidStep implements PairFunction<Measurement,Centroid,Measurement> {
+public class SparkClosestCentroidStep implements PairFunction<Measurement, Measurement, Measurement> {
 
-    private final List<Centroid> centroids;
+    private final List<Measurement> centroids;
     private final DistanceMetric<Double> distanceMetric;
 
-    public SparkClosestCentroidStep(List<Centroid> centroids, DistanceMetric<Double> distanceMetric) {
+    public SparkClosestCentroidStep(List<Measurement> centroids, DistanceMetric<Double> distanceMetric) {
         this.centroids = centroids;
         this.distanceMetric = distanceMetric;
     }
 
     @Override
-    public Tuple2<Centroid, Measurement> call(Measurement measurement) throws Exception {
+    public Tuple2<Measurement, Measurement> call(Measurement measurement) throws Exception {
         DistanceMetric<Double> distanceMetric = this.distanceMetric;
-        Double[] measurementVector = measurement.getPoint().getVector();
+        Double[] measurementVector = measurement.getVector();
 
-        Centroid nearestCentroid = this.centroids.get(0);
+        Measurement nearestCentroid = this.centroids.get(0);
         double minimumDistance = Double.MAX_VALUE;
 
-        for (Centroid centroid : this.centroids) {
-            Double [] centroidVector = centroid.getPoint().getVector();
+        for (Measurement centroid : this.centroids) {
+            Double [] centroidVector = centroid.getVector();
 
             double dist = distanceMetric.distance(centroidVector, measurementVector);
             if (dist < minimumDistance) {

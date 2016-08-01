@@ -6,7 +6,7 @@
 
     <groupId>net.caspervg</groupId>
     <artifactId>aggr</artifactId>
-    <version>0.3.0</version>
+    <version>0.3.1</version>
 
     <properties>
         <!-- need 1.6.2 for compatibility with the Spark-Master and Spark-Worker dockers -->
@@ -41,6 +41,12 @@
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-csv</artifactId>
             <version>1.2</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-math3</artifactId>
+            <version>3.4.1</version>
         </dependency>
 
         <dependency>

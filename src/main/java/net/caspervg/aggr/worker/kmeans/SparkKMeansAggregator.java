@@ -2,12 +2,12 @@ package net.caspervg.aggr.worker.kmeans;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
-import net.caspervg.aggr.worker.core.bean.Centroid;
 import net.caspervg.aggr.worker.core.bean.Dataset;
 import net.caspervg.aggr.worker.core.bean.Measurement;
-import net.caspervg.aggr.worker.core.bean.Point;
+import net.caspervg.aggr.worker.core.bean.UniquelyIdentifiable;
 import net.caspervg.aggr.worker.core.bean.aggregation.AggregationResult;
 import net.caspervg.aggr.worker.core.bean.aggregation.KMeansAggregation;
+import net.caspervg.aggr.worker.core.bean.impl.WeightedGeoMeasurement;
 import net.caspervg.aggr.worker.core.distance.DistanceMetric;
 import net.caspervg.aggr.worker.core.distance.DistanceMetricChoice;
 import net.caspervg.aggr.worker.core.util.AggrContext;
@@ -22,10 +22,12 @@ import java.util.*;
 public class SparkKMeansAggregator extends AbstractKMeansAggregator {
 
     @Override
-    public Iterable<AggregationResult<KMeansAggregation, Centroid>> aggregate(Dataset dataset,
+    public Iterable<AggregationResult<KMeansAggregation, Measurement>> aggregate(Dataset dataset,
                                                                               Iterable<Measurement> measurements,
                                                                               AggrContext context) {
         Objects.requireNonNull(context.getSparkContext());
+
+        Class<? extends Measurement> clazz = context.getOutputClass();
 
         DistanceMetric<Double> distanceMetric = DistanceMetricChoice.valueOf(
                 context.getParameters().getOrDefault(METRIC_PARAM, DEFAULT_DISTANCE_METRIC)
@@ -43,81 +45,73 @@ public class SparkKMeansAggregator extends AbstractKMeansAggregator {
         // Choose a number of measurements to act as first generation centroids
         List<Measurement> centroidSeeds = measRDD.takeSample(false, numCentroids);
 
-        // Convert these measurements into Centroid objects
-        JavaRDD<Centroid> centroids = context.getSparkContext().parallelize(centroidSeeds).map(
-                (Function<Measurement, Centroid>) measurement -> {
-                    return Centroid.Builder
-                            .setup()
-                            .withPoint(
-                                    new Point(
-                                            new Double[]{
-                                                    measurement.getPoint().getVector()[0],
-                                                    measurement.getPoint().getVector()[1]
-                                            }
-                                    )
-                            )
-                            .build();
-                }
-        );
+        // Parallelize the measurements
+        JavaRDD<Measurement> centroids = context.getSparkContext().parallelize(centroidSeeds);
 
         int iterations = 0;
-        while(iterations++ < maxIterations) {
+        while (iterations++ < maxIterations) {
             // Find the closest centroid for each measurement
-            JavaPairRDD<Centroid, Measurement> closest = measRDD.mapToPair(new SparkClosestCentroidStep(centroids.collect(), distanceMetric));
+            JavaPairRDD<Measurement, Measurement> closest = measRDD.mapToPair(
+                    new SparkClosestCentroidStep(centroids.collect(), distanceMetric)
+            );
 
             centroids = closest
                     .mapValues((Function<Measurement, Tuple2<Measurement, Integer>>) measurement ->
                             // Convert each measurement to a tuple of itself and a count of one
                             // The count will be summed and is then used to calculate the total number of citizens
                             new Tuple2<>(measurement, 1)
-                    ).reduceByKey((Function2<Tuple2<Measurement, Integer>, Tuple2<Measurement, Integer>, Tuple2<Measurement, Integer>>) (pair1, pair2) -> {
-                        // Sum the locations of all citizens
-                        Point sum = new Point(new Double[]{
-                                pair1._1.getPoint().getVector()[0] + pair2._1.getPoint().getVector()[0],
-                                pair1._1.getPoint().getVector()[1] + pair2._1.getPoint().getVector()[1]
-                        });
+                    )
+                    .reduceByKey((Function2<Tuple2<Measurement, Integer>, Tuple2<Measurement, Integer>, Tuple2<Measurement, Integer>>) (pair1, pair2) -> {
+                        // Sum the vector of all citizens
+                        Double[] vec1 = pair1._1.getVector();
+                        Double[] vec2 = pair2._1.getVector();
 
-                        Measurement sumMeas = Measurement.Builder
-                                .setup()
-                                .withPoint(sum)
-                                .build();
+                        Double[] sum = new Double[vec1.length];
+                        for (int i = 0; i < sum.length; i++) {
+                            sum[i] = vec1[i] + vec2[i];
+                        }
+
+                        Measurement sumMeas = newInstance(clazz);
+                        sumMeas.setVector(sum);
 
                         return new Tuple2<>(sumMeas, pair1._2 + pair2._2);
-                    }).map((Function<Tuple2<Centroid, Tuple2<Measurement, Integer>>, Centroid>) centroidTuple2Tuple2 -> {
+                    }).map((Function<Tuple2<Measurement, Tuple2<Measurement, Integer>>, Measurement>) centroidTuple2Tuple2 -> {
                         // Calculate the new position of the centroid (average of the citizen measurements)
                         Tuple2<Measurement, Integer> pair = centroidTuple2Tuple2._2;
                         Measurement sum = pair._1;
                         Integer amount = pair._2;
 
-                        return Centroid.Builder
-                                .setup()
-                                .withPoint(
-                                        new Point(
-                                                new Double[]{
-                                                        sum.getPoint().getVector()[0] / amount,
-                                                        sum.getPoint().getVector()[1] / amount
-                                                }
-                                        )
-                                )
-                                .build();
+                        Measurement avgMeas = newInstance(clazz);
+
+                        Double[] vecSum = sum.getVector();
+                        Double[] vecAvg = new Double[vecSum.length];
+                        for (int i = 0; i < vecSum.length; i++) {
+                            vecAvg[i] = vecSum[i] / (double) amount;
+                        }
+
+                        avgMeas.setVector(vecAvg);
+
+                        return avgMeas;
                     });
         }
 
         // After the iterations, do a final step that will map the initial measurements to their closest centroids
-        JavaPairRDD<Centroid, Iterable<Measurement>> results = measRDD
+        JavaPairRDD<Measurement, Iterable<Measurement>> results = measRDD
                 .mapToPair(
                         new SparkClosestCentroidStep(centroids.collect(), distanceMetric)
                 ).groupByKey();
 
-        Map<Centroid, Iterable<Measurement>> resultMapping = results.collectAsMap();
-        List<Centroid> finalCentroids = new ArrayList<>();
-        for (Centroid centroid : resultMapping.keySet()) {
+        Map<Measurement, Iterable<Measurement>> resultMapping = results.collectAsMap();
+        List<Measurement> finalCentroids = new ArrayList<>();
+        for (Measurement centroid : resultMapping.keySet()) {
+            Measurement finalCentroid = context.newInputMeasurement();
+            finalCentroid.setVector(centroid.getVector());
+            Set<Measurement> parents = Sets.newHashSet(resultMapping.get(centroid));
+            finalCentroid.setParents(Sets.newHashSet(parents));
+            finalCentroid.setDatum(WeightedGeoMeasurement.WEIGHT_KEY, parents.size());
+
             finalCentroids.add(
-                    Centroid.Builder
-                            .setup()
-                            .withPoint(centroid.getPoint())
-                            .withParents(Sets.newHashSet(resultMapping.get(centroid)))
-                            .build()
+                finalCentroid
             );
         }
 
@@ -126,7 +120,8 @@ public class SparkKMeansAggregator extends AbstractKMeansAggregator {
                 dataset,
                 numCentroids,
                 maxIterations,
-                Lists.newArrayList(measurements)
+                Lists.newArrayList(measurements),
+                finalCentroids
         );
         aggr.setComponents(finalCentroids);
 

@@ -69,6 +69,8 @@ public class JenaAggrRequestReader {
             "         own:output ?output ;\n"+
             "         own:aggregation_type ?aggregation_type ;\n"+
             "         own:provenance ?provenance ;\n"+
+            "         own:input_class ?input_class ;\n"+
+            "         own:output_class ?output_class ;\n"+
             "         own:status ?status ;\n"+
             "         own:big_data ?big_data .\n"+
             "   \n"+
@@ -129,6 +131,8 @@ public class JenaAggrRequestReader {
                                     .aggregationType(rs.getString("aggregation_type"))
                                     .writeProvenance(parseBoolean(rs.getString("provenance")))
                                     .bigData(parseBoolean(rs.getString("big_data")))
+                                    .inputClassName(rs.getString("input_class"))
+                                    .outputClassName(rs.getString("output_class"))
                                     .parameters(params)
                                     .environment(env)
                                     .build()

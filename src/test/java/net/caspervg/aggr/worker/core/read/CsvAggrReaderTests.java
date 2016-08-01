@@ -2,8 +2,7 @@ package net.caspervg.aggr.worker.core.read;
 
 import com.google.common.collect.Iterables;
 import net.caspervg.aggr.worker.core.bean.Measurement;
-import net.caspervg.aggr.worker.core.bean.Point;
-import net.caspervg.aggr.worker.core.bean.TimedMeasurement;
+import net.caspervg.aggr.worker.core.bean.impl.TimedGeoMeasurement;
 import net.caspervg.aggr.worker.core.util.AggrContext;
 import org.junit.Assert;
 import org.junit.Before;
@@ -26,11 +25,10 @@ public class CsvAggrReaderTests {
         Map<String, String> params = new HashMap<>();
 
         params.put("id_key", "identifier");
-        params.put("timestamp_key", "timestamp_column");
         params.put("source_key", "parent_column");
         params.put("input_path", CsvAggrReaderTests.class.getResource("/measurements.csv").getPath());
 
-        ctx = new AggrContext(params);
+        ctx = AggrContext.builder().parameters(params).inputClass(TimedGeoMeasurement.class).build();
         reader = new CsvAggrReader(new BufferedReader(new InputStreamReader(CsvAggrReader.class.getResourceAsStream("/measurements.csv"))));
     }
 
@@ -40,16 +38,10 @@ public class CsvAggrReaderTests {
 
         Assert.assertTrue(possibleMeasurement.isPresent());
 
-        TimedMeasurement meas = (TimedMeasurement) possibleMeasurement.get();
+        Measurement meas = possibleMeasurement.get();
         Assert.assertEquals("measurement_4", meas.getUuid());
-        Assert.assertEquals(new Point(new Double[]{50.4,4.4}), meas.getPoint());
-        Assert.assertEquals(LocalDateTime.parse("2015-09-10T08:47:39"), meas.getTimestamp());
-
-/*        possibleMeasurement = (Optional<TimedMeasurement>) reader.read("measurement_2", ctx);
-
-        Assert.assertTrue(possibleMeasurement.isPresent());
-        meas = possibleMeasurement.get();
-        Assert.assertFalse(meas.getParent().isPresent());*/
+        Assert.assertArrayEquals(new Double[]{50.4,4.4}, meas.getVector());
+        Assert.assertEquals(Optional.of(LocalDateTime.parse("2015-09-10T08:47:39")), meas.getTimestamp());
     }
 
     @Test

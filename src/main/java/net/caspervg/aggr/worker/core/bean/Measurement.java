@@ -1,112 +1,94 @@
 package net.caspervg.aggr.worker.core.bean;
 
-import com.google.common.collect.Sets;
-import org.apache.commons.lang3.StringUtils;
-
 import java.io.Serializable;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.UUID;
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
-public class Measurement implements Serializable, UniquelyIdentifiable {
+public interface Measurement extends UniquelyIdentifiable, Combinable, Child, Serializable {
+    /**
+     * Retrieves the vector for this measurement.
+     *
+     * @return Vector for this measurement.
+     */
+    Double[] getVector();
 
-    private Point point;
-    private String uuid;
-    private Iterable<Measurement> parents;
+    /**
+     * Sets the vector for this measurement.
+     *
+     * @param vector Vector to set
+     */
+    void setVector(Double[] vector);
 
-    protected Measurement(String uuid, Point point, Iterable<Measurement> parents) {
-        this.point = point;
-        if (StringUtils.isBlank(uuid)) {
-            this.uuid = UUID.randomUUID().toString();
-        } else {
-            this.uuid = uuid;
-        }
-        if (parents == null) {
-            this.parents = new HashSet<>();
-        } else {
-            this.parents = parents;
-        }
-    }
+    /**
+     * Retrieves the timestamp for this measurement. Implementations may return {@link Optional#empty()} if
+     * they do not support timestamps.
+     *
+     * @return Timestamp for this measurement, if it exists.
+     */
+    Optional<LocalDateTime> getTimestamp();
 
-    public Point getPoint() {
-        return point;
-    }
+    /**
+     * Sets the timestamp for this measurement. Implementations may ignore this call if they
+     * do not support timestamps.
+     *
+     * @param timestamp Timestamp to set.
+     */
+    void setTimestamp(LocalDateTime timestamp);
 
-    @Override
-    public String getUuid() {
-        return uuid;
-    }
+    /**
+     * Retrieves the data that is stored in this measurement.
+     *
+     * This map should at least contain a value for all keys present in {@link #getWriteKeys()}.
+     *
+     * @return Data stored in this measurement
+     */
+    Map<String, Object> getData();
 
-    public Iterable<Measurement> getParents() {
-        return parents;
-    }
+    /**
+     * Retrieves a single piece of information with given key from this measurement.
+     *
+     * @param key Key of the information to retrieve.
+     * @return Requested piece of information, if it exists in this measurement.
+     */
+    Optional<Object> getDatum(String key);
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof Measurement)) return false;
+    /**
+     * Sets the data in the given map in this measurement.
+     *
+     * @param data Data to set.
+     */
+    void setData(Map<String, Object> data);
 
-        Measurement that = (Measurement) o;
+    /**
+     * Sets a single piece of information with given key and value in this measurement.
+     *
+     * Implementations should at least accept all keys present in {@link #getReadKeys()}
+     *
+     * @param key Key of the information to set.
+     * @param value Value of the information to set.
+     * @throws IllegalArgumentException if the callee does not accept given key.
+     */
+    void setDatum(String key, Object value);
 
-        if (point != null ? !point.equals(that.point) : that.point != null) return false;
-        if (uuid != null ? !uuid.equals(that.uuid) : that.uuid != null) return false;
-        return true;
-    }
+    /**
+     * Returns a list of keys that are used to deserialize this measurement from an input channel. These keys
+     * should be used in the {@link #setData(Map)} call.
+     *
+     * It is suggested, but not required, that this returns the same keys as {@link #getWriteKeys()}.
+     *
+     * @return List of keys for deserialization.
+     */
+    List<String> getReadKeys();
 
-    @Override
-    public int hashCode() {
-        int result = point != null ? point.hashCode() : 0;
-        result = 31 * result + (uuid != null ? uuid.hashCode() : 0);
-        return result;
-    }
-
-    @Override
-    public String toString() {
-        return "Measurement{" +
-                "point=" + point +
-                ", uuid='" + uuid + '\'' +
-                ", parent='" + parents + '\'' +
-                '}';
-    }
-
-    public static final class Builder {
-        private Point point;
-        private String uuid = UUID.randomUUID().toString();
-        private Set<Measurement> parents = new HashSet<>();
-
-        private Builder() {
-        }
-
-        public static Builder setup() {
-            return new Builder();
-        }
-
-        public Builder withPoint(Point point) {
-            this.point = point;
-            return this;
-        }
-
-        public Builder withUuid(String uuid) {
-            this.uuid = uuid;
-            return this;
-        }
-
-        public Builder withParents(Iterable<Measurement> parents) {
-            this.parents = Sets.newHashSet(parents);
-            return this;
-        }
-
-        public Builder withParent(String parentId) {
-            return withParent(Measurement.Builder.setup().withUuid(parentId).build());
-        }
-
-        public Builder withParent(Measurement parent) {
-            this.parents.add(parent);
-            return this;
-        }
-
-        public Measurement build() {
-            return new Measurement(uuid, point,parents);
-        }
-    }
+    /**
+     * Returns a list of keys that are to be used to serialize this measurement to an output channel. These
+     * keys should indicate values in the return value of {@link #getData()}.
+     *
+     * It is suggested, but not required, that this returns the same keys as {@link #getWriteKeys()}.
+     *
+     * @return List of keys for serialization
+     */
+    List<String> getWriteKeys();
 }

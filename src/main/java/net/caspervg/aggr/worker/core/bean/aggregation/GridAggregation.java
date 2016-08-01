@@ -20,8 +20,8 @@ public class GridAggregation extends AbstractAggregation implements Serializable
      * @param dataset Dataset to use
      * @param source Source data
      */
-    public GridAggregation(Dataset dataset, Collection<Measurement> source) {
-        this(dataset, 0.0005, source);
+    public GridAggregation(Dataset dataset, Collection<Measurement> source, Collection<Measurement> results) {
+        this(dataset, 0.0005, source, results);
     }
 
     /**
@@ -31,8 +31,8 @@ public class GridAggregation extends AbstractAggregation implements Serializable
      * @param gridSize Grid size that was used
      * @param source Source data
      */
-    public GridAggregation(Dataset dataset, double gridSize, Collection<Measurement> source) {
-        this(UUID.randomUUID().toString(), dataset, gridSize,  source);
+    public GridAggregation(Dataset dataset, double gridSize, Collection<Measurement> source, Collection<Measurement> results) {
+        this(UUID.randomUUID().toString(), dataset, gridSize,  source, results);
     }
 
     /**
@@ -43,8 +43,8 @@ public class GridAggregation extends AbstractAggregation implements Serializable
      * @param gridSize Grid size that was used
      * @param source Source data
      */
-    public GridAggregation(String uuid, Dataset dataset, double gridSize, Collection<Measurement> source) {
-        super(uuid, dataset, source);
+    public GridAggregation(String uuid, Dataset dataset, double gridSize, Collection<Measurement> source, Collection<Measurement> results) {
+        super(uuid, dataset, source, results);
         this.gridSize = gridSize;
     }
 

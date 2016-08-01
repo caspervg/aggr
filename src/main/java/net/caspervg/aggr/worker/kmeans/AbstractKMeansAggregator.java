@@ -1,6 +1,10 @@
 package net.caspervg.aggr.worker.kmeans;
 
-public abstract class AbstractKMeansAggregator implements KMeansAggregator {
+import net.caspervg.aggr.worker.core.AbstractAggregator;
+import net.caspervg.aggr.worker.core.bean.Measurement;
+import net.caspervg.aggr.worker.core.bean.aggregation.KMeansAggregation;
+
+public abstract class AbstractKMeansAggregator extends AbstractAggregator<KMeansAggregation, Measurement> implements KMeansAggregator {
     public static final String METRIC_PARAM = "metric";
     public static final String CENTROIDS_PARAM = "num_centroids";
     public static final String ITERATIONS_PARAM = "max_iterations";

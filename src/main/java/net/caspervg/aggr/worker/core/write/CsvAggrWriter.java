@@ -1,19 +1,21 @@
 package net.caspervg.aggr.worker.core.write;
 
 import com.google.common.collect.Iterables;
-import net.caspervg.aggr.worker.core.bean.Centroid;
+import com.google.common.collect.Lists;
 import net.caspervg.aggr.worker.core.bean.Measurement;
-import net.caspervg.aggr.worker.core.bean.TimedMeasurement;
+import net.caspervg.aggr.worker.core.bean.UniquelyIdentifiable;
 import net.caspervg.aggr.worker.core.util.AggrContext;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
 
 import java.io.IOException;
-import java.time.ZoneOffset;
-import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
-import static net.caspervg.aggr.worker.core.util.Constants.*;
+import static net.caspervg.aggr.worker.core.util.Constants.DEFAULT_ID_KEY;
+import static net.caspervg.aggr.worker.core.util.Constants.DEFAULT_SOURCE_KEY;
 
 /**
  * Implementation fo the {@link AggrWriter} interface that writes data
@@ -23,10 +25,6 @@ import static net.caspervg.aggr.worker.core.util.Constants.*;
  */
 public class CsvAggrWriter extends FileAggrWriter {
 
-    private static final String[] MEAS_HEADERS = new String[]{DEFAULT_ID_KEY, DEFAULT_LAT_KEY, DEFAULT_LON_KEY,
-            DEFAULT_TIMESTAMP_KEY, DEFAULT_SOURCE_KEY, DEFAULT_TYPE_KEY};
-    private static final String[] CENT_HEADERS = new String[]{DEFAULT_ID_KEY, DEFAULT_LAT_KEY, DEFAULT_LON_KEY,
-            DEFAULT_TIMESTAMP_KEY, DEFAULT_SOURCE_KEY, DEFAULT_TYPE_KEY};
     private Appendable out;
 
     public CsvAggrWriter(Appendable out) {
@@ -35,7 +33,7 @@ public class CsvAggrWriter extends FileAggrWriter {
 
     @Override
     public void writeMeasurement(Measurement measurement, AggrContext context) {
-        try (CSVPrinter printer = CSVFormat.DEFAULT.withHeader(MEAS_HEADERS).print(out)) {
+        try (CSVPrinter printer = CSVFormat.DEFAULT.withHeader(getMeasurementHeaders(measurement)).print(out)) {
             printMeasurement(printer, measurement);
             printer.flush();
         } catch (IOException e) {
@@ -45,14 +43,11 @@ public class CsvAggrWriter extends FileAggrWriter {
 
     @Override
     public void writeMeasurements(Iterable<Measurement> measurements, AggrContext context) {
-        try (CSVPrinter printer = CSVFormat.DEFAULT.withHeader(MEAS_HEADERS).print(out)) {
+        if (Iterables.isEmpty(measurements)) return;
+
+        try (CSVPrinter printer = CSVFormat.DEFAULT.withHeader(getMeasurementHeaders(measurements)).print(out)) {
             for (Measurement measurement : measurements) {
-                if (measurement instanceof TimedMeasurement) {
-                    TimedMeasurement timedMeasurement = (TimedMeasurement) measurement;
-                    printMeasurement(printer, timedMeasurement);
-                } else {
-                    printMeasurement(printer, measurement);
-                }
+                printMeasurement(printer, measurement);
             }
             printer.flush();
         } catch (IOException e) {
@@ -60,65 +55,33 @@ public class CsvAggrWriter extends FileAggrWriter {
         }
     }
 
-    @Override
-    public void writeCentroid(Centroid centroid, AggrContext context) {
-        try (CSVPrinter printer = CSVFormat.DEFAULT.withHeader(CENT_HEADERS).print(out)) {
-            printCentroid(printer, centroid);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+    private String[] getMeasurementHeaders(Iterable<Measurement> measurements) {
+        return getMeasurementHeaders(Iterables.get(measurements, 0));
     }
 
-    @Override
-    public void writeCentroids(Iterable<Centroid> centroids, AggrContext context) {
-        try (CSVPrinter printer = CSVFormat.DEFAULT.withHeader(CENT_HEADERS).print(out)) {
-            for (Centroid centroid : centroids) {
-                printCentroid(printer, centroid);
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+    private String[] getMeasurementHeaders(Measurement measurement) {
+        List<String> headerList = Lists.newArrayList(DEFAULT_ID_KEY, DEFAULT_SOURCE_KEY);
+        headerList.addAll(measurement.getWriteKeys());
+        return headerList.toArray(new String[]{});
     }
 
     private void printMeasurement(CSVPrinter printer, Measurement measurement) throws IOException {
+        List<Object> recordList = Lists.newArrayList(measurement.getUuid(),
+                getParentIds(measurement.getParents()));
+        Map<String, Object> data = measurement.getData();
+        for (String key : measurement.getWriteKeys()) {
+            recordList.add(data.get(key));
+        }
         printer.printRecord(
-                measurement.getUuid(),
-                measurement.getPoint().getVector()[0],
-                measurement.getPoint().getVector()[1],
-                "",
-                getParentId(measurement.getParents()),
-                "measurement"
+                recordList.toArray()
         );
     }
 
-    private void printMeasurement(CSVPrinter printer, TimedMeasurement measurement) throws IOException {
-        printer.printRecord(
-                measurement.getUuid(),
-                measurement.getPoint().getVector()[0],
-                measurement.getPoint().getVector()[1],
-                measurement.getTimestamp().atZone(ZoneOffset.UTC).format(DateTimeFormatter.ISO_DATE_TIME),
-                getParentId(measurement.getParents()),
-                "timed_measurement"
-        );
-    }
-
-    private void printCentroid(CSVPrinter printer, Centroid centroid) throws IOException {
-        printer.printRecord(
-                centroid.getUuid(),
-                centroid.getPoint().getVector()[0],
-                centroid.getPoint().getVector()[1],
-                "",
-                Arrays.toString(centroid.getMeasurements().stream().map(Measurement::getUuid).toArray()),
-                "centroid"
-        );
-    }
-
-    private String getParentId(Iterable<Measurement> parents) {
-        Measurement parent = Iterables.getFirst(parents, null);
-        if (parent != null) {
-            return parent.getUuid();
+    private String getParentIds(Set<UniquelyIdentifiable> parents) {
+        if (Iterables.isEmpty(parents)) {
+            return "[]";
         } else {
-            return "";
+            return Arrays.toString(parents.stream().map(UniquelyIdentifiable::getUuid).toArray());
         }
     }
 }

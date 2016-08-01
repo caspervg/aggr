@@ -38,21 +38,11 @@ public class GridAggregationExecution extends AbstractAggregationExecution {
         params.put(OUTPUT_PARAM_KEY, ac.getOutput());
         params.put(AbstractGridAggregator.GRID_SIZE_PARAM, String.valueOf(gac.getGridSize()));
 
-        AggrContext ctx;
+        AggrContext ctx = createContext(params, ac);
         GridAggregator aggregator;
         if (ac.isSpark()) {
-            String hdfsUrl = ac.getHdfsUrl();
-            JavaSparkContext sparkCtx = getSparkContext(ac);
-
-            if (StringUtils.isNotBlank(hdfsUrl)) {
-                FileSystem hdfs = FileSystem.get(new URI(hdfsUrl), sparkCtx.hadoopConfiguration());
-                ctx = new AggrContext(params, sparkCtx, hdfs);
-            } else {
-                ctx = new AggrContext(params, sparkCtx);
-            }
             aggregator = new SparkGridAggregator();
         } else {
-            ctx = new AggrContext(params);
             aggregator = new PlainGridAggregator();
         }
 

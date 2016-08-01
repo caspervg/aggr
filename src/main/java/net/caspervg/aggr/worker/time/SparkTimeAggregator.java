@@ -1,10 +1,8 @@
 package net.caspervg.aggr.worker.time;
 
-import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import net.caspervg.aggr.worker.core.bean.Dataset;
 import net.caspervg.aggr.worker.core.bean.Measurement;
-import net.caspervg.aggr.worker.core.bean.TimedMeasurement;
 import net.caspervg.aggr.worker.core.bean.aggregation.AggregationResult;
 import net.caspervg.aggr.worker.core.bean.aggregation.TimeAggregation;
 import net.caspervg.aggr.worker.core.util.AggrContext;
@@ -21,25 +19,25 @@ import java.util.stream.Collectors;
 
 public class SparkTimeAggregator extends AbstractTimeAggregator implements Serializable {
 
+    @SuppressWarnings("OptionalGetWithoutIsPresent")
     @Override
     public Iterable<AggregationResult<TimeAggregation, Measurement>> aggregate(Dataset dataset,
                                                                                Iterable<Measurement> measurements,
                                                                                AggrContext context) {
-        Measurement[] measurementArray = Iterables.toArray(measurements, Measurement.class);
-        TimedMeasurement[] timedMeasurementArray = Arrays.copyOf(measurementArray, measurementArray.length, TimedMeasurement[].class);
-        List<TimedMeasurement> measurementList = Lists.newArrayList(timedMeasurementArray);
-
         Objects.requireNonNull(context.getSparkContext());
 
+        List<Measurement> measurementList = Lists.newArrayList(measurements);
+
         JavaSparkContext sparkCtx = context.getSparkContext();
-        JavaRDD<TimedMeasurement> measRDD = sparkCtx.parallelize(measurementList);
+        Class<? extends Measurement> clazz = context.getOutputClass();
+        JavaRDD<Measurement> measRDD = sparkCtx.parallelize(measurementList);
 
         if (measurementList.size() < 1) {
             return new HashSet<>();
         }
 
-        LocalDateTime minTimestamp = measRDD.min(new TimedMeasurementComparator()).getTimestamp();
-        LocalDateTime maxTimestamp = measRDD.max(new TimedMeasurementComparator()).getTimestamp();
+        LocalDateTime minTimestamp = measRDD.min(new TimedMeasurementComparator()).getTimestamp().get();
+        LocalDateTime maxTimestamp = measRDD.max(new TimedMeasurementComparator()).getTimestamp().get();
         long duration = minTimestamp.until(maxTimestamp, ChronoUnit.MILLIS);
 
         Set<AggregationResult<TimeAggregation, Measurement>> aggregationResults = new HashSet<>();
@@ -51,25 +49,26 @@ public class SparkTimeAggregator extends AbstractTimeAggregator implements Seria
                 LocalDateTime start = minTimestamp.plus(timeStep * i, ChronoUnit.MILLIS);
                 LocalDateTime end = minTimestamp.plus(timeStep * (i + 1), ChronoUnit.MILLIS);
 
-                JavaRDD<TimedMeasurement> filteredMeas = measRDD.filter((Function<TimedMeasurement, Boolean>) measurement -> {
-                    LocalDateTime timestamp = measurement.getTimestamp();
+                JavaRDD<Measurement> filteredMeas = measRDD.filter((Function<Measurement, Boolean>) measurement -> {
+                    LocalDateTime timestamp = measurement.getTimestamp().get();
                     return (timestamp.isEqual(start) || (timestamp.isAfter(start) && timestamp.isBefore(end)));
                 });
 
                 List<Measurement> childMeasurements = filteredMeas.collect()
                         .stream()
-                        .map(parent ->
-                                TimedMeasurement.Builder
-                                    .setup()
-                                    .withPoint(parent.getPoint())
-                                    .withParent(parent)
-                                    .withTimestamp(parent.getTimestamp())
-                                    .build()
+                        .map(parent -> {
+                                    Measurement child = newInstance(clazz);
+                                    child.setVector(parent.getVector());
+                                    child.setData(parent.getData());
+                                    child.setTimestamp(parent.getTimestamp().get());
+
+                                    return child;
+                                }
                         )
                         .collect(Collectors.toList());
 
                 aggregationResults.add(new AggregationResult<>(
-                        new TimeAggregation(dataset, start, end, childMeasurements),
+                        new TimeAggregation(dataset, start, end, filteredMeas.collect(), childMeasurements),
                         childMeasurements
                 ));
             }
