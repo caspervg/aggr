@@ -137,7 +137,7 @@ public class AggrCommand {
         command.service = req.getService();
         command.writeDataCsv = req.isBigData();
         command.writeProvenance = req.isWriteProvenance();
-        command.datasetId = req.getId();
+        command.datasetId = req.getDataset();
         command.inputClassName = req.getInputClassName();
         command.outputClassName = req.getOutputClassName();
         command.dynamicParameters = new HashMap<>(req.getParameters().getDynamic());

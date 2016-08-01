@@ -6,12 +6,14 @@ import net.caspervg.aggr.worker.core.bean.impl.BasicParent;
 import net.caspervg.aggr.worker.core.bean.impl.GeoMeasurement;
 import net.caspervg.aggr.worker.core.bean.impl.TimedGeoMeasurement;
 import net.caspervg.aggr.worker.core.util.AggrContext;
+import net.caspervg.aggr.worker.core.util.untyped.UntypedLiteral;
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Statement;
 import org.eclipse.rdf4j.model.ValueFactory;
 import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
 import org.eclipse.rdf4j.model.vocabulary.DCTERMS;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
+import org.eclipse.rdf4j.model.vocabulary.XMLSchema;
 import org.eclipse.rdf4j.repository.Repository;
 import org.eclipse.rdf4j.repository.RepositoryConnection;
 import org.eclipse.rdf4j.repository.RepositoryResult;
@@ -19,14 +21,12 @@ import org.eclipse.rdf4j.repository.sail.SailRepository;
 import org.eclipse.rdf4j.sail.memory.MemoryStore;
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
 
 import static net.caspervg.aggr.worker.core.write.AbstractSparqlAggrWriter.*;
 
@@ -53,17 +53,17 @@ public class Rdf4jAggrWriterTests {
         this.repository = new SailRepository(new MemoryStore());
         this.writer = new Rdf4jAggrWriter(repository, true);
         this.valueFactory = SimpleValueFactory.getInstance();
+        UntypedLiteral.setDatatype(XMLSchema.STRING);
 
-        this.geoPoint = valueFactory.createIRI(GEO_PREFIX, "Point");
-        this.geoLat = valueFactory.createIRI(OWN_PREFIX, TimedGeoMeasurement.LAT_KEY);
-        this.geoLon = valueFactory.createIRI(OWN_PREFIX, TimedGeoMeasurement.LON_KEY);
+        this.geoPoint = valueFactory.createIRI(OWN_CLASS, "Measurement");
+        this.geoLat = valueFactory.createIRI(OWN_PROPERTY, TimedGeoMeasurement.LAT_KEY);
+        this.geoLon = valueFactory.createIRI(OWN_PROPERTY, TimedGeoMeasurement.LON_KEY);
         this.ownWeight = valueFactory.createIRI(WEIGHT_PROPERTY);
         this.muUUID = valueFactory.createIRI(MU_PREFIX, "uuid");
     }
 
     @SuppressWarnings("deprecation")
     @Test
-    @Ignore("Can't handle untyped literals")
     public void testWriteMeasurement() {
         Measurement meas = new TimedGeoMeasurement("meas1");
         meas.setTimestamp(time1);

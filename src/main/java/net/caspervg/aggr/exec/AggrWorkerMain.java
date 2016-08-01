@@ -5,6 +5,7 @@ import com.google.common.collect.ImmutableMap;
 import net.caspervg.aggr.core.*;
 import net.caspervg.aggr.worker.basic.BasicAggregationExecution;
 import net.caspervg.aggr.worker.core.AggregationExecution;
+import net.caspervg.aggr.worker.diff.DiffAggregationExecution;
 import net.caspervg.aggr.worker.grid.GridAggregationExecution;
 import net.caspervg.aggr.worker.kmeans.KMeansAggregationExecution;
 import net.caspervg.aggr.worker.time.TimeAggregationExecution;
@@ -27,6 +28,8 @@ public class AggrWorkerMain {
         jc.addCommand("kmeans", kac);
         BasicCommand bac = new BasicCommand();
         jc.addCommand("combination", bac);
+        DiffAggrCommand dac = new DiffAggrCommand();
+        jc.addCommand("diff", dac);
 
         jc.parse(args);
 
@@ -38,7 +41,8 @@ public class AggrWorkerMain {
         Map<String, AggregationExecution> executionMap = ImmutableMap.of(
                 "grid",   new GridAggregationExecution(ac, gac),
                 "time",   new TimeAggregationExecution(ac, tac),
-                "kmeans", new KMeansAggregationExecution(ac, kac)
+                "kmeans", new KMeansAggregationExecution(ac, kac),
+                "diff", new DiffAggregationExecution(ac, dac)
         );
 
         executionMap.getOrDefault(

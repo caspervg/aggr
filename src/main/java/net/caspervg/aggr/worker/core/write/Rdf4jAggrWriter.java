@@ -45,6 +45,7 @@ public class Rdf4jAggrWriter extends AbstractSparqlAggrWriter {
     private IRI ownKMeansAggr;
     private IRI ownTimeAggr;
     private IRI ownBasicAggr;
+    private IRI ownDiffAggr;
     private IRI muUUID;
 
     public Rdf4jAggrWriter(Repository repository, boolean writeProvenance) {
@@ -52,7 +53,7 @@ public class Rdf4jAggrWriter extends AbstractSparqlAggrWriter {
         this.writeProvenance = writeProvenance;
 
         this.valueFactory = SimpleValueFactory.getInstance();
-        UntypedLiteral.setDatatype(XMLSchema.STRING);
+        UntypedLiteral.setDatatype(null);
 
         this.geoPoint = valueFactory.createIRI(GEO_PREFIX, "Point");
         this.ownMeas = valueFactory.createIRI(OWN_CLASS, "Measurement");
@@ -62,6 +63,7 @@ public class Rdf4jAggrWriter extends AbstractSparqlAggrWriter {
         this.ownKMeansAggr = valueFactory.createIRI(OWN_CLASS, "KMeansAggregation");
         this.ownTimeAggr = valueFactory.createIRI(OWN_CLASS, "TimeAggregation");
         this.ownBasicAggr = valueFactory.createIRI(OWN_CLASS, "BasicAggregation");
+        this.ownDiffAggr = valueFactory.createIRI(OWN_CLASS, "DiffAggregation");
         this.muUUID = valueFactory.createIRI(MU_PREFIX, "uuid");
     }
 
@@ -217,6 +219,33 @@ public class Rdf4jAggrWriter extends AbstractSparqlAggrWriter {
                         aggRes,
                         RDF.TYPE,
                         this.ownBasicAggr
+                )
+        );
+
+        add(statements);
+    }
+
+    @Override
+    public void writeAggregation(DiffAggregation aggregation, AggrContext context) {
+        Set<Statement> statements = new HashSet<>();
+
+        Resource aggRes = aggregationWithId(aggregation.getUuid());
+        statements.addAll(aggregationStatements(aggregation, aggRes));
+
+        // Type of the aggregation
+        statements.add(
+                valueFactory.createStatement(
+                        aggRes,
+                        RDF.TYPE,
+                        this.ownDiffAggr
+                )
+        );
+
+        statements.add(
+                valueFactory.createStatement(
+                        aggRes,
+                        valueFactory.createIRI(OWN_PROPERTY, "subtrahend"),
+                        stringLiteral(aggregation.getSubtrahend())
                 )
         );
 

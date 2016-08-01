@@ -1,14 +1,12 @@
 package net.caspervg.aggr.exec;
 
-import net.caspervg.aggr.core.AggrCommand;
-import net.caspervg.aggr.core.GridAggrCommand;
-import net.caspervg.aggr.core.KMeansAggrCommand;
-import net.caspervg.aggr.core.TimeAggrCommand;
+import net.caspervg.aggr.core.*;
 import net.caspervg.aggr.master.JenaAggrRequestReader;
 import net.caspervg.aggr.master.bean.AggregationRequest;
 import net.caspervg.aggr.master.bean.Rdf4jAggrRequestUpdater;
 import net.caspervg.aggr.worker.basic.BasicAggregationExecution;
 import net.caspervg.aggr.worker.core.util.untyped.UntypedSPARQLRepository;
+import net.caspervg.aggr.worker.diff.DiffAggregationExecution;
 import net.caspervg.aggr.worker.grid.GridAggregationExecution;
 import net.caspervg.aggr.worker.kmeans.KMeansAggregationExecution;
 import net.caspervg.aggr.worker.time.TimeAggregationExecution;
@@ -74,6 +72,17 @@ public class AggrMasterMain {
                             }
                         }).start();
                         break;
+                    case "diff":
+                        DiffAggrCommand diffCommand = DiffAggrCommand.of(request);
+                        new Thread(() -> {
+                            try {
+                                new DiffAggregationExecution(mainCommand, diffCommand).execute();
+                                updater.updateStatus(request.getId(), "success");
+                            } catch (Exception e){
+                                e.printStackTrace();
+                                updater.updateStatus(request.getId(), "failure");
+                            }
+                        }).start();
                     default:
                         new Thread(() -> {
                             try {

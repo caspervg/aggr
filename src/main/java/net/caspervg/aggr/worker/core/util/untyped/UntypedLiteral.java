@@ -40,7 +40,7 @@ public class UntypedLiteral implements Literal, Serializable {
 
     @Override
     public IRI getDatatype() {
-        return null;
+        return datatype;
     }
 
     public static void setDatatype(IRI datatype) {

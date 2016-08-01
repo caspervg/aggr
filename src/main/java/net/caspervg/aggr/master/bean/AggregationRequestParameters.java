@@ -8,6 +8,7 @@ public class AggregationRequestParameters {
     private String metric;
     private int levels;
     private double gridSize;
+    private String subtrahend;
     private Map<String, String> dynamic;
 
     private AggregationRequestParameters(int iterations,
@@ -15,12 +16,14 @@ public class AggregationRequestParameters {
                                          String metric,
                                          int levels,
                                          double gridSize,
+                                         String subtrahend,
                                          Map<String, String> dynamic) {
         this.iterations = iterations;
         this.centroids = centroids;
         this.metric = metric;
         this.levels = levels;
         this.gridSize = gridSize;
+        this.subtrahend = subtrahend;
         this.dynamic = dynamic;
     }
 
@@ -42,6 +45,10 @@ public class AggregationRequestParameters {
 
     public double getGridSize() {
         return gridSize;
+    }
+
+    public String getSubtrahend() {
+        return subtrahend;
     }
 
     public Map<String, String> getDynamic() {
@@ -66,6 +73,7 @@ public class AggregationRequestParameters {
         private int levels;
         private double gridSize;
         private Map<String, String> dynamic;
+        private String subtrahend;
 
         private Builder() {
         }
@@ -105,7 +113,12 @@ public class AggregationRequestParameters {
         }
 
         public AggregationRequestParameters build() {
-            return new AggregationRequestParameters(iterations, centroids, metric, levels, gridSize, dynamic);
+            return new AggregationRequestParameters(iterations, centroids, metric, levels, gridSize, subtrahend, dynamic);
+        }
+
+        public Builder subtrahend(String subtrahend) {
+            this.subtrahend = subtrahend;
+            return this;
         }
     }
 }

@@ -47,20 +47,31 @@ public abstract class AbstractAggregationExecution implements AggregationExecuti
      * @throws IOException if the input cannot be opened or read
      */
     protected AggrReader getReader(AggrCommand ac, AggrContext ctx) throws IOException {
-        if (ac.getInput().toLowerCase().contains("sparql")) {
+        return getReader(ac.getInput(), ac, ctx);
+    }
+
+    /**
+     * Retrieve a suitable {@link AggrReader} based on the user's demands
+     *
+     * @param ac Demands of the user
+     * @param ctx Context of the execution
+     * @return Suitable instance of {@link AggrReader} with a pre-set {@link BufferedReader}
+     * @throws IOException if the input cannot be opened or read
+     */
+    protected AggrReader getReader(String filePath, AggrCommand ac, AggrContext ctx) throws IOException {
+        if (filePath.toLowerCase().contains("sparql")) {
             return new JenaAggrReader();
         } else {
             if (!ac.isHdfs()) {
-                BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(ac.getInput())));
+                BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(filePath)));
                 return new CsvAggrReader(reader);
             } else {
-                Path path = new Path(ac.getInput());
+                Path path = new Path(filePath);
                 BufferedReader reader = new BufferedReader(new InputStreamReader(ctx.getFileSystem().open(path)));
                 return new CsvAggrReader(reader);
             }
         }
     }
-
     /**
      * Retrieve a suitable AggrResultWriter based on the user's demands
      *

@@ -65,6 +65,7 @@ public class JenaAggrRequestReader {
             "select *\n"+
             "where {\n"+
             "    ?req mu:uuid ?id ;\n"+
+            "         own:dataset ?dataset ;\n"+
             "         own:input ?input ;\n"+
             "         own:output ?output ;\n"+
             "         own:aggregation_type ?aggregation_type ;\n"+
@@ -82,6 +83,7 @@ public class JenaAggrRequestReader {
             "    OPTIONAL { ?req own:metric ?metric }\n"+
             "    OPTIONAL { ?req own:levels ?levels }\n"+
             "    OPTIONAL { ?req own:grid_size ?grid_size }\n"+
+            "    OPTIONAL { ?req own:subtrahend ?subtrahend }\n"+
             "\n"+
             "    OPTIONAL { ?req own:query ?query }\n"+
             "    OPTIONAL { ?req own:latitude_key ?latitude_key }\n"+
@@ -114,6 +116,7 @@ public class JenaAggrRequestReader {
                             .metric(rs.getString("metric"))
                             .levels(rs.getInt("levels"))
                             .gridSize(parseDouble(rs.getString("grid_size")))
+                            .subtrahend(rs.getString("subtrahend"))
                             .dynamic(getDynamicParameters(rs))
                             .build();
 
@@ -126,6 +129,7 @@ public class JenaAggrRequestReader {
                             AggregationRequest.Builder
                                     .setup()
                                     .id(rs.getString("id"))
+                                    .dataset(rs.getString("dataset"))
                                     .input(rs.getString("input"))
                                     .output(rs.getString("output"))
                                     .aggregationType(rs.getString("aggregation_type"))

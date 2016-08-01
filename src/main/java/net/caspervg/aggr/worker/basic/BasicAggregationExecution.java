@@ -55,7 +55,7 @@ public class BasicAggregationExecution extends AbstractAggregationExecution {
             aggregator = PLAIN_AGGREGATORS.get(type);
         }
 
-        Dataset dataset = Dataset.Builder.setup().withTitle(ac.getDatasetId()).build();
+        Dataset dataset = Dataset.Builder.setup().withTitle(ac.getDatasetId()).withUuid(ac.getDatasetId()).build();
         Iterable<Measurement> meas = getReader(ac, ctx).read(ctx);
         Iterable<AggregationResult<BasicAggregation, Measurement>> results = aggregator.aggregate(dataset, meas, ctx);
 

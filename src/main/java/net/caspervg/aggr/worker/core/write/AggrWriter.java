@@ -2,10 +2,7 @@ package net.caspervg.aggr.worker.core.write;
 
 import net.caspervg.aggr.worker.core.bean.Dataset;
 import net.caspervg.aggr.worker.core.bean.Measurement;
-import net.caspervg.aggr.worker.core.bean.aggregation.BasicAggregation;
-import net.caspervg.aggr.worker.core.bean.aggregation.GridAggregation;
-import net.caspervg.aggr.worker.core.bean.aggregation.KMeansAggregation;
-import net.caspervg.aggr.worker.core.bean.aggregation.TimeAggregation;
+import net.caspervg.aggr.worker.core.bean.aggregation.*;
 import net.caspervg.aggr.worker.core.util.AggrContext;
 
 public interface AggrWriter {
@@ -56,6 +53,14 @@ public interface AggrWriter {
      * @param context Context of the operation
      */
     void writeAggregation(BasicAggregation aggregation, AggrContext context);
+
+    /**
+     * Writes a diff aggregation to the channel
+     *
+     * @param aggregation Aggregation to write
+     * @param context Context of the operation
+     */
+    void writeAggregation(DiffAggregation aggregation, AggrContext context);
 
     /**
      * Writes a dataset to the channel

@@ -10,5 +10,6 @@ public interface AggrResultWriter {
     void writeKMeansAggregation(AggregationResult<KMeansAggregation, Measurement> result, AggrContext context);
     void writeTimeAggregation(AggregationResult<TimeAggregation, Measurement> result, AggrContext context);
     void writeBasicAggregation(AggregationResult<BasicAggregation, Measurement> result, AggrContext context);
+    void writeDiffAggregation(AggregationResult<DiffAggregation, Measurement> res, AggrContext ctx);
     void writeDataset(Dataset dataset, AggrContext context);
 }

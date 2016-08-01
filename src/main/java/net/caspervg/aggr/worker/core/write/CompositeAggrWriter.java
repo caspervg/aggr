@@ -70,6 +70,12 @@ public class CompositeAggrWriter implements AggrResultWriter {
     }
 
     @Override
+    public void writeDiffAggregation(AggregationResult<DiffAggregation, Measurement> result, AggrContext context) {
+        dataWriter.writeMeasurements(result.getResults(), context);
+        metaWriter.writeAggregation(result.getAggregation(), context);
+    }
+
+    @Override
     public void writeDataset(Dataset dataset, AggrContext context) {
         metaWriter.writeDataset(dataset, context);
     }

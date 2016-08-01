@@ -46,7 +46,7 @@ public class TimeAggregationExecution extends AbstractAggregationExecution {
         }
         AggrContext ctx = createContext(params, ac);
 
-        Dataset dataset = Dataset.Builder.setup().withTitle(ac.getDatasetId()).build();
+        Dataset dataset = Dataset.Builder.setup().withTitle(ac.getDatasetId()).withUuid(ac.getDatasetId()).build();
         Iterable<Measurement> meas = getReader(ac, ctx).read(ctx);
         Iterable<AggregationResult<TimeAggregation, Measurement>> results = aggregator.aggregate(dataset, meas, ctx);
 

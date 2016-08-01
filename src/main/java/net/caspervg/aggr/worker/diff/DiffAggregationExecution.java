@@ -1,60 +1,56 @@
-package net.caspervg.aggr.worker.grid;
+package net.caspervg.aggr.worker.diff;
 
+import net.caspervg.aggr.core.AggrCommand;
+import net.caspervg.aggr.core.DiffAggrCommand;
 import net.caspervg.aggr.worker.core.AbstractAggregationExecution;
 import net.caspervg.aggr.worker.core.bean.Dataset;
 import net.caspervg.aggr.worker.core.bean.Measurement;
 import net.caspervg.aggr.worker.core.bean.aggregation.AggregationResult;
-import net.caspervg.aggr.worker.core.bean.aggregation.GridAggregation;
+import net.caspervg.aggr.worker.core.bean.aggregation.DiffAggregation;
 import net.caspervg.aggr.worker.core.read.AbstractAggrReader;
-import net.caspervg.aggr.core.AggrCommand;
 import net.caspervg.aggr.worker.core.util.AggrContext;
 import net.caspervg.aggr.worker.core.write.AggrResultWriter;
-import net.caspervg.aggr.core.GridAggrCommand;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.hadoop.fs.FileSystem;
-import org.apache.spark.api.java.JavaSparkContext;
 
 import java.io.IOException;
-import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Map;
 
 import static net.caspervg.aggr.worker.core.write.AbstractAggrWriter.OUTPUT_PARAM_KEY;
 
-public class GridAggregationExecution extends AbstractAggregationExecution {
-
+public class DiffAggregationExecution extends AbstractAggregationExecution {
+    
     private AggrCommand ac;
-    private GridAggrCommand gac;
+    private DiffAggrCommand dac;
 
-    public GridAggregationExecution(AggrCommand ac, GridAggrCommand gac) {
+    public DiffAggregationExecution(AggrCommand ac, DiffAggrCommand dac) {
         this.ac = ac;
-        this.gac = gac;
+        this.dac = dac;
     }
-
+    
     @Override
     public void execute() throws URISyntaxException, IOException {
         Map<String, String> params = ac.getDynamicParameters();
         params.put(AbstractAggrReader.INPUT_PARAM_KEY, ac.getInput());
         params.put(OUTPUT_PARAM_KEY, ac.getOutput());
-        params.put(AbstractGridAggregator.GRID_SIZE_PARAM, String.valueOf(gac.getGridSize()));
 
+        DiffAggregator aggregator;
         AggrContext ctx = createContext(params, ac);
-        GridAggregator aggregator;
+        Iterable<Measurement> subtrahends = getReader(dac.getSubtrahend(), ac, ctx).read(ctx);
         if (ac.isSpark()) {
-            aggregator = new SparkGridAggregator();
+            aggregator = new SparkDiffAggregator(subtrahends);
         } else {
-            aggregator = new PlainGridAggregator();
+            aggregator = new PlainDiffAggregator(subtrahends);
         }
 
         Dataset dataset = Dataset.Builder.setup().withTitle(ac.getDatasetId()).withUuid(ac.getDatasetId()).build();
         Iterable<Measurement> meas = getReader(ac, ctx).read(ctx);
-        Iterable<AggregationResult<GridAggregation, Measurement>> results = aggregator.aggregate(dataset, meas, ctx);
+        Iterable<AggregationResult<DiffAggregation, Measurement>> results = aggregator.aggregate(dataset, meas, ctx);
 
         AggrResultWriter writer = null;
-        for (AggregationResult<GridAggregation, Measurement> res : results) {
+        for (AggregationResult<DiffAggregation, Measurement> res : results) {
             writer = getWriter(res, ac, ctx);
 
-            writer.writeGridAggregation(res, ctx);
+            writer.writeDiffAggregation(res, ctx);
         }
 
         if (writer != null) {
@@ -62,6 +58,5 @@ public class GridAggregationExecution extends AbstractAggregationExecution {
         }
 
         stop(ctx);
-
     }
 }

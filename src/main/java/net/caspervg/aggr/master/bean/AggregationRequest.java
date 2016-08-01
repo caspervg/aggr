@@ -4,6 +4,7 @@ import org.apache.commons.lang3.StringUtils;
 
 public class AggregationRequest {
     private String id;
+    private String dataset;
     private String input;
     private String output;
     private String aggregationType;
@@ -16,6 +17,7 @@ public class AggregationRequest {
     private String outputClassName;
 
     private AggregationRequest(String id,
+                               String dataset,
                                String input,
                                String output,
                                String aggregationType,
@@ -26,6 +28,7 @@ public class AggregationRequest {
                                AggregationRequestParameters parameters,
                                AggregationRequestEnvironment environment) {
         this.id = id;
+        this.dataset = dataset;
         this.input = input;
         this.output = output;
         this.aggregationType = aggregationType;
@@ -39,6 +42,10 @@ public class AggregationRequest {
 
     public String getId() {
         return id;
+    }
+
+    public String getDataset() {
+        return dataset;
     }
 
     public String getInput() {
@@ -110,6 +117,7 @@ public class AggregationRequest {
         private String outputClassName;
         private AggregationRequestParameters parameters;
         private AggregationRequestEnvironment environment;
+        private String dataset;
 
         private Builder() {
         }
@@ -175,6 +183,7 @@ public class AggregationRequest {
         public AggregationRequest build() {
             return new AggregationRequest(
                     id,
+                    dataset,
                     input,
                     output,
                     aggregationType,
@@ -185,6 +194,11 @@ public class AggregationRequest {
                     parameters,
                     environment
             );
+        }
+
+        public Builder dataset(String dataset) {
+            this.dataset = dataset;
+            return this;
         }
     }
 }
