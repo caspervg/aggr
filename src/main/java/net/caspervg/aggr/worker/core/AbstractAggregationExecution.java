@@ -91,6 +91,8 @@ public abstract class AbstractAggregationExecution implements AggregationExecuti
         AggrWriter dataWriter;
 
         if (ac.isWriteDataCsv()) {
+            String dataPath;
+
             try {
                 String hdfsUrl = ac.getHdfsUrl();
                 String dirPath = ac.getOutput();
@@ -102,21 +104,23 @@ public abstract class AbstractAggregationExecution implements AggregationExecuti
                         Path child = new Path(parent, fileName);
                         FSDataOutputStream os = ctx.getFileSystem().create(child, false);
                         dataWriter = new CsvAggrWriter(new PrintWriter(os));
+                        dataPath = ac.getHdfsUrl() + dirPath + "/" + fileName;
                     } else {
                         dataWriter = new CsvAggrWriter(new PrintWriter(new File(dirPath + "/" + fileName)));
+                        dataPath = "file://" + dirPath + "/" + fileName;
                     }
                 } else {
                     dataWriter = new CsvAggrWriter(new PrintWriter(new File(dirPath + "/" + fileName)));
+                    dataPath = "file://" + dirPath + "/" + fileName;
                 }
             } catch (IOException ex) {
-                ex.printStackTrace();
                 throw new RuntimeException(ex);
             }
 
-            return new CompositeAggrWriter(dataWriter, metaWriter, ac.isWriteProvenance());     // Split data to CSV, metadata to triple store
+            return new CompositeAggrWriter(dataWriter, metaWriter, ac.isWriteProvenance(), dataPath);     // Split data to CSV, metadata to triple store
         }
 
-        return new CompositeAggrWriter(metaWriter, metaWriter, ac.isWriteProvenance());         // Write data and metadata to the triple store
+        return new CompositeAggrWriter(metaWriter, metaWriter, ac.isWriteProvenance(), ac.getService());  // Write data and metadata to the triple store
     }
 
     /**

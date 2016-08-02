@@ -1,6 +1,5 @@
 package net.caspervg.aggr.worker.core.write;
 
-import com.beust.jcommander.internal.Lists;
 import net.caspervg.aggr.worker.core.bean.Dataset;
 import net.caspervg.aggr.worker.core.bean.Measurement;
 import net.caspervg.aggr.worker.core.bean.aggregation.*;
@@ -16,6 +15,7 @@ public class CompositeAggrWriter implements AggrResultWriter {
     private AggrWriter dataWriter;
     private AggrWriter metaWriter;
     private boolean writeProvenance;
+    private String dataPath;
 
     /**
      * Create a new CompositeAggrWriter that will write all
@@ -39,14 +39,20 @@ public class CompositeAggrWriter implements AggrResultWriter {
     }
 
     public CompositeAggrWriter(AggrWriter dataWriter, AggrWriter metaWriter, boolean writeProvenance) {
+        this(dataWriter, metaWriter, writeProvenance, "triples");
+    }
+
+    public CompositeAggrWriter(AggrWriter dataWriter, AggrWriter metaWriter, boolean writeProvenance, String dataPath) {
         this.dataWriter = dataWriter;
         this.metaWriter = metaWriter;
         this.writeProvenance = writeProvenance;
+        this.dataPath = dataPath;
     }
 
     @Override
     public void writeGridAggregation(AggregationResult<GridAggregation, Measurement> result, AggrContext context) {
         dataWriter.writeMeasurements(result.getResults(), context);
+        result.getAggregation().setDataPath(dataPath);
         metaWriter.writeAggregation(result.getAggregation(), context);
     }
 
@@ -54,24 +60,28 @@ public class CompositeAggrWriter implements AggrResultWriter {
     public void writeKMeansAggregation(AggregationResult<KMeansAggregation, Measurement> result, AggrContext context) {
         Iterable<Measurement> centroids = result.getResults();
         dataWriter.writeMeasurements(centroids, context);
+        result.getAggregation().setDataPath(dataPath);
         metaWriter.writeAggregation(result.getAggregation(), context);
     }
 
     @Override
     public void writeTimeAggregation(AggregationResult<TimeAggregation, Measurement> result, AggrContext context) {
         dataWriter.writeMeasurements(result.getResults(), context);
+        result.getAggregation().setDataPath(dataPath);
         metaWriter.writeAggregation(result.getAggregation(), context);
     }
 
     @Override
     public void writeBasicAggregation(AggregationResult<BasicAggregation, Measurement> result, AggrContext context) {
         dataWriter.writeMeasurements(result.getResults(), context);
+        result.getAggregation().setDataPath(dataPath);
         metaWriter.writeAggregation(result.getAggregation(), context);
     }
 
     @Override
     public void writeDiffAggregation(AggregationResult<DiffAggregation, Measurement> result, AggrContext context) {
         dataWriter.writeMeasurements(result.getResults(), context);
+        result.getAggregation().setDataPath(dataPath);
         metaWriter.writeAggregation(result.getAggregation(), context);
     }
 

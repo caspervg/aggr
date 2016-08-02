@@ -83,6 +83,7 @@ public class AggrMasterMain {
                                 updater.updateStatus(request.getId(), "failure");
                             }
                         }).start();
+                        break;
                     default:
                         new Thread(() -> {
                             try {

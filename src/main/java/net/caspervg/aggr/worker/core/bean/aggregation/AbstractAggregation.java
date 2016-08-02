@@ -18,6 +18,7 @@ public abstract class AbstractAggregation implements Serializable {
     private Dataset dataset;
     private Collection<Measurement> sources;
     private Collection<? extends UniquelyIdentifiable> components;
+    private String dataPath = "sparql";
 
     public AbstractAggregation(Dataset dataset, Collection<Measurement> sources, Collection<Measurement> results) {
         this(UUID.randomUUID().toString(), dataset, sources, results);
@@ -46,6 +47,14 @@ public abstract class AbstractAggregation implements Serializable {
      */
     public Dataset getDataset() {
         return dataset;
+    }
+
+    public String getDataPath() {
+        return dataPath;
+    }
+
+    public void setDataPath(String dataPath) {
+        this.dataPath = dataPath;
     }
 
     /**

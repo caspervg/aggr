@@ -364,6 +364,16 @@ public class Rdf4jAggrWriter extends AbstractSparqlAggrWriter {
                 )
         );
 
+        statements.add(
+                valueFactory.createStatement(
+                        aggRes,
+                        DCTERMS.REFERENCES,
+                        valueFactory.createIRI(
+                                aggregation.getDataPath()
+                        )
+                )
+        );
+
         if (writeProvenance) {
             // Sources of the aggregation
             for (Measurement measurement : aggregation.getSources()) {
