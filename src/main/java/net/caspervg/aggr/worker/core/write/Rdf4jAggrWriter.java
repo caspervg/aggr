@@ -41,6 +41,7 @@ public class Rdf4jAggrWriter extends AbstractSparqlAggrWriter {
     private IRI ownMeas;
     private IRI ownDs;
     private IRI ownAggr;
+    private IRI ownType;
     private IRI ownGridAggr;
     private IRI ownKMeansAggr;
     private IRI ownTimeAggr;
@@ -59,6 +60,7 @@ public class Rdf4jAggrWriter extends AbstractSparqlAggrWriter {
         this.ownMeas = valueFactory.createIRI(OWN_CLASS, "Measurement");
         this.ownDs = valueFactory.createIRI(OWN_CLASS, "Dataset");
         this.ownAggr = valueFactory.createIRI(OWN_CLASS, "Aggregation");
+        this.ownType = valueFactory.createIRI(OWN_PROPERTY, "aggregation_type");
         this.ownGridAggr = valueFactory.createIRI(OWN_CLASS, "GridAggregation");
         this.ownKMeansAggr = valueFactory.createIRI(OWN_CLASS, "KMeansAggregation");
         this.ownTimeAggr = valueFactory.createIRI(OWN_CLASS, "TimeAggregation");
@@ -128,7 +130,7 @@ public class Rdf4jAggrWriter extends AbstractSparqlAggrWriter {
         statements.add(
                 valueFactory.createStatement(
                         aggRes,
-                        RDF.TYPE,
+                        this.ownType,
                         this.ownTimeAggr
                 )
         );
@@ -168,7 +170,7 @@ public class Rdf4jAggrWriter extends AbstractSparqlAggrWriter {
         statements.add(
                 valueFactory.createStatement(
                         aggRes,
-                        RDF.TYPE,
+                        this.ownType,
                         this.ownKMeansAggr
                 )
         );
@@ -198,7 +200,7 @@ public class Rdf4jAggrWriter extends AbstractSparqlAggrWriter {
         statements.add(
                 valueFactory.createStatement(
                         aggRes,
-                        RDF.TYPE,
+                        this.ownType,
                         this.ownGridAggr
                 )
         );
@@ -217,7 +219,7 @@ public class Rdf4jAggrWriter extends AbstractSparqlAggrWriter {
         statements.add(
                 valueFactory.createStatement(
                         aggRes,
-                        RDF.TYPE,
+                        this.ownType,
                         this.ownBasicAggr
                 )
         );
@@ -236,7 +238,7 @@ public class Rdf4jAggrWriter extends AbstractSparqlAggrWriter {
         statements.add(
                 valueFactory.createStatement(
                         aggRes,
-                        RDF.TYPE,
+                        this.ownType,
                         this.ownDiffAggr
                 )
         );
@@ -355,7 +357,6 @@ public class Rdf4jAggrWriter extends AbstractSparqlAggrWriter {
                 )
         );
 
-/*
         // Supertype of the aggregation
         statements.add(
                 valueFactory.createStatement(
@@ -364,7 +365,6 @@ public class Rdf4jAggrWriter extends AbstractSparqlAggrWriter {
                         this.ownAggr
                 )
         );
-*/
 
         // Data path of the aggregation
         statements.add(

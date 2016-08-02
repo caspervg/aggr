@@ -27,7 +27,7 @@
                 (gridSize :number ,(s-prefix "casp:grid_size"))
                 ;; Diff
                 ;; Global
-                (type :uri ,(s-prefix "rdf:type"))
+                (type :uri ,(s-prefix "casp:aggregation_type"))
                 (location :string ,(s-prefix "dct:references"))
                 (created :string ,(s-prefix "dct:date")))
   :features '(no-pagination-defaults)
