@@ -355,8 +355,8 @@ public class Rdf4jAggrWriter extends AbstractSparqlAggrWriter {
                 )
         );
 
-        // Supertype of the aggregation
 /*
+        // Supertype of the aggregation
         statements.add(
                 valueFactory.createStatement(
                         aggRes,
@@ -366,6 +366,7 @@ public class Rdf4jAggrWriter extends AbstractSparqlAggrWriter {
         );
 */
 
+        // Data path of the aggregation
         statements.add(
                 valueFactory.createStatement(
                         aggRes,
@@ -373,6 +374,15 @@ public class Rdf4jAggrWriter extends AbstractSparqlAggrWriter {
                         valueFactory.createIRI(
                                 aggregation.getDataPath()
                         )
+                )
+        );
+
+        // Creation time of the aggregation
+        statements.add(
+                valueFactory.createStatement(
+                        aggRes,
+                        DCTERMS.DATE,
+                        literalTimestamp(aggregation.getCreated())
                 )
         );
 

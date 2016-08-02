@@ -19,17 +19,17 @@
   :properties `(
                 ;; KMeans
                 (iterations :number ,(s-prefix "casp:iterations"))
-                (num_centroids :number ,(s-prefix "casp:num_centroids"))
+                (numCentroids :number ,(s-prefix "casp:num_centroids"))
                 ;; Time
                 (start :string ,(s-prefix "casp:start"))
                 (end :string ,(s-prefix "casp:end"))
                 ;; Grid
-                (grid_size :number ,(s-prefix "casp:grid_size"))
+                (gridSize :number ,(s-prefix "casp:grid_size"))
                 ;; Diff
                 ;; Global
                 (type :uri ,(s-prefix "rdf:type"))
                 (location :string ,(s-prefix "dct:references"))
-                (created :string ,(s-prefix "casp:created")))
+                (created :string ,(s-prefix "dct:date")))
   :features '(no-pagination-defaults)
   :has-one `((dataset :via ,(s-prefix "dct:isPartOf") :as "dataset"))
   :has-many `((measurement :via ,(s-prefix "dct:isReplacedBy")

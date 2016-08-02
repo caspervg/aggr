@@ -1,10 +1,11 @@
 package net.caspervg.aggr.worker.core.bean.aggregation;
 
 import net.caspervg.aggr.worker.core.bean.Dataset;
-import net.caspervg.aggr.worker.core.bean.UniquelyIdentifiable;
 import net.caspervg.aggr.worker.core.bean.Measurement;
+import net.caspervg.aggr.worker.core.bean.UniquelyIdentifiable;
 
 import java.io.Serializable;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.UUID;
@@ -19,6 +20,7 @@ public abstract class AbstractAggregation implements Serializable {
     private Collection<Measurement> sources;
     private Collection<? extends UniquelyIdentifiable> components;
     private String dataPath = "sparql";
+    private LocalDateTime created = LocalDateTime.now();
 
     public AbstractAggregation(Dataset dataset, Collection<Measurement> sources, Collection<Measurement> results) {
         this(UUID.randomUUID().toString(), dataset, sources, results);
@@ -47,6 +49,10 @@ public abstract class AbstractAggregation implements Serializable {
      */
     public Dataset getDataset() {
         return dataset;
+    }
+
+    public LocalDateTime getCreated() {
+        return created;
     }
 
     public String getDataPath() {
