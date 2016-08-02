@@ -91,6 +91,11 @@ public class TimedGeoMeasurement extends GeoMeasurement {
     }
 
     @Override
+    public int combinationHash() {
+        return 31 * super.combinationHash() + (timestamp != null ? timestamp.hashCode() : 0);
+    }
+
+    @Override
     public Measurement combine(Measurement other) {
         if (! canCombine(other)) {
             throw new IllegalArgumentException("Other measurement must have the same vector and timestamp");

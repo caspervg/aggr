@@ -11,5 +11,4 @@ ADD run/ run
 
 RUN chmod -R +x run/
 
-CMD ["mkdir -p", "/tmp/spark-events"]
 CMD ["/bin/bash", "run/master.sh"]

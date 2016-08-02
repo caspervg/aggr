@@ -135,6 +135,11 @@ public class GeoMeasurement implements Measurement {
     }
 
     @Override
+    public int combinationHash() {
+        return Arrays.hashCode(Arrays.copyOf(vector, 2));
+    }
+
+    @Override
     public Measurement combine(Measurement other) {
         if (! canCombine(other)) {
             throw new IllegalArgumentException("Other measurement must have the same vector");

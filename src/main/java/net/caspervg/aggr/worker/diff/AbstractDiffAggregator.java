@@ -4,13 +4,21 @@ import net.caspervg.aggr.worker.core.AbstractAggregator;
 import net.caspervg.aggr.worker.core.bean.Measurement;
 import net.caspervg.aggr.worker.core.bean.aggregation.DiffAggregation;
 
-public abstract class AbstractDiffAggregator extends AbstractAggregator<DiffAggregation, Measurement> implements DiffAggregator {
+import java.io.Serializable;
+import java.util.ArrayList;
 
-    public static final String SUBTRAHEND_PARAM_KEY = "subtrahend";
+public abstract class AbstractDiffAggregator extends AbstractAggregator<DiffAggregation, Measurement> implements DiffAggregator, Serializable {
 
-    protected Iterable<Measurement> subtrahends;
+    public static final String SUBTRAHEND_PARAM_KEY = "subtrahends";
 
-    public AbstractDiffAggregator(Iterable<Measurement> subtrahends) {
-        this.subtrahends = subtrahends;
+    protected Iterable<Iterable<Measurement>> others;
+
+    public AbstractDiffAggregator() {
+        this(new ArrayList<>());
     }
+
+    public AbstractDiffAggregator(Iterable<Iterable<Measurement>> others) {
+        this.others = others;
+    }
+
 }

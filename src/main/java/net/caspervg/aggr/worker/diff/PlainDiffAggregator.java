@@ -14,23 +14,26 @@ import java.util.Set;
 
 public class PlainDiffAggregator extends AbstractDiffAggregator {
 
-    public PlainDiffAggregator(Iterable<Measurement> subtrahends) {
+    public PlainDiffAggregator(Iterable<Iterable<Measurement>> subtrahends) {
         super(subtrahends);
     }
 
     @Override
     public Iterable<AggregationResult<DiffAggregation, Measurement>> aggregate(Dataset dataset, Iterable<Measurement> measurements, AggrContext context) {
-        String subtrahendFileName = context.getParameters().get(SUBTRAHEND_PARAM_KEY);
+        String subtrahendFileNames = context.getParameters().get(SUBTRAHEND_PARAM_KEY);
 
         Set<Measurement> results = new HashSet<>();
 
         Class<? extends Measurement> clazz = context.getOutputClass();
 
+        return null;
+/*
+
         // Find combinations
         for (Measurement measurement : measurements) {
             boolean foundPossibility = false;
 
-            for (Measurement subtrahend : subtrahends) {
+            for (Measurement subtrahend : others) {
                 if (subtrahend.canCombine(measurement)) {
                     Measurement difference = newInstance(clazz);
                     difference.setData(measurement.getData());
@@ -59,13 +62,14 @@ public class PlainDiffAggregator extends AbstractDiffAggregator {
                 new AggregationResult<>(
                         new DiffAggregation(
                                 dataset,
-                                subtrahendFileName,
+                                subtrahendFileNames,
                                 Lists.newArrayList(measurements),
                                 results
                         ),
                         results
                 )
         );
+*/
 
     }
 }

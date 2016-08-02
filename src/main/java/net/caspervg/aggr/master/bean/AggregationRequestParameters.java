@@ -1,6 +1,10 @@
 package net.caspervg.aggr.master.bean;
 
+import com.google.common.collect.Lists;
+
+import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 public class AggregationRequestParameters {
     private int iterations;
@@ -8,7 +12,7 @@ public class AggregationRequestParameters {
     private String metric;
     private int levels;
     private double gridSize;
-    private String subtrahend;
+    private List<String> subtrahends;
     private Map<String, String> dynamic;
 
     private AggregationRequestParameters(int iterations,
@@ -16,14 +20,14 @@ public class AggregationRequestParameters {
                                          String metric,
                                          int levels,
                                          double gridSize,
-                                         String subtrahend,
+                                         List<String> subtrahends,
                                          Map<String, String> dynamic) {
         this.iterations = iterations;
         this.centroids = centroids;
         this.metric = metric;
         this.levels = levels;
         this.gridSize = gridSize;
-        this.subtrahend = subtrahend;
+        this.subtrahends = subtrahends;
         this.dynamic = dynamic;
     }
 
@@ -47,8 +51,8 @@ public class AggregationRequestParameters {
         return gridSize;
     }
 
-    public String getSubtrahend() {
-        return subtrahend;
+    public List<String> getSubtrahends() {
+        return subtrahends;
     }
 
     public Map<String, String> getDynamic() {
@@ -73,7 +77,7 @@ public class AggregationRequestParameters {
         private int levels;
         private double gridSize;
         private Map<String, String> dynamic;
-        private String subtrahend;
+        private List<String> subtrahends;
 
         private Builder() {
         }
@@ -113,11 +117,15 @@ public class AggregationRequestParameters {
         }
 
         public AggregationRequestParameters build() {
-            return new AggregationRequestParameters(iterations, centroids, metric, levels, gridSize, subtrahend, dynamic);
+            return new AggregationRequestParameters(iterations, centroids, metric, levels, gridSize, subtrahends, dynamic);
         }
 
-        public Builder subtrahend(String subtrahend) {
-            this.subtrahend = subtrahend;
+        public Builder subtrahendString(String subtrahend) {
+            if (Objects.nonNull(subtrahend)) {
+                this.subtrahends = Lists.newArrayList(subtrahend.split(","));
+            } else {
+                this.subtrahends = Lists.newArrayList();
+            }
             return this;
         }
     }

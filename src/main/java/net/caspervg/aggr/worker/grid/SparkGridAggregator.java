@@ -16,8 +16,6 @@ import java.util.Set;
 
 public class SparkGridAggregator extends AbstractGridAggregator implements Serializable {
 
-
-
     @Override
     public Iterable<AggregationResult<GridAggregation, Measurement>> aggregate(Dataset dataset,
                                                                                        Iterable<Measurement> measurements,

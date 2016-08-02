@@ -83,7 +83,7 @@ public class JenaAggrRequestReader {
             "    OPTIONAL { ?req own:metric ?metric }\n"+
             "    OPTIONAL { ?req own:levels ?levels }\n"+
             "    OPTIONAL { ?req own:grid_size ?grid_size }\n"+
-            "    OPTIONAL { ?req own:subtrahend ?subtrahend }\n"+
+            "    OPTIONAL { ?req own:subtrahends ?subtrahends }\n"+
             "\n"+
             "    OPTIONAL { ?req own:query ?query }\n"+
             "    OPTIONAL { ?req own:latitude_key ?latitude_key }\n"+
@@ -116,7 +116,7 @@ public class JenaAggrRequestReader {
                             .metric(rs.getString("metric"))
                             .levels(rs.getInt("levels"))
                             .gridSize(parseDouble(rs.getString("grid_size")))
-                            .subtrahend(rs.getString("subtrahend"))
+                            .subtrahendString(rs.getString("subtrahends"))
                             .dynamic(getDynamicParameters(rs))
                             .build();
 

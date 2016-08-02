@@ -10,6 +10,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
+@Deprecated
 public class BasicMeasurement implements Measurement {
 
     private double[] vector;
@@ -95,6 +96,11 @@ public class BasicMeasurement implements Measurement {
     @Override
     public boolean canCombine(Measurement other) {
         return false;
+    }
+
+    @Override
+    public int combinationHash() {
+        return 0;
     }
 
     @Override

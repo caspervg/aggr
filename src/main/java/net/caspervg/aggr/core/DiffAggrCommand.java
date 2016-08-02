@@ -3,12 +3,20 @@ package net.caspervg.aggr.core;
 import com.beust.jcommander.Parameter;
 import net.caspervg.aggr.master.bean.AggregationRequest;
 
-public class DiffAggrCommand {
-    @Parameter(names = {"-s", "--subtrahend"}, description = "Input file (CSV) with data to subtract from the input data")
-    private String subtrahend = "";
+import java.util.ArrayList;
+import java.util.List;
 
-    public String getSubtrahend() {
-        return subtrahend;
+public class DiffAggrCommand {
+    @Parameter(
+            names = {"-s", "--subtrahends"},
+            description = "Input file (CSV) with data to subtract from the input data",
+            required = true,
+            variableArity = true
+    )
+    private List<String> subtrahends;
+
+    public List<String> getSubtrahends() {
+        return subtrahends;
     }
 
     public static DiffAggrCommand of(AggregationRequest req) {
@@ -16,7 +24,7 @@ public class DiffAggrCommand {
 
         assert req.getAggregationType().equalsIgnoreCase("diff");
 
-        command.subtrahend = req.getParameters().getSubtrahend();
+        command.subtrahends = req.getParameters().getSubtrahends();
 
         return command;
     }

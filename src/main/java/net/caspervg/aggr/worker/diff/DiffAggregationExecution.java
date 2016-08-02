@@ -14,6 +14,8 @@ import net.caspervg.aggr.worker.core.write.AggrResultWriter;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.Map;
+import java.util.concurrent.Callable;
+import java.util.stream.Collectors;
 
 import static net.caspervg.aggr.worker.core.write.AbstractAggrWriter.OUTPUT_PARAM_KEY;
 
@@ -32,10 +34,18 @@ public class DiffAggregationExecution extends AbstractAggregationExecution {
         Map<String, String> params = ac.getDynamicParameters();
         params.put(AbstractAggrReader.INPUT_PARAM_KEY, ac.getInput());
         params.put(OUTPUT_PARAM_KEY, ac.getOutput());
+        params.put(AbstractDiffAggregator.SUBTRAHEND_PARAM_KEY, String.join(",", dac.getSubtrahends()));
 
         DiffAggregator aggregator;
         AggrContext ctx = createContext(params, ac);
-        Iterable<Measurement> subtrahends = getReader(dac.getSubtrahend(), ac, ctx).read(ctx);
+
+        Iterable<Iterable<Measurement>> subtrahends = dac.getSubtrahends()
+                .parallelStream()
+                .map(subtrahend ->
+                    uncheckCall(() -> getReader(subtrahend, ac, ctx).read(ctx))
+                )
+                .collect(Collectors.toList());
+
         if (ac.isSpark()) {
             aggregator = new SparkDiffAggregator(subtrahends);
         } else {
@@ -58,5 +68,10 @@ public class DiffAggregationExecution extends AbstractAggregationExecution {
         }
 
         stop(ctx);
+    }
+
+    public static <T> T uncheckCall(Callable<T> callable) {
+        try { return callable.call(); }
+        catch (Exception e) { throw new RuntimeException(e); }
     }
 }

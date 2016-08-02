@@ -11,6 +11,16 @@ public interface Combinable {
     boolean canCombine(Measurement other);
 
     /**
+     * Returns a hash of the combination of data points that are required for another
+     * {@link Measurement} to be combined with this measurement.
+     *
+     * In other words, if {@code this.canCombine(other)} then {@code this.combinationHash() == other.combinationHash()}
+     *
+     * @return A hash identifying the data points that are required for compatibility.
+     */
+    int combinationHash();
+
+    /**
      * Combines this measurement with the given measurement, returning at least a
      * new instance of the {@link Measurement} interface with the callee and the given measurement as it's parents.
      *

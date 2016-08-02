@@ -71,6 +71,11 @@ public class WeightedGeoMeasurement extends GeoMeasurement {
     }
 
     @Override
+    public int combinationHash() {
+        return 31 * super.combinationHash();
+    }
+
+    @Override
     public Measurement combine(Measurement other) {
         if (! canCombine(other)) {
             throw new IllegalArgumentException("Other measurement must have the same vector");
