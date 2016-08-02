@@ -356,6 +356,7 @@ public class Rdf4jAggrWriter extends AbstractSparqlAggrWriter {
         );
 
         // Supertype of the aggregation
+/*
         statements.add(
                 valueFactory.createStatement(
                         aggRes,
@@ -363,6 +364,7 @@ public class Rdf4jAggrWriter extends AbstractSparqlAggrWriter {
                         this.ownAggr
                 )
         );
+*/
 
         statements.add(
                 valueFactory.createStatement(

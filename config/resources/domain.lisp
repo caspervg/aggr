@@ -25,9 +25,10 @@
                 (end :string ,(s-prefix "casp:end"))
                 ;; Grid
                 (grid_size :number ,(s-prefix "casp:grid_size"))
+                ;; Diff
                 ;; Global
                 (type :uri ,(s-prefix "rdf:type"))
-                (location :string ,(s-prefix "casp:location"))
+                (location :string ,(s-prefix "dct:references"))
                 (created :string ,(s-prefix "casp:created")))
   :features '(no-pagination-defaults)
   :has-one `((dataset :via ,(s-prefix "dct:isPartOf") :as "dataset"))
