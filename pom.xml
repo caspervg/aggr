@@ -6,7 +6,7 @@
 
     <groupId>net.caspervg</groupId>
     <artifactId>aggr</artifactId>
-    <version>0.3.1</version>
+    <version>0.9.0</version>
 
     <properties>
         <!-- need 1.6.2 for compatibility with the Spark-Master and Spark-Worker dockers -->
@@ -31,34 +31,38 @@
         </dependency>
 
         <!-- General dependencies -->
+
+        <!-- Apache Commons (CSV parsing, math operations, StringUtils) -->
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
             <version>3.4</version>
         </dependency>
-
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-csv</artifactId>
             <version>1.2</version>
         </dependency>
-
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-math3</artifactId>
             <version>3.4.1</version>
         </dependency>
-
         <dependency>
             <groupId>commons-io</groupId>
             <artifactId>commons-io</artifactId>
             <version>${commons.io.version}</version>
         </dependency>
+
+
+        <!-- JCommander (CLI parsing) -->
         <dependency>
             <groupId>com.beust</groupId>
             <artifactId>jcommander</artifactId>
             <version>1.48</version>
         </dependency>
+
+        <!-- Guava (support classes, especially for Iterables) -->
         <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
@@ -72,7 +76,7 @@
             <version>2.3.1</version>
         </dependency>
 
-        <!-- Jena -->
+        <!-- Jena (reading from triple store) -->
         <dependency>
             <groupId>org.apache.jena</groupId>
             <artifactId>jena-jdbc-driver-remote</artifactId>
@@ -84,7 +88,7 @@
             <version>3.0.1</version>
         </dependency>
 
-        <!-- RDF4J -->
+        <!-- RDF4J (writing to triple store) -->
         <dependency>
             <groupId>org.eclipse.rdf4j</groupId>
             <artifactId>rdf4j-repository-http</artifactId>
@@ -96,7 +100,7 @@
             <version>${rdf4j.version}</version>
         </dependency>
 
-        <!-- JUnit -->
+        <!-- JUnit (unit testing) -->
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
