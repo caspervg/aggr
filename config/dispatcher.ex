@@ -30,11 +30,11 @@ defmodule Dispatcher do
   end
 
   match "/datasets/*path" do
-    Proxy.forward conn, path, "http://cache/datasets/"
+    Proxy.forward conn, path, "http://resource/datasets/"
   end
 
   match "/aggregations/*path" do
-    Proxy.forward conn, path, "http://cache/aggregations/"
+    Proxy.forward conn, path, "http://resource/aggregations/"
   end
 
   match "/measurements/*path" do
