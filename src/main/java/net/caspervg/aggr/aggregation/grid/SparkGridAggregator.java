@@ -15,6 +15,11 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
+/**
+ * {@inheritDoc}
+ *
+ * @implNote uses Spark to perform the aggregation
+ */
 public class SparkGridAggregator extends AbstractGridAggregator implements Serializable {
 
     @Override

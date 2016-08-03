@@ -7,6 +7,13 @@ import net.caspervg.aggr.aggregation.AggregationResult;
 import net.caspervg.aggr.aggregation.basic.BasicAggregation;
 import net.caspervg.aggr.core.util.AggrContext;
 
+/**
+ * {@inheritDoc}
+ *
+ * Combines measurements in the same dataset if they are compatible (e.g. identical vector, ...)
+ *
+ * @implNote Not yet implemented, delegates to {@link PlainCombinationAggregator} instead.
+ */
 @Deprecated
 public class SparkCombinationAggregator implements BasicAggregator {
     @Override

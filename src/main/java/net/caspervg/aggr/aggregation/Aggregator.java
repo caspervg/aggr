@@ -12,7 +12,7 @@ public interface Aggregator<A extends AbstractAggregation, M> {
      * @param dataset Dataset of the measurements
      * @param measurements Measurements to aggregate, filter, ...
      * @param context Context of the operation
-     * @return Result of the aggregation
+     * @return Results of the aggregation. The returned Iterable may be a singleton.
      */
     Iterable<AggregationResult<A, M>> aggregate(Dataset dataset, Iterable<Measurement> measurements, AggrContext context);
 }

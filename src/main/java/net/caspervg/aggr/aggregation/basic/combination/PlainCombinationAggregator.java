@@ -10,6 +10,13 @@ import net.caspervg.aggr.core.util.AggrContext;
 
 import java.util.*;
 
+/**
+ * {@inheritDoc}
+ *
+ * Combines measurements in the same dataset if they are compatible (e.g. identical vector, ...)
+ *
+ * @implNote uses the Java programming model
+ */
 public class PlainCombinationAggregator implements BasicAggregator {
     @Override
     public Iterable<AggregationResult<BasicAggregation, Measurement>> aggregate(Dataset dataset,

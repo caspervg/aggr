@@ -19,6 +19,11 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+/**
+ * {@inheritDoc}
+ *
+ * @implNote uses Spark to perform the aggregation
+ */
 public class SparkTimeAggregator extends AbstractTimeAggregator implements Serializable {
 
     @SuppressWarnings("OptionalGetWithoutIsPresent")

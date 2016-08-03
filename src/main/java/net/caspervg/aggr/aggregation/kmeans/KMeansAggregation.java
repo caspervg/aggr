@@ -9,7 +9,7 @@ import java.util.Collection;
 import java.util.UUID;
 
 /**
- * Aggregation that creates K means based on the data
+ * Aggregation that creates k-Means based on the data
  */
 public class KMeansAggregation extends AbstractAggregation implements Serializable {
 

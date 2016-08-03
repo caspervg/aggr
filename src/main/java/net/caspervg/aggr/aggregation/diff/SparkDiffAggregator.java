@@ -21,6 +21,11 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.StreamSupport;
 
+/**
+ * {@inheritDoc}
+ *
+ * @implNote uses Spark to perform the aggregation
+ */
 public class SparkDiffAggregator extends AbstractDiffAggregator implements Serializable {
 
     public SparkDiffAggregator() {

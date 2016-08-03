@@ -22,7 +22,7 @@ public interface Combinable {
 
     /**
      * Combines this measurement with the given measurement, returning at least a
-     * new instance of the {@link Measurement} interface with the callee and the given measurement as it's parents.
+     * new instance of the {@link Measurement} interface with the callee and the given measurement as its parents.
      *
      * This combined instance must have a fresh UUID attached to it.
      *
@@ -33,5 +33,16 @@ public interface Combinable {
      */
     Measurement combine(Measurement other);
 
+    /**
+     * Combines this measurement with all given measurements, returning at least a
+     * new instance of the {@link Measurement} interface with the callee and all the {@code others} as its parents.
+     *
+     * This combined instance must have a fresh UUID attached to it.
+     *
+     * @param others Measurements to combine with the callee.
+     * @return Combined measurement
+     * @throws IllegalArgumentException if {{@link #canCombine(Measurement)}} with one of the the given measurements
+     * returns <code>false</code>, indicating that the combination is not possible.
+     */
     Measurement combine(Iterable<Measurement> others);
 }

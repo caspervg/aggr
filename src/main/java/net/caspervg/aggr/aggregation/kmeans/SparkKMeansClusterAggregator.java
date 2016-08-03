@@ -14,10 +14,18 @@ import org.apache.spark.mllib.clustering.KMeans;
 import org.apache.spark.mllib.clustering.KMeansModel;
 import org.apache.spark.mllib.linalg.Vector;
 import org.apache.spark.mllib.linalg.Vectors;
+import org.apache.spark.rdd.RDD;
 
 import java.io.Serializable;
 import java.util.*;
 
+/**
+ * {@inheritDoc}
+ *
+ * @implNote uses Spark to perform the aggregation. In particular, the static {@link KMeans#train(RDD, int, int)}
+ * method that is supplied by the Spark-MLLib library. However, this implementation does not support
+ * selecting a different distance metric.
+ */
 public class SparkKMeansClusterAggregator extends AbstractKMeansAggregator implements Serializable {
     @Override
     public Iterable<AggregationResult<KMeansAggregation, Measurement>> aggregate(Dataset dataset,

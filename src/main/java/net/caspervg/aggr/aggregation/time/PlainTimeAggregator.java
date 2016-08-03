@@ -14,6 +14,11 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+/**
+ * {@inheritDoc}
+ *
+ * @implNote uses the Java programming model
+ */
 public class PlainTimeAggregator extends AbstractTimeAggregator {
     @SuppressWarnings("OptionalGetWithoutIsPresent")
     @Override

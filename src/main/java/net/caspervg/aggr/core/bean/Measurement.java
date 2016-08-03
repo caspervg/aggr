@@ -86,7 +86,7 @@ public interface Measurement extends UniquelyIdentifiable, Combinable, Child, Se
      * Returns a list of keys that are to be used to serialize this measurement to an output channel. These
      * keys should indicate values in the return value of {@link #getData()}.
      *
-     * It is suggested, but not required, that this returns the same keys as {@link #getWriteKeys()}.
+     * It is suggested, but not required, that this returns the same keys as {@link #getReadKeys()}.
      *
      * @return List of keys for serialization
      */

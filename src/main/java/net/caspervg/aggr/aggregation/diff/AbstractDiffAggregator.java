@@ -6,6 +6,11 @@ import net.caspervg.aggr.core.bean.Measurement;
 import java.io.Serializable;
 import java.util.ArrayList;
 
+/**
+ * Calculates the difference of one datum between the input measurements and the subtrahend measurements. The
+ * subtrahend measurements should be set in {@link #AbstractDiffAggregator(Iterable)}. The key to use for the data
+ * to subtract is set using {@link #KEY_PARAM_KEY}.
+ */
 public abstract class AbstractDiffAggregator extends AbstractAggregator<DiffAggregation, Measurement> implements DiffAggregator, Serializable {
 
     public static final String OTHER_PARAM_KEY = "other";

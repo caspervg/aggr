@@ -17,6 +17,12 @@ import scala.Tuple2;
 
 import java.util.*;
 
+/**
+ * {@inheritDoc}
+ *
+ * @implNote uses Spark to perform the aggregation. This method may return less centroids then requested under
+ * some circumstances. Use the {@link SparkKMeansClusterAggregator} instead.
+ */
 public class SparkKMeansAggregator extends AbstractKMeansAggregator {
 
     @Override

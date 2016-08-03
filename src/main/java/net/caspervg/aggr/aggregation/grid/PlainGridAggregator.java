@@ -11,6 +11,11 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+/**
+ * {@inheritDoc}
+ *
+ * @implNote uses the Java programming model
+ */
 public class PlainGridAggregator extends AbstractGridAggregator {
 
 

@@ -5,6 +5,11 @@ import net.caspervg.aggr.core.bean.Measurement;
 import net.caspervg.aggr.aggregation.AggregationResult;
 import net.caspervg.aggr.core.util.AggrContext;
 
+/**
+ * {@inheritDoc}
+ *
+ * @implNote Not yet implemented
+ */
 public class PlainAverageAggregator extends AbstractAverageAggregator {
 
     public PlainAverageAggregator(Iterable<Iterable<Measurement>> others) {

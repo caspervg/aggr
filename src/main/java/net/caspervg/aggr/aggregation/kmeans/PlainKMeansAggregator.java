@@ -15,6 +15,11 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
+/**
+ * {@inheritDoc}
+ *
+ * @implNote uses the Java programming model
+ */
 public class PlainKMeansAggregator extends AbstractKMeansAggregator {
 
     private DistanceMetric<Double> distanceMetric;

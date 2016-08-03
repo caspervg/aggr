@@ -7,6 +7,12 @@ public class Dataset {
     private String uuid;
     private String title;
 
+    /**
+     * Creates a new Dataset with given parameters
+     *
+     * @param uuid Uuid of the new dataset
+     * @param title Title of the dataset
+     */
     protected Dataset(String uuid, String title) {
         this.uuid = uuid;
         this.title = title;

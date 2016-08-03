@@ -22,6 +22,11 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.StreamSupport;
 
+/**
+ * {@inheritDoc}
+ *
+ * @implNote Uses Spark to perform the aggregation
+ */
 public class SparkAverageAggregator extends AbstractAverageAggregator implements Serializable {
 
     public SparkAverageAggregator() {
