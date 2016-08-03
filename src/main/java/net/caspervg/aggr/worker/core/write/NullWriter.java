@@ -46,6 +46,11 @@ public class NullWriter implements AggrWriter {
     }
 
     @Override
+    public void writeAggregation(AverageAggregation aggregation, AggrContext context) {
+        // Empty on purpose, don't write anything
+    }
+
+    @Override
     public void writeDataset(Dataset dataset, AggrContext context) {
         // Empty on purpose, don't write anything
     }

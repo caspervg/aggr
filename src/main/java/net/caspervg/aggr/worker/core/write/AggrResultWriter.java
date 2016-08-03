@@ -11,5 +11,6 @@ public interface AggrResultWriter {
     void writeTimeAggregation(AggregationResult<TimeAggregation, Measurement> result, AggrContext context);
     void writeBasicAggregation(AggregationResult<BasicAggregation, Measurement> result, AggrContext context);
     void writeDiffAggregation(AggregationResult<DiffAggregation, Measurement> res, AggrContext ctx);
+    void writeAverageAggregation(AggregationResult<AverageAggregation, Measurement> res, AggrContext ctx);
     void writeDataset(Dataset dataset, AggrContext context);
 }

@@ -12,12 +12,10 @@ import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
 import org.eclipse.rdf4j.model.vocabulary.DCTERMS;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
-import org.eclipse.rdf4j.model.vocabulary.XMLSchema;
 import org.eclipse.rdf4j.repository.Repository;
 import org.eclipse.rdf4j.repository.RepositoryConnection;
 import org.eclipse.rdf4j.repository.sail.SailRepository;
 import org.eclipse.rdf4j.sail.memory.MemoryStore;
-import scala.xml.XML;
 
 import java.math.BigInteger;
 import java.time.Instant;
@@ -47,6 +45,7 @@ public class Rdf4jAggrWriter extends AbstractSparqlAggrWriter {
     private IRI ownTimeAggr;
     private IRI ownBasicAggr;
     private IRI ownDiffAggr;
+    private IRI ownAvgAggr;
     private IRI muUUID;
 
     public Rdf4jAggrWriter(Repository repository, boolean writeProvenance) {
@@ -66,6 +65,7 @@ public class Rdf4jAggrWriter extends AbstractSparqlAggrWriter {
         this.ownTimeAggr = valueFactory.createIRI(OWN_CLASS, "TimeAggregation");
         this.ownBasicAggr = valueFactory.createIRI(OWN_CLASS, "BasicAggregation");
         this.ownDiffAggr = valueFactory.createIRI(OWN_CLASS, "DiffAggregation");
+        this.ownAvgAggr = valueFactory.createIRI(OWN_CLASS, "AverageAggregation");
         this.muUUID = valueFactory.createIRI(MU_PREFIX, "uuid");
     }
 
@@ -243,11 +243,66 @@ public class Rdf4jAggrWriter extends AbstractSparqlAggrWriter {
                 )
         );
 
+        // Subtrahend of the difference
         statements.add(
                 valueFactory.createStatement(
                         aggRes,
                         valueFactory.createIRI(OWN_PROPERTY, "subtrahend"),
-                        stringLiteral(aggregation.getSubtrahend())
+                        stringLiteral(aggregation.getOther())
+                )
+        );
+
+        // Key of the value to retrieve
+        statements.add(
+                valueFactory.createStatement(
+                        aggRes,
+                        valueFactory.createIRI(OWN_PROPERTY, "key"),
+                        stringLiteral(aggregation.getKey())
+                )
+        );
+
+        add(statements);
+    }
+
+    @Override
+    public void writeAggregation(AverageAggregation aggregation, AggrContext context) {
+        Set<Statement> statements = new HashSet<>();
+
+        Resource aggRes = aggregationWithId(aggregation.getUuid());
+        statements.addAll(aggregationStatements(aggregation, aggRes));
+
+        // Type of the aggregation
+        statements.add(
+                valueFactory.createStatement(
+                        aggRes,
+                        this.ownType,
+                        this.ownAvgAggr
+                )
+        );
+
+        statements.add(
+                valueFactory.createStatement(
+                        aggRes,
+                        valueFactory.createIRI(OWN_PROPERTY, "others"),
+                        stringLiteral(aggregation.getOthers())
+                )
+        );
+
+        // Key of the value to retrieve
+        statements.add(
+                valueFactory.createStatement(
+                        aggRes,
+                        valueFactory.createIRI(OWN_PROPERTY, "key"),
+                        stringLiteral(aggregation.getKey())
+                )
+        );
+
+        // Expected amount of measurements per data point
+        statements.add(
+                valueFactory.createStatement(
+                        aggRes,
+                        valueFactory.createIRI(OWN_PROPERTY, "amount"),
+                        valueFactory.createLiteral(BigInteger.valueOf(aggregation.getAmount()))
                 )
         );
 
@@ -257,22 +312,10 @@ public class Rdf4jAggrWriter extends AbstractSparqlAggrWriter {
     protected Collection<Statement> measurementStatements(Measurement measurement, Resource measRes) {
         Set<Statement> statements = new HashSet<>();
 
-/*        LocalDateTime timestamp = null;
-        if (measurement.getData().containsKey(DEFAULT_TIMESTAMP_KEY)) {
-            timestamp = (LocalDateTime) measurement.getData().get(DEFAULT_TIMESTAMP_KEY);
-        }*/
         String id = measurement.getUuid();
         Set<UniquelyIdentifiable> parents = measurement.getParents();
 
         // Types of the measurement
-/*        statements.add(
-                valueFactory.createStatement(
-                        measRes,
-                        RDF.TYPE,
-                        this.geoPoint
-                )
-        );*/
-
         statements.add(
                 valueFactory.createStatement(
                         measRes,

@@ -10,7 +10,7 @@ public class WeightedGeoMeasurement extends GeoMeasurement {
 
     public static final String WEIGHT_KEY = "weight";
 
-    private long weight;
+    private double weight;
 
     @Override
     public void setData(Map<String, Object> data) {
@@ -19,7 +19,7 @@ public class WeightedGeoMeasurement extends GeoMeasurement {
         if (weightObj != null) {
             String weightStr = String.valueOf(weightObj);
             if (StringUtils.isNotBlank(weightStr)) {
-                this.weight = Long.parseLong(weightStr);
+                this.weight = Double.parseDouble(weightStr);
             }
         }
 
@@ -28,7 +28,7 @@ public class WeightedGeoMeasurement extends GeoMeasurement {
     @Override
     public void setDatum(String key, Object value) {
         if (key.equalsIgnoreCase(WEIGHT_KEY)) {
-            this.weight = Long.parseLong(String.valueOf(value));
+            this.weight = Double.parseDouble(String.valueOf(value));
         } else {
             super.setDatum(key, value);
         }
@@ -90,7 +90,7 @@ public class WeightedGeoMeasurement extends GeoMeasurement {
             combined.setData(this.getData());
             combined.setVector(this.getVector());
 
-            combined.setDatum(WEIGHT_KEY, this.weight + (long) otherWeightObj.get());
+            combined.setDatum(WEIGHT_KEY, this.weight + (double) otherWeightObj.get());
             Set<UniquelyIdentifiable> parents = new HashSet<>();
             parents.add(this);
             parents.add(other);
@@ -106,7 +106,7 @@ public class WeightedGeoMeasurement extends GeoMeasurement {
         combined.setData(this.getData());
         combined.setVector(this.getVector());
 
-        long weightSum = this.weight;
+        double weightSum = this.weight;
 
         Set<UniquelyIdentifiable> parents = new HashSet<>();
         parents.add(this);
@@ -144,7 +144,9 @@ public class WeightedGeoMeasurement extends GeoMeasurement {
     @Override
     public int hashCode() {
         int result = super.hashCode();
-        result = 31 * result + (int) (weight ^ (weight >>> 32));
+        long temp;
+        temp = Double.doubleToLongBits(weight);
+        result = 31 * result + (int) (temp ^ (temp >>> 32));
         return result;
     }
 }

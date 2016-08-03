@@ -86,6 +86,13 @@ public class CompositeAggrWriter implements AggrResultWriter {
     }
 
     @Override
+    public void writeAverageAggregation(AggregationResult<AverageAggregation, Measurement> result, AggrContext context) {
+        dataWriter.writeMeasurements(result.getResults(), context);
+        result.getAggregation().setDataPath(dataPath);
+        metaWriter.writeAggregation(result.getAggregation(), context);
+    }
+
+    @Override
     public void writeDataset(Dataset dataset, AggrContext context) {
         metaWriter.writeDataset(dataset, context);
     }

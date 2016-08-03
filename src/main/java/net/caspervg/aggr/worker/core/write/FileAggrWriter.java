@@ -35,6 +35,11 @@ public abstract class FileAggrWriter extends AbstractAggrWriter {
     }
 
     @Override
+    public void writeAggregation(AverageAggregation aggregation, AggrContext context) {
+        notSupported();
+    }
+
+    @Override
     public void writeDataset(Dataset dataset, AggrContext context) {
         notSupported();
     }

@@ -1,12 +1,12 @@
-package net.caspervg.aggr.worker.diff;
+package net.caspervg.aggr.worker.average;
 
 import net.caspervg.aggr.core.AggrCommand;
 import net.caspervg.aggr.core.AverageAggrCommand;
-import net.caspervg.aggr.core.DiffAggrCommand;
 import net.caspervg.aggr.worker.core.AbstractAggregationExecution;
 import net.caspervg.aggr.worker.core.bean.Dataset;
 import net.caspervg.aggr.worker.core.bean.Measurement;
 import net.caspervg.aggr.worker.core.bean.aggregation.AggregationResult;
+import net.caspervg.aggr.worker.core.bean.aggregation.AverageAggregation;
 import net.caspervg.aggr.worker.core.bean.aggregation.DiffAggregation;
 import net.caspervg.aggr.worker.core.read.AbstractAggrReader;
 import net.caspervg.aggr.worker.core.util.AggrContext;
@@ -17,15 +17,16 @@ import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.concurrent.Callable;
+import java.util.stream.Collectors;
 
 import static net.caspervg.aggr.worker.core.write.AbstractAggrWriter.OUTPUT_PARAM_KEY;
 
-public class DiffAggregationExecution extends AbstractAggregationExecution {
-
+public class AverageAggregationExecution extends AbstractAggregationExecution {
+    
     private AggrCommand ac;
-    private DiffAggrCommand dac;
+    private AverageAggrCommand dac;
 
-    public DiffAggregationExecution(AggrCommand ac, DiffAggrCommand dac) {
+    public AverageAggregationExecution(AggrCommand ac, AverageAggrCommand dac) {
         this.ac = ac;
         this.dac = dac;
     }
@@ -35,31 +36,34 @@ public class DiffAggregationExecution extends AbstractAggregationExecution {
         Map<String, String> params = ac.getDynamicParameters();
         params.put(AbstractAggrReader.INPUT_PARAM_KEY, ac.getInput());
         params.put(OUTPUT_PARAM_KEY, ac.getOutput());
-        String other = dac.getOthers().get(0);
+        params.put(AbstractAverageAggregator.OTHERS_PARAM_KEY, String.join(",", dac.getOthers()));
+        params.put(AbstractAverageAggregator.AMOUNT_PARAM_KEY, String.valueOf(dac.getAmount()));
+        params.put(AbstractAverageAggregator.KEY_PARAM_KEY, dac.getKey());
 
-        params.put(AbstractDiffAggregator.OTHER_PARAM_KEY, other);
-        params.put(AbstractDiffAggregator.KEY_PARAM_KEY, dac.getKey());
-
-        DiffAggregator aggregator;
+        AverageAggregator aggregator;
         AggrContext ctx = createContext(params, ac);
 
-        Iterable<Measurement> subtrahends = getReader(other, ac, ctx).read(ctx);
+        Iterable<Iterable<Measurement>> others = dac.getOthers()
+                .parallelStream()
+                .map(other ->
+                    uncheckCall(() -> getReader(other, ac, ctx).read(ctx))
+                )
+                .collect(Collectors.toList());
 
         if (ac.isSpark()) {
-            aggregator = new SparkDiffAggregator(subtrahends);
+            aggregator = new SparkAverageAggregator(others);
         } else {
-            aggregator = new PlainDiffAggregator(subtrahends);
+            aggregator = new PlainAverageAggregator(others);
         }
 
         Dataset dataset = Dataset.Builder.setup().withTitle(ac.getDatasetId()).withUuid(ac.getDatasetId()).build();
-        Iterable<Measurement> minuends = getReader(ac, ctx).read(ctx);
-        Iterable<AggregationResult<DiffAggregation, Measurement>> results = aggregator.aggregate(dataset, minuends, ctx);
+        Iterable<AggregationResult<AverageAggregation, Measurement>> results = aggregator.aggregate(dataset, new ArrayList<>(), ctx);
 
         AggrResultWriter writer = null;
-        for (AggregationResult<DiffAggregation, Measurement> res : results) {
+        for (AggregationResult<AverageAggregation, Measurement> res : results) {
             writer = getWriter(res, ac, ctx);
 
-            writer.writeDiffAggregation(res, ctx);
+            writer.writeAverageAggregation(res, ctx);
         }
 
         if (writer != null) {

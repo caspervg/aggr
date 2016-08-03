@@ -12,52 +12,8 @@ import java.util.*;
 /**
  * Scans the triple store for new (not yet started) aggregation requested.
  */
+@SuppressWarnings("SqlNoDataSourceInspection")
 public class JenaAggrRequestReader {
-
-    @SuppressWarnings("SqlNoDataSourceInspection")
-/*    private static final String REQUEST_QUERY =
-            "PREFIX mu: <http://mu.semte.ch/vocabularies/core/>\n"+
-            "PREFIX own: <http://www.caspervg.net/test/property#>\n"+
-            "\n"+
-            "select distinct *\n"+
-            "where {\n"+
-            "  ?req mu:uuid ?id ;\n"+
-            "       own:input ?input ;\n"+
-            "       own:output ?output ;\n"+
-            "       own:aggregation_type ?aggregation_type ;\n"+
-            "       own:provenance ?provenance ;\n"+
-            "       own:status ?status ;\n"+
-            "       own:big_data ?big_data .\n"+
-            "\n"+
-            "  OPTIONAL {\n"+
-            "    ?req own:environment ?env .\n"+
-            "\n"+
-            "    OPTIONAL { ?env own:hdfs ?hdfs }\n"+
-            "    OPTIONAL { ?env own:spark ?spark }\n"+
-            "  }\n"+
-            "\n"+
-            "  OPTIONAL {\n"+
-            "    ?req own:parameters ?param .\n"+
-            "\n"+
-            "    OPTIONAL { ?params own:iterations ?iterations }\n"+
-            "    OPTIONAL { ?params own:centroids ?centroids }\n"+
-            "    OPTIONAL { ?params own:metric ?metric }\n"+
-            "    OPTIONAL { ?params own:levels ?levels }\n"+
-            "    OPTIONAL { ?params own:grid_size ?grid_size }\n"+
-            "\n"+
-            "    OPTIONAL {\n"+
-            "      ?params own:dynamic ?dyn .\n"+
-            "\n"+
-            "      OPTIONAL { ?dyn own:query ?query }\n"+
-            "      OPTIONAL { ?dyn own:latitude_key ?latitude_key }\n"+
-            "      OPTIONAL { ?dyn own:longitude_key ?longitude_key }\n"+
-            "      OPTIONAL { ?dyn own:id_key ?id_key }\n"+
-            "      OPTIONAL { ?dyn own:time_key ?time_key }\n"+
-            "      OPTIONAL { ?dyn own:source_key ?source_key }\n"+
-            "    }\n"+
-            "  }\n"+
-            "  FILTER(str(?status) = \"not_started\")\n"+
-            "}";*/
 
     private static final String REQUEST_QUERY = "PREFIX mu: <http://mu.semte.ch/vocabularies/core/>\n"+
             "PREFIX own: <http://www.caspervg.net/test/property#>\n"+
@@ -83,7 +39,9 @@ public class JenaAggrRequestReader {
             "    OPTIONAL { ?req own:metric ?metric }\n"+
             "    OPTIONAL { ?req own:levels ?levels }\n"+
             "    OPTIONAL { ?req own:grid_size ?grid_size }\n"+
-            "    OPTIONAL { ?req own:subtrahends ?subtrahends }\n"+
+            "    OPTIONAL { ?req own:others ?others }\n" +
+            "    OPTIONAL { ?req own:amount ?amount }\n" +
+            "    OPTIONAL { ?req own:key ?key }\n"+
             "\n"+
             "    OPTIONAL { ?req own:query ?query }\n"+
             "    OPTIONAL { ?req own:latitude_key ?latitude_key }\n"+
@@ -116,7 +74,9 @@ public class JenaAggrRequestReader {
                             .metric(rs.getString("metric"))
                             .levels(rs.getInt("levels"))
                             .gridSize(parseDouble(rs.getString("grid_size")))
-                            .subtrahendString(rs.getString("subtrahends"))
+                            .othersString(rs.getString("others"))
+                            .amount(rs.getLong("amount"))
+                            .key(rs.getString("key"))
                             .dynamic(getDynamicParameters(rs))
                             .build();
 

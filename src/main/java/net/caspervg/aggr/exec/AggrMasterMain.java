@@ -6,6 +6,7 @@ import net.caspervg.aggr.master.bean.AggregationRequest;
 import net.caspervg.aggr.master.bean.Rdf4jAggrRequestUpdater;
 import net.caspervg.aggr.worker.basic.BasicAggregationExecution;
 import net.caspervg.aggr.worker.core.util.untyped.UntypedSPARQLRepository;
+import net.caspervg.aggr.worker.average.AverageAggregationExecution;
 import net.caspervg.aggr.worker.diff.DiffAggregationExecution;
 import net.caspervg.aggr.worker.grid.GridAggregationExecution;
 import net.caspervg.aggr.worker.kmeans.KMeansAggregationExecution;
@@ -67,6 +68,18 @@ public class AggrMasterMain {
                                 new TimeAggregationExecution(mainCommand, timeCommand).execute();
                                 updater.updateStatus(request.getId(), "success");
                             } catch (Exception e) {
+                                e.printStackTrace();
+                                updater.updateStatus(request.getId(), "failure");
+                            }
+                        }).start();
+                        break;
+                    case "average":
+                        AverageAggrCommand avgCommand = AverageAggrCommand.of(request);
+                        new Thread(() -> {
+                            try {
+                                new AverageAggregationExecution(mainCommand, avgCommand).execute();
+                                updater.updateStatus(request.getId(), "success");
+                            } catch (Exception e){
                                 e.printStackTrace();
                                 updater.updateStatus(request.getId(), "failure");
                             }

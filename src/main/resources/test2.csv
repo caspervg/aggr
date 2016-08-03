@@ -1,0 +1,5 @@
+id,source,latitude,longitude,weight
+2a,0a,1.0,1.0,30
+2b,0b,2.0,2.0,40
+2c,0c,3.0,3.0,100
+2d,0d,4.0,4.0,10

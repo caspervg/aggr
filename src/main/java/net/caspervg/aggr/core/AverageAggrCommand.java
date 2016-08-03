@@ -5,7 +5,7 @@ import net.caspervg.aggr.master.bean.AggregationRequest;
 
 import java.util.List;
 
-public class DiffAggrCommand {
+public class AverageAggrCommand {
     @Parameter(
             names = {"-s", "--others"},
             description = "Input files (CSV) with other data to calculate average with",
@@ -13,6 +13,13 @@ public class DiffAggrCommand {
             variableArity = true
     )
     private List<String> others;
+
+    @Parameter(
+            names = {"-n", "--amount"},
+            description = "Amount of measurements expected for a single point (generally this should be #{others}+1)",
+            required = true
+    )
+    private long amount;
 
     @Parameter(
             names = {"-k", "--key"},
@@ -25,16 +32,21 @@ public class DiffAggrCommand {
         return others;
     }
 
+    public long getAmount() {
+        return amount;
+    }
+
     public String getKey() {
         return key;
     }
 
-    public static DiffAggrCommand of(AggregationRequest req) {
-        DiffAggrCommand command = new DiffAggrCommand();
+    public static AverageAggrCommand of(AggregationRequest req) {
+        AverageAggrCommand command = new AverageAggrCommand();
 
         assert req.getAggregationType().equalsIgnoreCase("avg");
 
         command.others = req.getParameters().getOthers();
+        command.amount = req.getParameters().getAmount();
         command.key = req.getParameters().getKey();
 
         return command;

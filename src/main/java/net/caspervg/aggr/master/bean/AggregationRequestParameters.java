@@ -12,22 +12,28 @@ public class AggregationRequestParameters {
     private String metric;
     private int levels;
     private double gridSize;
-    private List<String> subtrahends;
+    private List<String> others;
+    private long amount;
     private Map<String, String> dynamic;
+    private String key;
 
     private AggregationRequestParameters(int iterations,
                                          int centroids,
                                          String metric,
                                          int levels,
                                          double gridSize,
-                                         List<String> subtrahends,
+                                         List<String> others,
+                                         long amount,
+                                         String key,
                                          Map<String, String> dynamic) {
         this.iterations = iterations;
         this.centroids = centroids;
         this.metric = metric;
         this.levels = levels;
         this.gridSize = gridSize;
-        this.subtrahends = subtrahends;
+        this.others = others;
+        this.amount = amount;
+        this.key = key;
         this.dynamic = dynamic;
     }
 
@@ -51,8 +57,8 @@ public class AggregationRequestParameters {
         return gridSize;
     }
 
-    public List<String> getSubtrahends() {
-        return subtrahends;
+    public List<String> getOthers() {
+        return others;
     }
 
     public Map<String, String> getDynamic() {
@@ -70,6 +76,14 @@ public class AggregationRequestParameters {
                 '}';
     }
 
+    public long getAmount() {
+        return amount;
+    }
+
+    public String getKey() {
+        return key;
+    }
+
     public static final class Builder {
         private int iterations;
         private int centroids;
@@ -77,7 +91,9 @@ public class AggregationRequestParameters {
         private int levels;
         private double gridSize;
         private Map<String, String> dynamic;
-        private List<String> subtrahends;
+        private List<String> others;
+        private long amount;
+        private String key;
 
         private Builder() {
         }
@@ -117,15 +133,25 @@ public class AggregationRequestParameters {
         }
 
         public AggregationRequestParameters build() {
-            return new AggregationRequestParameters(iterations, centroids, metric, levels, gridSize, subtrahends, dynamic);
+            return new AggregationRequestParameters(iterations, centroids, metric, levels, gridSize, others, amount, key, dynamic);
         }
 
-        public Builder subtrahendString(String subtrahend) {
+        public Builder othersString(String subtrahend) {
             if (Objects.nonNull(subtrahend)) {
-                this.subtrahends = Lists.newArrayList(subtrahend.split(","));
+                this.others = Lists.newArrayList(subtrahend.split(","));
             } else {
-                this.subtrahends = Lists.newArrayList();
+                this.others = Lists.newArrayList();
             }
+            return this;
+        }
+
+        public Builder amount(long amount) {
+            this.amount = amount;
+            return this;
+        }
+
+        public Builder key(String key) {
+            this.key = key;
             return this;
         }
     }

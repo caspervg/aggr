@@ -5,6 +5,9 @@ import net.caspervg.aggr.worker.core.bean.Measurement;
 import net.caspervg.aggr.worker.core.bean.aggregation.*;
 import net.caspervg.aggr.worker.core.util.AggrContext;
 
+/**
+ * TODO: Could be simplified by using more OOP: let Aggregation objects write themselves
+ */
 public interface AggrWriter {
     /**
      * Writes a measurement to the channel
@@ -63,10 +66,19 @@ public interface AggrWriter {
     void writeAggregation(DiffAggregation aggregation, AggrContext context);
 
     /**
+     * Writes a average aggregation to the channel
+     *
+     * @param aggregation Aggregation to write
+     * @param context Context of the operation
+     */
+    void writeAggregation(AverageAggregation aggregation, AggrContext context);
+
+    /**
      * Writes a dataset to the channel
      *
      * @param dataset Dataset to write
      * @param context Context of the operation
      */
     void writeDataset(Dataset dataset, AggrContext context);
+
 }
