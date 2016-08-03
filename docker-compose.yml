@@ -125,7 +125,7 @@ services:
     volumes:
       - ./config:/config
     links:
-      - resource:resource
+      - cache:cache
     ports:
       - 8881:80
   aggr_web:
@@ -151,6 +151,12 @@ services:
         - database:database
       volumes:
         - ./config/resources:/config
+  cache:
+      image: semtech/mu-cache:0.1.0
+      links:
+        - resource:resource
+      environment:
+        CACHE_BACKEND: http://resource/
   pipeline:
     image: bde2020/mu-pipeline-service:0.1.0
   initdaemon:

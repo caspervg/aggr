@@ -29,20 +29,16 @@ defmodule Dispatcher do
     Proxy.forward conn, path, "http://aggr_web/aggregations/"
   end
 
-  match "/centroids/*path" do
-    Proxy.forward conn, path, "http://resource/centroids/"
-  end
-
   match "/datasets/*path" do
-    Proxy.forward conn, path, "http://resource/datasets/"
+    Proxy.forward conn, path, "http://cache/datasets/"
   end
 
   match "/aggregations/*path" do
-    Proxy.forward conn, path, "http://resource/aggregations/"
+    Proxy.forward conn, path, "http://cache/aggregations/"
   end
 
   match "/measurements/*path" do
-    Proxy.forward conn, path, "http://resource/measurements/"
+    Proxy.forward conn, path, "http://cache/measurements/"
   end
 
   match _ do

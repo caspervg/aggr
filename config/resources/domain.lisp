@@ -1,5 +1,11 @@
 (in-package :mu-cl-resources)
 
+(defparameter *camelcase-json-variables* nil
+  "when non-nil, json variable names should be camelcased, rather than dasherized.")
+
+(defparameter *supply-cache-headers-p* t
+  "when non-nil, cache headers are supplied.  this works together with mu-cache.")
+
 (define-resource measurement ()
   :class (s-prefix "casc:Measurement")
   :properties `((longitude :number ,(s-prefix "casp:longitude"))
@@ -19,12 +25,12 @@
   :properties `(
                 ;; KMeans
                 (iterations :number ,(s-prefix "casp:iterations"))
-                (numCentroids :number ,(s-prefix "casp:num_centroids"))
+                (num-centroids :number ,(s-prefix "casp:num_centroids"))
                 ;; Time
                 (start :string ,(s-prefix "casp:start"))
                 (end :string ,(s-prefix "casp:end"))
                 ;; Grid
-                (gridSize :number ,(s-prefix "casp:grid_size"))
+                (grid-size :number ,(s-prefix "casp:grid_size"))
                 ;; Diff
                 ;; Global
                 (type :uri ,(s-prefix "casp:aggregation_type"))
