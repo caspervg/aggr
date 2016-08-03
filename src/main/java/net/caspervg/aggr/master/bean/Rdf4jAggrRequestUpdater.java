@@ -9,7 +9,6 @@ import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
 import org.eclipse.rdf4j.repository.Repository;
 import org.eclipse.rdf4j.repository.RepositoryConnection;
 
-import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 

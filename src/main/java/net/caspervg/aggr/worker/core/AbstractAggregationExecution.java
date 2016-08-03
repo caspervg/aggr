@@ -1,16 +1,18 @@
 package net.caspervg.aggr.worker.core;
 
+import net.caspervg.aggr.core.AggrCommand;
 import net.caspervg.aggr.worker.core.bean.aggregation.AbstractAggregation;
 import net.caspervg.aggr.worker.core.bean.aggregation.AggregationResult;
 import net.caspervg.aggr.worker.core.read.AggrReader;
 import net.caspervg.aggr.worker.core.read.CsvAggrReader;
 import net.caspervg.aggr.worker.core.read.JenaAggrReader;
-import net.caspervg.aggr.core.AggrCommand;
 import net.caspervg.aggr.worker.core.util.AggrContext;
 import net.caspervg.aggr.worker.core.util.untyped.UntypedSPARQLRepository;
 import net.caspervg.aggr.worker.core.write.*;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.hadoop.fs.*;
+import org.apache.hadoop.fs.FSDataOutputStream;
+import org.apache.hadoop.fs.FileSystem;
+import org.apache.hadoop.fs.Path;
 import org.apache.spark.SparkConf;
 import org.apache.spark.SparkContext;
 import org.apache.spark.api.java.JavaSparkContext;

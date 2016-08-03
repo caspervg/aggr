@@ -4,7 +4,6 @@ import net.caspervg.aggr.worker.core.bean.Dataset;
 import net.caspervg.aggr.worker.core.bean.Measurement;
 import net.caspervg.aggr.worker.core.bean.aggregation.AggregationResult;
 import net.caspervg.aggr.worker.core.bean.aggregation.AverageAggregation;
-import net.caspervg.aggr.worker.core.bean.aggregation.DiffAggregation;
 import net.caspervg.aggr.worker.core.util.AggrContext;
 
 import java.util.HashSet;

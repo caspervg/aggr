@@ -7,8 +7,6 @@ import java.time.LocalDateTime;
 import java.util.Comparator;
 import java.util.Optional;
 
-import static net.caspervg.aggr.worker.core.util.Constants.DEFAULT_TIMESTAMP_KEY;
-
 public class TimedMeasurementComparator implements Comparator<Measurement>, Serializable {
     @SuppressWarnings("OptionalGetWithoutIsPresent")
     @Override

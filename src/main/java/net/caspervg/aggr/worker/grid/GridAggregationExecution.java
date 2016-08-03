@@ -1,21 +1,17 @@
 package net.caspervg.aggr.worker.grid;
 
+import net.caspervg.aggr.core.AggrCommand;
+import net.caspervg.aggr.core.GridAggrCommand;
 import net.caspervg.aggr.worker.core.AbstractAggregationExecution;
 import net.caspervg.aggr.worker.core.bean.Dataset;
 import net.caspervg.aggr.worker.core.bean.Measurement;
 import net.caspervg.aggr.worker.core.bean.aggregation.AggregationResult;
 import net.caspervg.aggr.worker.core.bean.aggregation.GridAggregation;
 import net.caspervg.aggr.worker.core.read.AbstractAggrReader;
-import net.caspervg.aggr.core.AggrCommand;
 import net.caspervg.aggr.worker.core.util.AggrContext;
 import net.caspervg.aggr.worker.core.write.AggrResultWriter;
-import net.caspervg.aggr.core.GridAggrCommand;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.hadoop.fs.FileSystem;
-import org.apache.spark.api.java.JavaSparkContext;
 
 import java.io.IOException;
-import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Map;
 

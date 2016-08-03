@@ -1,7 +1,6 @@
 package net.caspervg.aggr.worker.diff;
 
 import net.caspervg.aggr.core.AggrCommand;
-import net.caspervg.aggr.core.AverageAggrCommand;
 import net.caspervg.aggr.core.DiffAggrCommand;
 import net.caspervg.aggr.worker.core.AbstractAggregationExecution;
 import net.caspervg.aggr.worker.core.bean.Dataset;
@@ -14,7 +13,6 @@ import net.caspervg.aggr.worker.core.write.AggrResultWriter;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
-import java.util.ArrayList;
 import java.util.Map;
 import java.util.concurrent.Callable;
 

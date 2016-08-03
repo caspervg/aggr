@@ -14,7 +14,10 @@ import org.apache.spark.api.java.function.Function;
 import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
-import java.util.*;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 public class SparkTimeAggregator extends AbstractTimeAggregator implements Serializable {

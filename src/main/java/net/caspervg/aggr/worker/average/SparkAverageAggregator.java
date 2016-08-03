@@ -9,7 +9,6 @@ import net.caspervg.aggr.worker.core.bean.Measurement;
 import net.caspervg.aggr.worker.core.bean.UniquelyIdentifiable;
 import net.caspervg.aggr.worker.core.bean.aggregation.AggregationResult;
 import net.caspervg.aggr.worker.core.bean.aggregation.AverageAggregation;
-import net.caspervg.aggr.worker.core.bean.impl.WeightedGeoMeasurement;
 import net.caspervg.aggr.worker.core.util.AggrContext;
 import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.JavaRDD;
@@ -18,7 +17,10 @@ import org.apache.spark.api.java.function.Function;
 import scala.Tuple2;
 
 import java.io.Serializable;
-import java.util.*;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
 import java.util.stream.StreamSupport;
 
 public class SparkAverageAggregator extends AbstractAverageAggregator implements Serializable {

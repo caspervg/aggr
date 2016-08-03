@@ -4,8 +4,6 @@ import com.beust.jcommander.Parameter;
 import com.beust.jcommander.Parameters;
 import net.caspervg.aggr.master.bean.AggregationRequest;
 
-import java.util.HashMap;
-
 @Parameters(commandDescription = "Aggregate the data by rounding to a grid")
 public class GridAggrCommand {
 

@@ -1,12 +1,13 @@
 package net.caspervg.aggr.worker.grid;
 
 import com.google.common.collect.Lists;
-import net.caspervg.aggr.worker.core.bean.*;
+import net.caspervg.aggr.worker.core.bean.Dataset;
+import net.caspervg.aggr.worker.core.bean.Measurement;
+import net.caspervg.aggr.worker.core.bean.UniquelyIdentifiable;
 import net.caspervg.aggr.worker.core.bean.aggregation.AggregationResult;
 import net.caspervg.aggr.worker.core.bean.aggregation.GridAggregation;
 import net.caspervg.aggr.worker.core.util.AggrContext;
 
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;

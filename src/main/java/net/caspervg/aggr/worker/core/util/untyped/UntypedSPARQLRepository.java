@@ -7,16 +7,8 @@
  *******************************************************************************/
 package net.caspervg.aggr.worker.core.util.untyped;
 
-import java.io.File;
-import java.util.Collections;
-import java.util.Map;
-
 import org.apache.http.client.HttpClient;
-import org.eclipse.rdf4j.http.client.HttpClientDependent;
-import org.eclipse.rdf4j.http.client.SesameClient;
-import org.eclipse.rdf4j.http.client.SesameClientDependent;
-import org.eclipse.rdf4j.http.client.SesameClientImpl;
-import org.eclipse.rdf4j.http.client.SparqlSession;
+import org.eclipse.rdf4j.http.client.*;
 import org.eclipse.rdf4j.model.ValueFactory;
 import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
 import org.eclipse.rdf4j.query.resultio.TupleQueryResultFormat;
@@ -25,6 +17,10 @@ import org.eclipse.rdf4j.repository.RepositoryException;
 import org.eclipse.rdf4j.repository.base.AbstractRepository;
 import org.eclipse.rdf4j.repository.sparql.SPARQLConnection;
 import org.eclipse.rdf4j.repository.sparql.SPARQLRepository;
+
+import java.io.File;
+import java.util.Collections;
+import java.util.Map;
 
 /**
  * A proxy class to access any SPARQL endpoint, that allows inserting
