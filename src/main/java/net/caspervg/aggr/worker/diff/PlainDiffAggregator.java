@@ -15,6 +15,6 @@ public class PlainDiffAggregator extends AbstractDiffAggregator {
     @Deprecated
     @Override
     public Iterable<AggregationResult<DiffAggregation, Measurement>> aggregate(Dataset dataset, Iterable<Measurement> minuends, AggrContext context) {
-        return null;
+        throw new UnsupportedOperationException("Not yet implemented");
     }
 }
