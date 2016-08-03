@@ -32,6 +32,12 @@
                 ;; Grid
                 (grid-size :number ,(s-prefix "casp:grid_size"))
                 ;; Diff
+                (subtrahend :string ,(s-prefix "casp:subtrahend"))
+                ;; Average
+                (components :string ,(s-prefix "casp:others"))
+                (amount :number ,(s-prefix "casp:amount"))
+                ;; Diff & Average
+                (aggregation-key :string ,(s-prefix "casp:key"))
                 ;; Global
                 (type :uri ,(s-prefix "casp:aggregation_type"))
                 (location :string ,(s-prefix "dct:references"))
