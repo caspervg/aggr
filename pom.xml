@@ -6,7 +6,7 @@
 
     <groupId>net.caspervg</groupId>
     <artifactId>aggr</artifactId>
-    <version>0.9.0</version>
+    <version>0.9.1</version>
 
     <properties>
         <!-- need 1.6.2 for compatibility with the Spark-Master and Spark-Worker dockers -->
@@ -127,7 +127,7 @@
                 <configuration>
                     <archive>
                         <manifest>
-                            <mainClass>net.caspervg.aggr.exec.AggrMasterMain</mainClass>
+                            <mainClass>net.caspervg.aggr.master.AggrMasterMain</mainClass>
                         </manifest>
                     </archive>
                 </configuration>

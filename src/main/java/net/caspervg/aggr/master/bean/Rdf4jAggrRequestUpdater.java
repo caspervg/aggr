@@ -1,6 +1,6 @@
 package net.caspervg.aggr.master.bean;
 
-import net.caspervg.aggr.worker.core.util.untyped.UntypedLiteral;
+import net.caspervg.aggr.worker.write.untyped.UntypedLiteral;
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Resource;
 import org.eclipse.rdf4j.model.Statement;
@@ -12,7 +12,7 @@ import org.eclipse.rdf4j.repository.RepositoryConnection;
 import java.util.HashSet;
 import java.util.Set;
 
-import static net.caspervg.aggr.worker.core.util.Constants.DEFAULT_GRAPH;
+import static net.caspervg.aggr.core.util.Constants.DEFAULT_GRAPH;
 
 public class Rdf4jAggrRequestUpdater {
 
