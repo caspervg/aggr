@@ -68,7 +68,6 @@ public class SparkAverageAggregator extends AbstractAverageAggregator implements
 
 
         Map<Integer, Iterable<Measurement>> groupMap = otherGroups.collectAsMap();
-        Map<Integer, Double> averageMap = averages.collectAsMap();
 
         JavaRDD<Measurement> avgMeasRDD = averages.map(new Function<Tuple2<Integer, Double>, Measurement>() {
             @Override
