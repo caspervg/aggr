@@ -130,7 +130,7 @@ services:
     ports:
       - 8881:80
   aggr_web:
-    image: caspervg/aggr_web
+    image: caspervg/aggr-web
     volumes:
       - ./data/logs:/logs
     ports:
