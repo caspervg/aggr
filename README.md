@@ -136,33 +136,33 @@ Usage: <main class> [options] [command] [command options]
       * Parameters:
           * num_detail: `2^(number of detail levels wanted)` (default `8`)
   * **Grid**
-    * Rounds the vector components down so that they will fit into a grid
-    * Currently, having a different grid sensitivity for each component is not possible, all components are rounded to the same grid
-    * Spark and plain Java supported
-    * Parameters:
-      * grid_size: sensitivity of the grid (default `0.0005`)
+      * Rounds the vector components down so that they will fit into a grid
+      * Currently, having a different grid sensitivity for each component is not possible, all components are rounded to the same grid
+      * Spark and plain Java supported
+      * Parameters:
+          * grid_size: sensitivity of the grid (default `0.0005`)
   * **Basic**
-    * Combination
-      * Loops over the input data set and tries to find measurements that can be somehow combined (e.g. because they have the same vector).
-      * The requirements for combination & the logic for the combination itself are set in the `core.bean.Combinable` interface.
-      * Only plain Java supported currently
-      * Parameters: *nihil*
+      * Combination
+          * Loops over the input data set and tries to find measurements that can be somehow combined (e.g. because they have the same vector).
+          * The requirements for combination & the logic for the combination itself are set in the `core.bean.Combinable` interface.
+          * Only plain Java supported currently
+          * Parameters: *nihil*
   * **Difference**
-    * Calculates the difference between measurements from input dataset (the `minuends`) and those from the *other* dataset (the `subtrahends`).
-    * Only Spark supported currently
-    * Uses the method `Combinable#combinationHash` to determine which measurements to subtract
-    * Parameters:
-      * other: location of a CSV file containing the subtrahends
-      * key: key to use to retrieve the component that will be subtracted (default `weight`)
+      * Calculates the difference between measurements from input dataset (the `minuends`) and those from the *other* dataset (the `subtrahends`).
+      * Only Spark supported currently
+      * Uses the method `Combinable#combinationHash` to determine which measurements to subtract
+      * Parameters:
+         * other: location of a CSV file containing the subtrahends
+         * key: key to use to retrieve the component that will be subtracted (default `weight`)
   * **Average**
-    * Calculates the average of a certain component from all measurements in the given collection of datasets.
-    * uses the method `Combinable#combinationHash` to determine which measurements to subtract
-    * Only Spark supported currently
+      * Calculates the average of a certain component from all measurements in the given collection of datasets.
+      * uses the method `Combinable#combinationHash` to determine which measurements to subtract
+      * Only Spark supported currently
   * **KMeans**
-    * Executes a [k-Means](https://en.wikipedia.org/wiki/K-means_clustering) algorithm to determine centroids (means) for the vectors from all measurements in the input dataset.
-    * Albeit not yet integrated, several algorithms are provided for the initial seeding, to determine if it's time to end iterating and to select the optimal number of clusters. Information about the specifics behind each algorithm is available in the `Javadoc` of each strategy.
-    * Supports both Spark (`SparkKMeansClusterAggregator`, using [Spark.MLLib](http://spark.apache.org/docs/latest/mllib-clustering.html#k-means)) and plain Java. An alternative version (`SparkKMeansAggregator`) using just Spark is also available; it has an unsolved bug/useful feature where it returns less centroids than requested if at any time they became uninhabited.
-    * Parameters:
-      * num_centroids: number of centroids to find (default `25`)
-      * max_iterations: maximum number of iterations to use (default `50`). Implementations may stop earlier if they determine that some other stop condition has been met.
-      * metric: distance metric to use to calculate distance between measurements and centroids (default `EUCLIDEAN`). Note that setting this parameters has no effect when using the Spark MLLib k-Means aggregator; as it does not offer this level of customisation.
+      * Executes a [k-Means](https://en.wikipedia.org/wiki/K-means_clustering) algorithm to determine centroids (means) for the vectors from all measurements in the input dataset.
+      * Albeit not yet integrated, several algorithms are provided for the initial seeding, to determine if it's time to end iterating and to select the optimal number of clusters. Information about the specifics behind each algorithm is available in the `Javadoc` of each strategy.
+      * Supports both Spark (`SparkKMeansClusterAggregator`, using [Spark.MLLib](http://spark.apache.org/docs/latest/mllib-clustering.html#k-means)) and plain Java. An alternative version (`SparkKMeansAggregator`) using just Spark is also available; it has an unsolved bug/useful feature where it returns less centroids than requested if at any time they became uninhabited.
+      * Parameters:
+          * num_centroids: number of centroids to find (default `25`)
+          * max_iterations: maximum number of iterations to use (default `50`). Implementations may stop earlier if they determine that some other stop condition has been met.
+         * metric: distance metric to use to calculate distance between measurements and centroids (default `EUCLIDEAN`). Note that setting this parameters has no effect when using the Spark MLLib k-Means aggregator; as it does not offer this level of customisation.
