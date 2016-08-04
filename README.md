@@ -128,13 +128,13 @@ Usage: <main class> [options] [command] [command options]
 #### Aggregation
 * Contains the supported aggregations, generally with options for both Spark and normal Java.
   * **Time**
-    * Retrieves the maximum and minimum timestamp from the input data
-    * Iteratively divides the data into sections (based on start- and end time) with more detail
-    * Filters the data so that only measurements within the time slot are kept
-    * Outputs a new aggregation with only the filtered measurements and information about the start- and end time of the used time slot, as well as the maximum allowed detail.
-    * Spark and plain Java supported
-    * Parameters:
-      * num_detail: `2^(number of detail levels wanted)` (default `8`)
+      * Retrieves the maximum and minimum timestamp from the input data
+      * Iteratively divides the data into sections (based on start- and end time) with more detail
+      * Filters the data so that only measurements within the time slot are kept
+      * Outputs a new aggregation with only the filtered measurements and information about the start- and end time of the used time slot, as well as the maximum allowed detail.
+      * Spark and plain Java supported
+      * Parameters:
+          * num_detail: `2^(number of detail levels wanted)` (default `8`)
   * **Grid**
     * Rounds the vector components down so that they will fit into a grid
     * Currently, having a different grid sensitivity for each component is not possible, all components are rounded to the same grid
