@@ -1,10 +1,12 @@
 package net.caspervg.aggr.worker.command;
 
 import com.beust.jcommander.Parameter;
+import com.beust.jcommander.Parameters;
 import net.caspervg.aggr.master.bean.AggregationRequest;
 
 import java.util.List;
 
+@Parameters(commandDescription = "Aggregate the data by taking the average of a certain data point")
 public class AverageAggrCommand {
     @Parameter(
             names = {"-s", "--others"},
@@ -43,7 +45,7 @@ public class AverageAggrCommand {
     public static AverageAggrCommand of(AggregationRequest req) {
         AverageAggrCommand command = new AverageAggrCommand();
 
-        assert req.getAggregationType().equalsIgnoreCase("avg");
+        assert req.getAggregationType().equalsIgnoreCase("average");
 
         command.others = req.getParameters().getOthers();
         command.amount = req.getParameters().getAmount();

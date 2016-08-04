@@ -27,10 +27,17 @@ public class AggrWorkerMain {
         jc.addCommand("kmeans", kac);
         BasicCommand bac = new BasicCommand();
         jc.addCommand("combination", bac);
-        AverageAggrCommand dac = new AverageAggrCommand();
-        jc.addCommand("average", dac);
+        AverageAggrCommand aac = new AverageAggrCommand();
+        jc.addCommand("average", aac);
+        DiffAggrCommand dac = new DiffAggrCommand();
+        jc.addCommand("diff", dac);
 
         jc.parse(args);
+
+        if (ac.isHelp()) {
+            jc.usage();
+            return;
+        }
 
         if (jc.getParsedCommand() == null) {
             jc.usage();
@@ -41,7 +48,7 @@ public class AggrWorkerMain {
                 "grid",   new GridAggregationExecution(ac, gac),
                 "time",   new TimeAggregationExecution(ac, tac),
                 "kmeans", new KMeansAggregationExecution(ac, kac),
-                "average", new AverageAggregationExecution(ac, dac)
+                "average", new AverageAggregationExecution(ac, aac)
         );
 
         executionMap.getOrDefault(

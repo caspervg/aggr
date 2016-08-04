@@ -28,6 +28,9 @@ public class AggrCommand {
         HDFS_URL = Optional.ofNullable(System.getenv("HDFS_URL")).orElse("");
     }
 
+    @Parameter(names = "--help", description = "Show this help message", help = true)
+    private boolean help = false;
+
     @Parameter(names = {"-i", "--input"}, description = "Input file (CSV) or SPARQL endpoint to retrieve source data from")
     private String input = "";
 
@@ -58,6 +61,10 @@ public class AggrCommand {
     @DynamicParameter(names ={"-D"}, description = "Additional dynamic parameters that could be useful for some " +
             "aggregation command, data reader and/or writer. e.g. 'query', 'latitude_key', ...")
     protected Map<String, String> dynamicParameters = new HashMap<>();
+
+    public boolean isHelp() {
+        return help;
+    }
 
     public String getSparkMasterUrl() {
         return SPARK_URL;

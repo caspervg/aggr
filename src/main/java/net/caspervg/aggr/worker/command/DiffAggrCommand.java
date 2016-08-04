@@ -1,10 +1,12 @@
 package net.caspervg.aggr.worker.command;
 
 import com.beust.jcommander.Parameter;
+import com.beust.jcommander.Parameters;
 import net.caspervg.aggr.master.bean.AggregationRequest;
 
 import java.util.List;
 
+@Parameters(commandDescription = "Aggregate the data by taking the difference between a certain data point and another")
 public class DiffAggrCommand {
     @Parameter(
             names = {"-s", "--others"},
@@ -32,7 +34,7 @@ public class DiffAggrCommand {
     public static DiffAggrCommand of(AggregationRequest req) {
         DiffAggrCommand command = new DiffAggrCommand();
 
-        assert req.getAggregationType().equalsIgnoreCase("avg");
+        assert req.getAggregationType().equalsIgnoreCase("diff");
 
         command.others = req.getParameters().getOthers();
         command.key = req.getParameters().getKey();
