@@ -23,12 +23,15 @@ import java.util.Collections;
 import java.util.Map;
 
 /**
+ * {@inheritDoc}
+ *
  * A proxy class to access any SPARQL endpoint, that allows inserting
  * simple (untyped) literals into the SPARQL store. Necessary for a hack in RDF4J to allow simple literal insertion.
  * The instance must be initialized prior to using it.
  *
  * @see AbstractRepository#initialize()
  * @author James Leigh
+ * @author Casper Van Gheluwe
  */
 public class UntypedSPARQLRepository extends AbstractRepository
         implements HttpClientDependent, SesameClientDependent

@@ -48,6 +48,8 @@ import java.util.List;
 import static org.eclipse.rdf4j.query.QueryLanguage.SPARQL;
 
 /**
+ * {@inheritDoc}
+ *
  * Provides a {@link RepositoryConnection} interface to any SPARQL endpoint, that allows inserting
  * simple (untyped) literals into the SPARQL store. Necessary for a hack in RDF4J to allow simple literal insertion.
  *
