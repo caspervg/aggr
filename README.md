@@ -194,6 +194,10 @@ This project can be built using the *Maven* build system, using the command: `mv
 A **Docker configuration** (`Dockerfile`) is provided, based on [bde2020/spark-java-template](https://github.com/big-data-europe/docker-spark). When ran, it will automatically start the `Spark-Master`, which will begin polling for new aggregation requests in the triple-store.
 
 A **Docker-Compose configuration** (`docker-compose.yml`) is also provided, which will set up an entire environment for the execution (including, but not limited to, a triple-store, a automatic JSON API compliant HTTP server for the datasets, aggregations and measurements, a HDFS file browser and a Spark Master and Worker instance). Using it is recommended for development and deployment. It was based on the configuration of [big-data-europe/demo-spark-sensor-data](https://github.com/big-data-europe/demo-spark-sensor-data).
+  * Port 80: HDFS filebrowser, pipeline monitor, Spark monitors, HDFS monitor
+  * Port 8890: SPARQL endpoint (`http://localhost:8890/sparql`)
+  * Port 8880: Aggr-Web endpoint (`http://localhost:8880/aggregations`)
+  * Port 8881: JSON API endpoint (`http://localhost:8881/datasets`)
 
 ### Tests
 Some basic unit tests are provided to check if the `AggrReader` and `AggrWriter` implementations work correctly.
