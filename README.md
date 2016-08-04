@@ -152,12 +152,16 @@ Usage: <main class> [options] [command] [command options]
       * Only Spark supported currently
       * Uses the method `Combinable#combinationHash` to determine which measurements to subtract
       * Parameters:
-         * other: location of a CSV file containing the subtrahends
-         * key: key to use to retrieve the component that will be subtracted (default `weight`)
+          * other: location of a CSV file containing the subtrahends
+          * key: key to use to retrieve the component that will be subtracted (default `weight`)
   * **Average**
       * Calculates the average of a certain component from all measurements in the given collection of datasets.
       * uses the method `Combinable#combinationHash` to determine which measurements to subtract
       * Only Spark supported currently
+      * Parameters:
+          * others: locations of the CSV files containing the datasets to calculate average of
+          * key: key to use to retrieve the component that will be averaged (default `weight`)
+          * amount: expected total amount of measurements with the same combination hash. Generally this should equal the number of datasets (`#{others}`).
   * **KMeans**
       * Executes a [k-Means](https://en.wikipedia.org/wiki/K-means_clustering) algorithm to determine centroids (means) for the vectors from all measurements in the input dataset.
       * Albeit not yet integrated, several algorithms are provided for the initial seeding, to determine if it's time to end iterating and to select the optimal number of clusters. Information about the specifics behind each algorithm is available in the `Javadoc` of each strategy.
@@ -166,3 +170,30 @@ Usage: <main class> [options] [command] [command options]
           * num_centroids: number of centroids to find (default `25`)
           * max_iterations: maximum number of iterations to use (default `50`). Implementations may stop earlier if they determine that some other stop condition has been met.
          * metric: distance metric to use to calculate distance between measurements and centroids (default `EUCLIDEAN`). Note that setting this parameters has no effect when using the Spark MLLib k-Means aggregator; as it does not offer this level of customisation.
+
+#### Extensions
+* The `net.caspervg.aggr.ext` package contains some implementations of the `Measurement` and `Combinable` interfaces that are useful to run aggregations on geo-data.
+* Available classes:
+    * **GeoMeasurement**:
+        * Retrieves the keys `latitude` and `longitude` and stores them (as doubles) in the vector.
+        * Allows combining measurements if they have an identical vector (thus they have the same latitude and longitude coordinates).
+        * Does not support timestamps!
+    * **TimedGeoMeasurement** (extends GeoMeasurement):
+        * Adds support for storing and retrieving a timestamp associated with the measurement.
+        * Allows combining measurements if they have an identical vector (thus they have the same latitude and longitude coordinates) and if both have the same timestamp.
+    * **WeightedGeoMeasurement** (extends GeoMeasurement):
+        * Adds support for storing and retrieving a weight associated with the measurement.
+        * Allows combining measurements if they have an identical vector (thus they have the same latitude and longitude coordinates) and if both have a weight (but it does not need to be the same)
+        * Combines the measurements by adding their weights
+        * Very useful as output of a k-Means aggregation, as it returns the centroids together with a weight indicating the number of measurements that were combined to form the centroid.
+
+### Building
+This project can be built using the *Maven* build system, using the command: `mvn package`. JAR dependencies will be included in the resulting JAR named `aggr-{version}-with-dependencies.jar`. There is one exception; the Spark runtime must be provided by the user.
+
+### Docker
+A **Docker configuration** (`Dockerfile`) is provided, based on [bde2020/spark-java-template](https://github.com/big-data-europe/docker-spark). When ran, it will automatically start the `Spark-Master`, which will begin polling for new aggregation requests in the triple-store.
+
+A **Docker-Compose configuration** (`docker-compose.yml`) is also provided, which will set up an entire environment for the execution (including, but not limited to, a triple-store, a automatic JSON API compliant HTTP server for the datasets, aggregations and measurements, a HDFS file browser and a Spark Master and Worker instance). Using it is recommended for development and deployment. It was based on the configuration of [big-data-europe/demo-spark-sensor-data](https://github.com/big-data-europe/demo-spark-sensor-data).
+
+### Tests
+Some basic unit tests are provided to check if the `AggrReader` and `AggrWriter` implementations work correctly.
