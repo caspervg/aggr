@@ -6,7 +6,7 @@
 
     <groupId>net.caspervg</groupId>
     <artifactId>aggr</artifactId>
-    <version>1.0.0</version>
+    <version>1.0.1</version>
 
     <properties>
         <!-- need 1.6.2 for compatibility with the Spark-Master and Spark-Worker dockers -->

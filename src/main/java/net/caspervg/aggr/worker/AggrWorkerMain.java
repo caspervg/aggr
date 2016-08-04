@@ -4,6 +4,7 @@ import com.beust.jcommander.JCommander;
 import com.google.common.collect.ImmutableMap;
 import net.caspervg.aggr.aggregation.average.AverageAggregationExecution;
 import net.caspervg.aggr.aggregation.basic.BasicAggregationExecution;
+import net.caspervg.aggr.aggregation.diff.DiffAggregationExecution;
 import net.caspervg.aggr.worker.command.*;
 import net.caspervg.aggr.aggregation.AggregationExecution;
 import net.caspervg.aggr.aggregation.grid.GridAggregationExecution;
@@ -48,7 +49,8 @@ public class AggrWorkerMain {
                 "grid",   new GridAggregationExecution(ac, gac),
                 "time",   new TimeAggregationExecution(ac, tac),
                 "kmeans", new KMeansAggregationExecution(ac, kac),
-                "average", new AverageAggregationExecution(ac, aac)
+                "average", new AverageAggregationExecution(ac, aac),
+                "diff", new DiffAggregationExecution(ac, dac)
         );
 
         executionMap.getOrDefault(
