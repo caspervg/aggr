@@ -1,7 +1,7 @@
 # Aggr
 
 ## Description
-This repository contains the Java and Spark components of the Aggr project, as well as a Docker-Compose file which combines all the backend components.
+This repository contains the Java and Spark components of the Aggr project, as well as a Docker-Compose file which combines all the backend components. Available on DockerHub: [caspervg/aggr](https://hub.docker.com/r/caspervg/aggr/)
 
 Implemented by Casper Van Gheluwe (UGent) during the summer of 2016, as part of an internship at TenForce.
 
@@ -191,7 +191,7 @@ Usage: <main class> [options] [command] [command options]
 This project can be built using the *Maven* build system, using the command: `mvn package`. JAR dependencies will be included in the resulting JAR named `aggr-{version}-with-dependencies.jar`. There is one exception; the Spark runtime must be provided by the user.
 
 ### Docker
-A **Docker configuration** (`Dockerfile`) is provided, based on [bde2020/spark-java-template](https://github.com/big-data-europe/docker-spark). When ran, it will automatically start the `Spark-Master`, which will begin polling for new aggregation requests in the triple-store.
+A **Docker configuration** (`Dockerfile`) is provided, based on [bde2020/spark-java-template](https://github.com/big-data-europe/docker-spark). When ran, it will automatically start the `Spark-Master`, which will begin polling for new aggregation requests in the triple-store. The image is also available on DockerHub: [caspervg/aggr](https://hub.docker.com/r/caspervg/aggr/)
 
 A **Docker-Compose configuration** (`docker-compose.yml`) is also provided, which will set up an entire environment for the execution (including, but not limited to, a triple-store, a automatic JSON API compliant HTTP server for the datasets, aggregations and measurements, a HDFS file browser and a Spark Master and Worker instance). Using it is recommended for development and deployment. It was based on the configuration of [big-data-europe/demo-spark-sensor-data](https://github.com/big-data-europe/demo-spark-sensor-data).
   * Port 80: HDFS filebrowser, pipeline monitor, Spark monitors, HDFS monitor
